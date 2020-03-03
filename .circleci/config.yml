@@ -48,7 +48,7 @@ jobs:
 
       - run:
           name: Run python tests
-          command: poetry run pytest --cov src/prodstats tests/ --cov-report html:./coverage/coverage.html --junitxml=test-results/python/junit.xml --log-cli-level 30 --log-level 20
+          command: poetry run pytest --cov src/prodstats tests/ --cov-report xml:./coverage/python/coverage.xml --junitxml=test-results/python/junit.xml --log-cli-level 30 --log-level 20
 
       - codecov/upload:
           file: ./coverage/python/coverage.xml
