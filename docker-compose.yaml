@@ -1,0 +1,31 @@
+version: "3.7"
+
+x-defaults: &defaults
+  image: prodstats
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  env_file:
+    - .env
+
+services:
+  ihs:
+    image: driftwood/ihs:latest
+    command: ihs run web -b 0.0.0.0:5001
+    ports:
+      - "5001:5001"
+    environment:
+      DATABASE_URI: $IHS_DATABASE_URI
+      LOG_LEVEL: 10
+  fracfocus:
+    image: driftwood/fracfocus:latest
+    command: fracfocus run web -b 0.0.0.0:5002
+    ports:
+      - "5002:5002"
+    environment:
+      DATABASE_HOST: docker.for.mac.host.internal
+      DATABASE_USERNAME: fracfocus
+      DATABASE_PASSWORD: null
+      LOG_LEVEL: 10
+      LOG_FORMAT: layman

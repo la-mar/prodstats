@@ -1,0 +1,92 @@
+version: 2.1
+
+orbs:
+  # codecov: codecov/codecov@1.0.2
+  docker: circleci/docker@0.5.19
+  # github: haskell-works/github-release@1.3.3
+
+jobs:
+  lint-and-test:
+    docker:
+      - image: circleci/python:3.8.1
+        environment:
+          SECRET_KEY: ci
+          LOG_FORMAT: funcname
+          LOG_LEVEL: 10
+          DATABASE_USERNAME: root
+          DATABASE_NAME: circle_test
+          PRODSTATS_BROKER_URL: memory://
+          PRODSTATS_REDIS_URL: redis://localhost:6379/1
+          PYTHONPATH: /home/circleci/project/src/prodstats:/home/circleci/project/src:/home/circleci/project:${PYTHONPATH}
+
+      - image: circleci/postgres:12.1-postgis-ram
+        environment: # environment variables for the Postgres container.
+          POSTGRES_USER: root
+          POSTGRES_DB: circle_test
+
+      - image: circleci/redis:5.0.6
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v4-deps-{{ checksum "poetry.lock" }}-{{checksum "pyproject.toml"}}
+
+      - run:
+          name: Install Dependencies
+          command: |
+            touch /home/circleci/.cache/pypoetry/virtualenvs/prodstats-3aSsmiER-py3.8/lib/python3.8/site-packages/easy-install.pth || echo "cache not found"
+            poetry install
+
+      - save_cache:
+          key: v4-deps-{{ checksum "poetry.lock" }}-{{checksum "pyproject.toml"}}
+          paths:
+            - /home/circleci/.cache/pypoetry/virtualenvs
+
+      - run:
+          name: Run python tests
+          command: poetry run pytest --cov src/prodstats tests/ --cov-report html:./coverage/coverage.html --junitxml=test-results/python/junit.xml --log-cli-level 30 --log-level 20
+
+      - codecov/upload:
+          file: ./coverage/python/coverage.xml
+
+      - store_artifacts:
+          path: coverage
+
+      - store_test_results:
+          path: test-results
+  # build-image:
+  #   executor: docker/docker
+  #   steps:
+  #     - setup_remote_docker
+  #     - checkout
+  #     - docker/check
+  #     - docker/build:
+  #         image: brocklfriedrich/prodstats
+  #         tag: $(echo ${CIRCLE_SHA1} | cut -c -7),dev,latest
+  #     - docker/push:
+  #         image: brocklfriedrich/prodstats
+  #         tag: $(echo ${CIRCLE_SHA1} | cut -c -7),dev,latest
+
+workflows:
+  version: 2.1
+
+  deployment:
+    jobs:
+      - lint-and-test
+      # - build-image:
+      #     requires:
+      #       - lint-and-test
+      # - docker/publish:
+      #     context: global
+      #     image: brocklfriedrich/prodstats
+      #     tag: ${CIRCLE_TAG}
+      #     requires:
+      #       - lint-and-test
+      #       - build-image
+      #     filters:
+      #       tags:
+      #         only: /^\d+\.\d+\.\d+$/
+      #       branches:
+      #         only: master
