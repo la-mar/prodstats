@@ -10,7 +10,6 @@ def load():
     if conf.SENTRY_ENABLED:
         import sentry_sdk
         from sentry_sdk.integrations.logging import LoggingIntegration
-        from sentry_sdk.integrations.celery import CeleryIntegration
         from sentry_sdk.integrations.redis import RedisIntegration
 
         # from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
@@ -29,7 +28,7 @@ def load():
 
                 sentry_integrations = [
                     sentry_logging,
-                    CeleryIntegration(),
+                    # CeleryIntegration(),
                     RedisIntegration(),
                 ]
 
