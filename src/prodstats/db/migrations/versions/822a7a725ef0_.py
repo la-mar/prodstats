@@ -1,19 +1,16 @@
 """empty message
 
 Revision ID: 822a7a725ef0
-Revises:
+Revises: 244869cf6945
 Create Date: 2020-03-05 17:13:59.860800
 
 """
-from alembic import op
 import sqlalchemy as sa
-import sqlalchemy_utils
-import geoalchemy2
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "822a7a725ef0"
-down_revision = None
+down_revision = "244869cf6945"
 branch_labels = None
 depends_on = None
 

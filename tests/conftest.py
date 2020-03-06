@@ -13,6 +13,7 @@ import string
 import gino
 import pytest
 import sqlalchemy
+from sqlalchemy.engine import Engine
 from async_asgi_testclient import TestClient
 from async_generator import async_generator, yield_
 from sqlalchemy_utils import create_database, database_exists, drop_database
@@ -32,8 +33,8 @@ def sa_engine():
         drop_database(url)
     create_database(url)
 
-    rv = sqlalchemy.create_engine(url, echo=ECHO)
-
+    rv: Engine = sqlalchemy.create_engine(url, echo=ECHO)
+    rv.execute("create extension if not exists postgis;")
     db.create_all(rv)  # create tables
     yield rv
     db.drop_all(rv)
