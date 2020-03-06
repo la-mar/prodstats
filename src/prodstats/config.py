@@ -121,22 +121,6 @@ DATADOG_DEFAULT_TAGS: Dict[str, str] = {
 IHS_BASE_URL = conf("PRODSTATS_IHS_URL", cast=HTTPUrl)
 FRACFOCUS_BASE_URL = conf("PRODSTATS_FRACFOCUS_URL", cast=HTTPUrl)
 
-# COLLECTOR_URLS = AttrDict(
-#     {
-#         "ihs": {
-#             "well": {
-#                 "h": IHS_BASE_URL / "well" / "h",
-#                 "v": IHS_BASE_URL / "well" / "v",
-#             },
-#             "prod": {
-#                 "h": IHS_BASE_URL / "production" / "h",
-#                 "v": IHS_BASE_URL / "production" / "v",
-#             },
-#         },
-#         "fracfocus": {"comp": FRACFOCUS_BASE_URL / "completions"},
-#     }
-# )
-
 
 # ---Accessors---------------------------------------------------------------- #
 

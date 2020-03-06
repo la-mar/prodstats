@@ -1,9 +1,10 @@
+from typing import Dict, Optional
 import os
 
 import tomlkit
 
 
-def _get_project_meta(pyproj_path: str = "./pyproject.toml") -> dict:
+def _get_project_meta(pyproj_path: str = "./pyproject.toml") -> Dict[str, str]:
     if os.path.exists(pyproj_path):
         with open(pyproj_path, "r") as pyproject:
             file_contents = pyproject.read()
@@ -12,6 +13,6 @@ def _get_project_meta(pyproj_path: str = "./pyproject.toml") -> dict:
         return {}
 
 
-pkg_meta = _get_project_meta()
-project = pkg_meta.get("name")
-version = pkg_meta.get("version")
+pkg_meta: Dict[str, str] = _get_project_meta()
+project: Optional[str] = pkg_meta.get("name")
+version: Optional[str] = pkg_meta.get("version")

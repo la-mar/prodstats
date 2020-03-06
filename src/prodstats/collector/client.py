@@ -207,13 +207,70 @@ class AsyncClient(httpx.AsyncClient):
 
             self._credentials = credentials
 
-    # @classmethod
-    # def from_endpoint(cls, endpoint: Endpoint, **kwargs):
-    #     return cls(base_url=endpoint.path, **kwargs)
+    async def post(self, *args, **kwargs) -> httpx.Response:
+        response = await super().post(*args, **kwargs)
+        if response.content:
+            response.json = lambda: orjson.loads(response.content)  # type: ignore
+        return response
 
 
 if __name__ == "__main__":
     pass
+    import config as conf
+    import asyncio
+    import random
 
     async def async_wrapper():
-        pass
+
+        deo_ids = [
+            "42461409160000",
+            "42383406370000",
+            "42461412100000",
+            "42461412090000",
+            "42461411750000",
+            "42461411740000",
+            "42461411730000",
+            "42461411720000",
+            "42461411600000",
+            "42461411280000",
+            "42461411270000",
+            "42461411260000",
+            "42383406650000",
+            "42383406640000",
+            "42383406400000",
+            "42383406390000",
+            "42383406380000",
+            "42461412110000",
+            "42383402790000",
+        ]
+
+        client = AsyncClient(base_url=conf.IHS_BASE_URL)
+
+        resp_ids = await client.get("well/h/ids/tx-upton")
+        resp_ids.json()
+
+        # params = {"api14": ",".join(random.sample(deo_ids, 3))}
+
+        async def get(client):
+            return await client.post(
+                "well/h",
+                params={"api14": ",".join(random.sample(deo_ids, 3))},
+                timeout=None,
+            )
+
+        result = None
+        async with AsyncClient(base_url=conf.IHS_BASE_URL) as client:
+            coros = [
+                client.get(
+                    "well/h",
+                    params={"api14": ",".join(random.sample(deo_ids, 3))},
+                    timeout=None,
+                )
+                for x in range(0, 5)
+            ]
+            result = await asyncio.gather(*coros)
+            print([len(x.json()) for x in result])
+
+        data = [x.json() for x in result]
+        [x["data"]["ip"] for x in data]
+        data[0]["data"][0]

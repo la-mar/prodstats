@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Union
 
 import pytz
 from geoalchemy2 import Geometry
+import geoalchemy2
 from gino.dialects.asyncpg import JSONB
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import UUID

@@ -1,25 +1,37 @@
 from db.models.bases import Base, db
 
-__all__ = ["ProdStat"]
+__all__ = ["ProdMonthly", "ProdStat"]
+
+
+class ProdMonthly(Base):
+    __tablename__ = "production_monthly"
+
+    api10 = db.Column(db.String(10), index=True, primary_key=True)
+    prod_date = db.Column(db.Date())
+    oil = db.Column(db.Numeric(19, 2))
+    gas = db.Column(db.Numeric(19, 2))
+    water = db.Column(db.Numeric(19, 2))
+    gas_normalized_to_10k_ft = db.Column(db.Numeric(19, 2))
+    oil_normalized_to_10k_ft = db.Column(db.Numeric(19, 2))
+    gas_normalized_to_7500_ft = db.Column(db.Numeric(19, 2))
+    oil_normalized_to_7500_ft = db.Column(db.Numeric(19, 2))
+    gas_normalized_to_5k_ft = db.Column(db.Numeric(19, 2))
+    oil_normalized_to_5k_ft = db.Column(db.Numeric(19, 2))
+    prod_day = db.Column(db.Numeric(19, 2))
+    prod_month = db.Column(db.Integer())
+    peak_norm_month = db.Column(db.Integer())
 
 
 class ProdStat(Base):
     __tablename__ = "prodstats"
 
     api10 = db.Column(db.String(10), index=True, primary_key=True)
-    perfll = db.Column(db.Integer())
-    frac_bbl = db.Column(db.Integer())
-    frac_lb = db.Column(db.Integer())
-    frac_bbl_ft = db.Column(db.Integer())
-    frac_lb_ft = db.Column(db.Integer())
-    frac_gen_int = db.Column(db.Integer())
-    frac_gen_str = db.Column(db.String())
     firstprod = db.Column(db.Date())
     lastprod = db.Column(db.Date())
     days_on = db.Column(db.Integer())
     monthsproducing = db.Column(db.Integer())
     gor_first6mo = db.Column(db.Integer())
-    gor_first6mononzero = db.Column(db.Integer())
+    gor_first6mo_nonzero = db.Column(db.Integer())  # gor_first6mononzero
     oil_percent_first6mo = db.Column(db.Integer())
     oil_percent_last3mo = db.Column(db.Integer())
     oil_pk30 = db.Column(db.Integer())
@@ -40,7 +52,7 @@ class ProdStat(Base):
     oil_perk_first24mo = db.Column(db.Integer())
     oil_sum_last1mo = db.Column(db.Integer())
     oil_sum_last3mo = db.Column(db.Integer())
-    oil_sumnonzero_last3mo = db.Column(db.Integer())
+    oil_sum_last3mo_nonzero = db.Column(db.Integer())  # oil_sumnonzero_last3mo
     oil_sum_first1mo = db.Column(db.Integer())
     oil_sum_first3mo = db.Column(db.Integer())
     oil_sum_first6mo = db.Column(db.Integer())
@@ -66,7 +78,7 @@ class ProdStat(Base):
     gas_perk_first24mo = db.Column(db.Integer())
     gas_sum_last1mo = db.Column(db.Integer())
     gas_sum_last3mo = db.Column(db.Integer())
-    gas_sumnonzero_last3mo = db.Column(db.Integer())
+    gas_sum_last3mo_nonzero = db.Column(db.Integer())  # gas_sumnonzero_last3mo
     gas_sum_first1mo = db.Column(db.Integer())
     gas_sum_first3mo = db.Column(db.Integer())
     gas_sum_first6mo = db.Column(db.Integer())
@@ -82,6 +94,4 @@ class ProdStat(Base):
     water_sum_last1mo = db.Column(db.Integer())
     water_sum_last3mo = db.Column(db.Integer())
     water_sumnonzero_last3mo = db.Column(db.Integer())
-    productiondatecutoff = db.Column(db.Date())
-    perf_upper_min = db.Column(db.Integer())
-    perf_lower_max = db.Column(db.Integer())
+    # productiondatecutoff = db.Column(db.Date())
