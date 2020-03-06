@@ -21,6 +21,8 @@ from sqlalchemy_utils import create_database, database_exists, drop_database
 import config
 from db import db
 from prodstats.main import app
+from tests.models import TestModel  # noqa
+
 
 ECHO = False
 

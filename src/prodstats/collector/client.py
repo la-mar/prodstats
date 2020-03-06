@@ -207,15 +207,14 @@ class AsyncClient(httpx.AsyncClient):
 
             self._credentials = credentials
 
-    async def post(self, *args, **kwargs) -> httpx.Response:
-        response = await super().post(*args, **kwargs)
+    async def get(self, *args, **kwargs) -> httpx.Response:
+        response = await super().get(*args, **kwargs)
         if response.content:
             response.json = lambda: orjson.loads(response.content)  # type: ignore
         return response
 
 
 if __name__ == "__main__":
-    pass
     import config as conf
     import asyncio
     import random

@@ -14,7 +14,6 @@ class CustomBaseModel(BaseModel):
 
 
 class ORMBase(CustomBaseModel):
-    id: int
     created_at: datetime
     updated_at: datetime
 
