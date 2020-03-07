@@ -15,6 +15,8 @@ services:
     command: ihs run web -b 0.0.0.0:5001
     ports:
       - "5001:5001"
+    volumes:
+      - /Users/friedrichb/repo/ihs-deo:/app
     environment:
       DATABASE_URI: $IHS_DATABASE_URI
       LOG_LEVEL: 10
