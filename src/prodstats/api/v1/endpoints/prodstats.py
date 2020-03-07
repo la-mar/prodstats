@@ -22,8 +22,6 @@ async def create_ProdStats(items: List[ProdStatCreateIn]):
         addresses are not immediately available.
     """
 
-    # NOTE: if in the future we want to submit geocoding tasks in real time, we would
-    # add a call to schedule the job (to be executed immediately) on a celery worker.
     await asyncio.gather(
         *[ORMProdStat.create(api10=u.name, json=u.dict()) for u in items]
     )

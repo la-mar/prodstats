@@ -250,12 +250,12 @@ if __name__ == "__main__":
 
         # params = {"api14": ",".join(random.sample(deo_ids, 3))}
 
-        async def get(client):
-            return await client.post(
-                "well/h",
-                params={"api14": ",".join(random.sample(deo_ids, 3))},
-                timeout=None,
-            )
+        # async def get(client):
+        #     return await client.post(
+        #         "well/h",
+        #         params={"api14": ",".join(random.sample(deo_ids, 3))},
+        #         timeout=None,
+        #     )
 
         result = None
         async with AsyncClient(base_url=conf.IHS_BASE_URL) as client:
@@ -270,6 +270,24 @@ if __name__ == "__main__":
             result = await asyncio.gather(*coros)
             print([len(x.json()) for x in result])
 
-        data = [x.json() for x in result]
-        [x["data"]["ip"] for x in data]
-        data[0]["data"][0]
+        wells = [x.json() for x in result]
+        wells
+
+        async with AsyncClient(base_url=conf.IHS_BASE_URL) as client:
+            coros = [
+                client.get(
+                    "prod/h",
+                    params={
+                        "api10": ",".join(
+                            [api[:10] for api in random.sample(deo_ids, 3)]
+                        )
+                    },
+                    timeout=None,
+                )
+                for x in range(0, 5)
+            ]
+            result = await asyncio.gather(*coros)
+            print([len(x.json()) for x in result])
+
+        prod = [x.json() for x in result]
+        prod
