@@ -1,13 +1,13 @@
 from db.models.bases import Base, db
 
-__all__ = ["Well", "WellStat", "WellDepth", "WellLink", "WellShape"]
+__all__ = ["WellHeader", "WellStat", "WellDepth", "WellLink", "WellShape"]
 
 
 class WellBase(Base):
     api14 = db.Column(db.String(14), index=True, primary_key=True)
 
 
-class Well(WellBase):
+class WellHeader(WellBase):
     __tablename__ = "well"
 
     api10 = db.Column(db.String(10), index=True)
