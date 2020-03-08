@@ -51,6 +51,16 @@ def to_string(data: Dict[Any, Any], pretty: bool = True) -> str:
     return json.dumps(data, indent=indent, cls=UniversalEncoder)
 
 
+def to_json(d: dict, path: str, cls=DateTimeEncoder):
+    with open(path, "w") as f:
+        json.dump(d, f, cls=cls, indent=4)
+
+
+def load_json(path: str):
+    with open(path, "r") as f:
+        return json.load(f)
+
+
 def make_repr(data: Dict[Any, Any], pretty: bool = True) -> str:
     """wraps to_string to encapsulate repr specific edge cases """
     return to_string(data=data, pretty=pretty)

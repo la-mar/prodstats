@@ -218,6 +218,16 @@ if __name__ == "__main__":
     import config as conf
     import asyncio
     import random
+    from typing import List
+
+    def unpack(results: List):
+        data = []
+        for x in results:
+            if x:
+                x = x.json()["data"]
+                if len(x) > 0:
+                    data.append(x[0])
+        return data
 
     async def async_wrapper():
 
@@ -270,8 +280,7 @@ if __name__ == "__main__":
             result = await asyncio.gather(*coros)
             print([len(x.json()) for x in result])
 
-        wells = [x.json() for x in result]
-        wells
+        unpack(result)
 
         async with AsyncClient(base_url=conf.IHS_BASE_URL) as client:
             coros = [
@@ -289,5 +298,23 @@ if __name__ == "__main__":
             result = await asyncio.gather(*coros)
             print([len(x.json()) for x in result])
 
-        prod = [x.json() for x in result]
-        prod
+        prod = unpack(result)
+
+        {k: type(v) for k, v in prod[0].items()}
+
+        list(prod[0].keys())
+        prod[0]["dates"]
+        prod[0]["statuses"]
+        prod[0]["well_counts"]
+        prod[0]["production"]
+        prod[0]["products"]
+        prod[0]["production_type"]
+
+        ids = ["14207C017575"]
+
+        result = await client.get("prod/h", params={"id": ",".join(ids)}, timeout=None,)
+
+        result.status_code
+        result = result.json()
+        [x["api10"] for x in result["data"]]
+        # ProdRecord(**result["data"][0]["production"][0])
