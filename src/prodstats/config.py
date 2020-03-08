@@ -17,6 +17,7 @@ import socket
 from pathlib import Path
 from typing import Dict, Optional
 
+import pandas as pd
 import uvloop
 from httpx import URL as HTTPUrl
 from starlette.config import Config
@@ -25,6 +26,12 @@ from starlette.datastructures import Secret
 from schemas.database_url import DatabaseURL
 from util.iterables import filter_by_prefix
 from util.toml import project, version
+
+""" Optional Pandas display settings"""
+pd.options.display.max_rows = 100
+pd.set_option("display.float_format", lambda x: "%.2f" % x)
+pd.set_option("large_repr", "truncate")
+pd.set_option("precision", 2)
 
 """ Congiure asyncio to use uvloop. Not sure where else to put this
     to guarantee it gets called at the moment. """
