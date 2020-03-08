@@ -119,13 +119,16 @@ def downgrade(revision: str = "-1", args: List[str] = None):
     help="Drop the current database and rebuild using the existing migrations"
 )
 def recreate(args: List[str] = None):
-    from db import db
-    import sqlalchemy
+    from sqlalchemy_utils import create_database, database_exists, drop_database
 
     url = conf.ALEMBIC_CONFIG.url
-    rv = sqlalchemy.create_engine(url, echo=False)
-    db.drop_all(bind=rv)
-    db.create_all(bind=rv)
+    if database_exists(url):
+        drop_database(url)
+    create_database(url)
+    upgrade()
+    # rv = sqlalchemy.create_engine(url, echo=False)
+    # db.drop_all(bind=rv)
+    # db.create_all(bind=rv)
     logger.info(f"Recreated database at: {url}")
     # cmd = ["seed_db"]
     # subprocess.call(cmd)
