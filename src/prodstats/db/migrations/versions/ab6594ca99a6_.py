@@ -1,15 +1,16 @@
 """empty message
 
-Revision ID: 822a7a725ef0
+Revision ID: ab6594ca99a6
 Revises: 244869cf6945
-Create Date: 2020-03-05 17:13:59.860800
+Create Date: 2020-03-08 15:11:06.202382
 
 """
+import geoalchemy2
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "822a7a725ef0"
+revision = "ab6594ca99a6"
 down_revision = "244869cf6945"
 branch_labels = None
 depends_on = None
@@ -48,6 +49,34 @@ def upgrade():
     op.create_index(op.f("ix_depths_api14"), "depths", ["api14"], unique=False)
     op.create_index(op.f("ix_depths_name"), "depths", ["name"], unique=False)
     op.create_table(
+        "prodstat_header",
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column("api10", sa.String(length=10), nullable=False),
+        sa.Column("api14s", sa.ARRAY(sa.Integer()), nullable=True),
+        sa.Column("prod_date_first", sa.Date(), nullable=True),
+        sa.Column("prod_date_last", sa.Date(), nullable=True),
+        sa.Column("prod_months", sa.Integer(), nullable=True),
+        sa.Column("prod_days", sa.Integer(), nullable=True),
+        sa.Column("peak_norm_months", sa.Integer(), nullable=True),
+        sa.Column("peak_norm_days", sa.Integer(), nullable=True),
+        sa.Column("peak30_oil", sa.Integer(), nullable=True),
+        sa.Column("peak30_gas", sa.Integer(), nullable=True),
+        sa.Column("peak30_date", sa.Date(), nullable=True),
+        sa.Column("peak30_month", sa.Integer(), nullable=True),
+        sa.PrimaryKeyConstraint("api10"),
+    )
+    op.create_table(
         "prodstats",
         sa.Column(
             "created_at",
@@ -62,77 +91,20 @@ def upgrade():
             nullable=True,
         ),
         sa.Column("api10", sa.String(length=10), nullable=False),
-        sa.Column("firstprod", sa.Date(), nullable=True),
-        sa.Column("lastprod", sa.Date(), nullable=True),
-        sa.Column("days_on", sa.Integer(), nullable=True),
-        sa.Column("monthsproducing", sa.Integer(), nullable=True),
-        sa.Column("gor_first6mo", sa.Integer(), nullable=True),
-        sa.Column("gor_first6mo_nonzero", sa.Integer(), nullable=True),
-        sa.Column("oil_percent_first6mo", sa.Integer(), nullable=True),
-        sa.Column("oil_percent_last3mo", sa.Integer(), nullable=True),
-        sa.Column("oil_pk30", sa.Integer(), nullable=True),
-        sa.Column("oil_pk30_date", sa.Date(), nullable=True),
-        sa.Column("oil_p30_prodmonth", sa.Integer(), nullable=True),
-        sa.Column("oil_avgdaily_last3mo", sa.Integer(), nullable=True),
-        sa.Column("oil_pdp_30kpbbl_last3mo", sa.Integer(), nullable=True),
-        sa.Column("oil_pknorm_perk_1mo", sa.Integer(), nullable=True),
-        sa.Column("oil_pknorm_perk_3mo", sa.Integer(), nullable=True),
-        sa.Column("oil_pknorm_perk_6mo", sa.Integer(), nullable=True),
-        sa.Column("oil_total", sa.Integer(), nullable=True),
-        sa.Column("oil_perk_first1mo", sa.Integer(), nullable=True),
-        sa.Column("oil_perk_first3mo", sa.Integer(), nullable=True),
-        sa.Column("oil_perk_first6mo", sa.Integer(), nullable=True),
-        sa.Column("oil_perk_first9mo", sa.Integer(), nullable=True),
-        sa.Column("oil_perk_first12mo", sa.Integer(), nullable=True),
-        sa.Column("oil_perk_first18mo", sa.Integer(), nullable=True),
-        sa.Column("oil_perk_first24mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_last1mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_last3mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_last3mo_nonzero", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_first1mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_first3mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_first6mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_first9mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_first12mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_first18mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_first24mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_pknorm_1mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_pknorm_3mo", sa.Integer(), nullable=True),
-        sa.Column("oil_sum_pknorm_6mo", sa.Integer(), nullable=True),
-        sa.Column("gas_pk30", sa.Integer(), nullable=True),
-        sa.Column("gas_avgdaily_last3mo", sa.Integer(), nullable=True),
-        sa.Column("gas_pknorm_perk_1mo", sa.Integer(), nullable=True),
-        sa.Column("gas_pknorm_perk_3mo", sa.Integer(), nullable=True),
-        sa.Column("gas_pknorm_perk_6mo", sa.Integer(), nullable=True),
-        sa.Column("gas_total", sa.Integer(), nullable=True),
-        sa.Column("gas_perk_first1mo", sa.Integer(), nullable=True),
-        sa.Column("gas_perk_first3mo", sa.Integer(), nullable=True),
-        sa.Column("gas_perk_first6mo", sa.Integer(), nullable=True),
-        sa.Column("gas_perk_first9mo", sa.Integer(), nullable=True),
-        sa.Column("gas_perk_first12mo", sa.Integer(), nullable=True),
-        sa.Column("gas_perk_first18mo", sa.Integer(), nullable=True),
-        sa.Column("gas_perk_first24mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_last1mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_last3mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_last3mo_nonzero", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_first1mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_first3mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_first6mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_first9mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_first12mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_first18mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_first24mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_pknorm_1mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_pknorm_3mo", sa.Integer(), nullable=True),
-        sa.Column("gas_sum_pknorm_6mo", sa.Integer(), nullable=True),
-        sa.Column("boe_avgdaily_last3mo", sa.Integer(), nullable=True),
-        sa.Column("boe_pdp_30kpbbl_last3mo", sa.Integer(), nullable=True),
-        sa.Column("water_sum_last1mo", sa.Integer(), nullable=True),
-        sa.Column("water_sum_last3mo", sa.Integer(), nullable=True),
-        sa.Column("water_sumnonzero_last3mo", sa.Integer(), nullable=True),
-        sa.PrimaryKeyConstraint("api10"),
+        sa.Column("name", sa.String(length=50), nullable=False),
+        sa.Column("value", sa.Float(), nullable=True),
+        sa.Column("property_name", sa.String(length=50), nullable=True),
+        sa.Column("aggregate_type", sa.String(length=25), nullable=True),
+        sa.Column("is_peak_normalized", sa.Boolean(), nullable=True),
+        sa.Column("is_lateral_length_normalized", sa.Boolean(), nullable=True),
+        sa.Column("includes_zeroes", sa.Boolean(), nullable=True),
+        sa.Column("start_date", sa.Date(), nullable=True),
+        sa.Column("end_date", sa.Date(), nullable=True),
+        sa.Column("start_month", sa.Integer(), nullable=True),
+        sa.Column("end_month", sa.Integer(), nullable=True),
+        sa.Column("comments", sa.String(), nullable=True),
+        sa.PrimaryKeyConstraint("api10", "name"),
     )
-    op.create_index(op.f("ix_prodstats_api10"), "prodstats", ["api10"], unique=False)
     op.create_table(
         "production_monthly",
         sa.Column(
@@ -149,42 +121,149 @@ def upgrade():
         ),
         sa.Column("api10", sa.String(length=10), nullable=False),
         sa.Column("prod_date", sa.Date(), nullable=True),
+        sa.Column("prod_month", sa.Integer(), nullable=True),
+        sa.Column("days_in_month", sa.Integer(), nullable=True),
+        sa.Column("prod_days", sa.Integer(), nullable=True),
+        sa.Column("peak_norm_month", sa.Integer(), nullable=True),
+        sa.Column("peak_norm_days", sa.Integer(), nullable=True),
         sa.Column("oil", sa.Numeric(precision=19, scale=2), nullable=True),
         sa.Column("gas", sa.Numeric(precision=19, scale=2), nullable=True),
         sa.Column("water", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column(
-            "gas_normalized_to_10k_ft", sa.Numeric(precision=19, scale=2), nullable=True
-        ),
-        sa.Column(
-            "oil_normalized_to_10k_ft", sa.Numeric(precision=19, scale=2), nullable=True
-        ),
-        sa.Column(
-            "gas_normalized_to_7500_ft",
-            sa.Numeric(precision=19, scale=2),
-            nullable=True,
-        ),
-        sa.Column(
-            "oil_normalized_to_7500_ft",
-            sa.Numeric(precision=19, scale=2),
-            nullable=True,
-        ),
-        sa.Column(
-            "gas_normalized_to_5k_ft", sa.Numeric(precision=19, scale=2), nullable=True
-        ),
-        sa.Column(
-            "oil_normalized_to_5k_ft", sa.Numeric(precision=19, scale=2), nullable=True
-        ),
-        sa.Column("prod_day", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("prod_month", sa.Integer(), nullable=True),
-        sa.Column("peak_norm_month", sa.Integer(), nullable=True),
+        sa.Column("boe", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("oil_norm_1k", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("gas_norm_1k", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("boe_norm_1k", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("gas_norm_5k", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("oil_norm_5k", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("boe_norm_5k", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("gas_norm_7500", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("oil_norm_7500", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("boe_norm_7500", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("gas_norm_10k", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("oil_norm_10k", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("boe_norm_10k", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("oil_percent", sa.Float(), nullable=True),
+        sa.Column("gor", sa.Float(), nullable=True),
         sa.PrimaryKeyConstraint("api10"),
     )
-    op.create_index(
-        op.f("ix_production_monthly_api10"),
-        "production_monthly",
-        ["api10"],
-        unique=False,
+    op.create_table(
+        "shapes",
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column("api14", sa.String(length=14), nullable=False),
+        sa.Column(
+            "shl",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "kop",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "heel",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "mid",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "toe",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "bhl",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "wellbore",
+            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "stick",
+            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "bent_stick",
+            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "lateral_only",
+            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=4326),
+            nullable=True,
+        ),
+        sa.Column(
+            "shl_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=3857),
+            nullable=True,
+        ),
+        sa.Column(
+            "kop_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=3857),
+            nullable=True,
+        ),
+        sa.Column(
+            "heel_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=3857),
+            nullable=True,
+        ),
+        sa.Column(
+            "mid_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=3857),
+            nullable=True,
+        ),
+        sa.Column(
+            "toe_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=3857),
+            nullable=True,
+        ),
+        sa.Column(
+            "bhl_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="POINT", srid=3857),
+            nullable=True,
+        ),
+        sa.Column(
+            "wellbore_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=3857),
+            nullable=True,
+        ),
+        sa.Column(
+            "stick_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=3857),
+            nullable=True,
+        ),
+        sa.Column(
+            "bent_stick_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=3857),
+            nullable=True,
+        ),
+        sa.Column(
+            "lateral_only_webmercator",
+            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=3857),
+            nullable=True,
+        ),
+        sa.PrimaryKeyConstraint("api14"),
     )
+    op.create_index(op.f("ix_shapes_api14"), "shapes", ["api14"], unique=False)
     op.create_table(
         "well",
         sa.Column(
@@ -202,7 +281,8 @@ def upgrade():
         sa.Column("api14", sa.String(length=14), nullable=False),
         sa.Column("api10", sa.String(length=10), nullable=True),
         sa.Column("hole_direction", sa.String(length=1), nullable=True),
-        sa.Column("is_producing", sa.Integer(), nullable=True),
+        sa.Column("status", sa.String(length=50), nullable=True),
+        sa.Column("is_producing", sa.Boolean(), nullable=True),
         sa.Column("operator", sa.String(), nullable=True),
         sa.Column("hist_operator", sa.String(), nullable=True),
         sa.Column("primary_product", sa.String(length=10), nullable=True),
@@ -231,10 +311,19 @@ def upgrade():
     )
     op.create_index(op.f("ix_well_api10"), "well", ["api10"], unique=False)
     op.create_index(op.f("ix_well_api14"), "well", ["api14"], unique=False)
+    op.create_index(op.f("ix_well_basin"), "well", ["basin"], unique=False)
+    op.create_index(op.f("ix_well_county"), "well", ["county"], unique=False)
     op.create_index(
         op.f("ix_well_hist_operator"), "well", ["hist_operator"], unique=False
     )
     op.create_index(op.f("ix_well_operator"), "well", ["operator"], unique=False)
+    op.create_index(
+        "well_basin_holedir_isprod_idx",
+        "well",
+        ["basin", "hole_direction", "is_producing"],
+        unique=False,
+    )
+    op.create_index("well_basin_status_idx", "well", ["basin", "status"], unique=False)
     op.create_table(
         "well_links",
         sa.Column(
@@ -295,15 +384,20 @@ def downgrade():
     op.drop_index(op.f("ix_well_links_name"), table_name="well_links")
     op.drop_index(op.f("ix_well_links_api14"), table_name="well_links")
     op.drop_table("well_links")
+    op.drop_index("well_basin_status_idx", table_name="well")
+    op.drop_index("well_basin_holedir_isprod_idx", table_name="well")
     op.drop_index(op.f("ix_well_operator"), table_name="well")
     op.drop_index(op.f("ix_well_hist_operator"), table_name="well")
+    op.drop_index(op.f("ix_well_county"), table_name="well")
+    op.drop_index(op.f("ix_well_basin"), table_name="well")
     op.drop_index(op.f("ix_well_api14"), table_name="well")
     op.drop_index(op.f("ix_well_api10"), table_name="well")
     op.drop_table("well")
-    op.drop_index(op.f("ix_production_monthly_api10"), table_name="production_monthly")
+    op.drop_index(op.f("ix_shapes_api14"), table_name="shapes")
+    op.drop_table("shapes")
     op.drop_table("production_monthly")
-    op.drop_index(op.f("ix_prodstats_api10"), table_name="prodstats")
     op.drop_table("prodstats")
+    op.drop_table("prodstat_header")
     op.drop_index(op.f("ix_depths_name"), table_name="depths")
     op.drop_index(op.f("ix_depths_api14"), table_name="depths")
     op.drop_table("depths")

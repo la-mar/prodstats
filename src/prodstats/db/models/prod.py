@@ -38,8 +38,8 @@ class ProdHeader(Base):
 
     api10 = db.Column(db.String(10), primary_key=True)
     api14s = db.Column(db.ARRAY(db.Integer), default=[])
-    first_prod_date = db.Column(db.Date())
-    last_prod_date = db.Column(db.Date())
+    prod_date_first = db.Column(db.Date())
+    prod_date_last = db.Column(db.Date())
     prod_months = db.Column(db.Integer())  # months producing
     prod_days = db.Column(db.Integer())
     peak_norm_months = db.Column(db.Integer())  # months producing
