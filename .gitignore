@@ -135,3 +135,6 @@ dump.rdb
 pgbouncer/userlist.txt
 pgbouncer/pgbouncer.pid
 pgbouncer/pgbouncer.ini
+tests/data/~$14207C017575.xlsx
+tests/data/14207C017575.csv
+tests/data/14207C017575.xlsx

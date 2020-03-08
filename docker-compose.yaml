@@ -19,7 +19,7 @@ services:
       - /Users/friedrichb/repo/ihs-deo:/app
     environment:
       DATABASE_URI: $IHS_DATABASE_URI
-      LOG_LEVEL: 10
+      LOG_LEVEL: 20
   fracfocus:
     image: driftwood/fracfocus:latest
     command: fracfocus run web -b 0.0.0.0:5002

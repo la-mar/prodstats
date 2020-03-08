@@ -23,8 +23,8 @@
 - api10
 - perf_upper_min
 - perf_lower_max
-- frac_lb
-- frac_bbl
+  <!-- - frac_lb -->
+  <!-- - frac_bbl -->
 
 # Add comments to prodstat records
 
