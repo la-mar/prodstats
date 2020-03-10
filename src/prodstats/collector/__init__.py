@@ -1,2 +1,3 @@
 # flake8: noqa
-from collector.client import AsyncClient
+from collector.client import *
+from collector.ihs_client import *

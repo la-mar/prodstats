@@ -12,7 +12,7 @@
 
 from __future__ import annotations
 
-import asyncio
+# import asyncio
 import socket
 from pathlib import Path
 from typing import Dict, Optional
@@ -35,7 +35,8 @@ pd.set_option("precision", 2)
 
 """ Congiure asyncio to use uvloop. Not sure where else to put this
     to guarantee it gets called at the moment. """
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+# asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+uvloop.install()
 
 conf: Config = Config(".env")
 
@@ -128,6 +129,7 @@ DATADOG_DEFAULT_TAGS: Dict[str, str] = {
 IHS_BASE_URL = conf("PRODSTATS_IHS_URL", cast=HTTPUrl)
 FRACFOCUS_BASE_URL = conf("PRODSTATS_FRACFOCUS_URL", cast=HTTPUrl)
 
+PEAK_NORM_LIMIT: int = 6
 
 # ---Accessors---------------------------------------------------------------- #
 

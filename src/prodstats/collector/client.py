@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import copy
+import functools
 import inspect
 import logging
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import httpx
 import orjson
@@ -13,6 +14,8 @@ import util
 from schemas.credentials import HTTPAuth
 
 logger = logging.getLogger(__name__)
+
+__all__ = ["AsyncClient"]
 
 
 class AsyncClient(httpx.AsyncClient):
@@ -208,9 +211,12 @@ class AsyncClient(httpx.AsyncClient):
             self._credentials = credentials
 
     async def get(self, *args, **kwargs) -> httpx.Response:
+        logger.debug(f"AsyncClient.get -- {args} {kwargs}")
         response = await super().get(*args, **kwargs)
-        if response.content:
-            response.json = lambda: orjson.loads(response.content)  # type: ignore
+
+        # patch json loader to use orjson and return empty dict when content is empty
+        if response.content and not response.is_error:
+            response.json = functools.partial(orjson.loads, response.content or {})  # type: ignore
         return response
 
 
@@ -218,13 +224,14 @@ if __name__ == "__main__":
     import config as conf
     import asyncio
     import random
-    from typing import List
+    from schema import ProdCalcSet
 
     def unpack(results: List):
         data = []
         for x in results:
+            x = x.json()
             if x:
-                x = x.json()["data"]
+                x = x["data"]
                 if len(x) > 0:
                     data.append(x[0])
         return data
@@ -256,7 +263,7 @@ if __name__ == "__main__":
         client = AsyncClient(base_url=conf.IHS_BASE_URL)
 
         resp_ids = await client.get("well/h/ids/tx-upton")
-        resp_ids.json()
+        resp_ids.json()["data"][0]["ids"]
 
         # params = {"api14": ",".join(random.sample(deo_ids, 3))}
 
@@ -282,39 +289,97 @@ if __name__ == "__main__":
 
         unpack(result)
 
-        async with AsyncClient(base_url=conf.IHS_BASE_URL) as client:
-            coros = [
-                client.get(
-                    "prod/h",
-                    params={
-                        "api10": ",".join(
-                            [api[:10] for api in random.sample(deo_ids, 3)]
-                        )
-                    },
-                    timeout=None,
-                )
-                for x in range(0, 5)
-            ]
-            result = await asyncio.gather(*coros)
-            print([len(x.json()) for x in result])
+        # async with AsyncClient(base_url=conf.IHS_BASE_URL) as client:
+        #     coros = [
+        #         client.get(
+        #             "prod/h",
+        #             params={
+        #                 "api10": ",".join(
+        #                     [api[:10] for api in random.sample(deo_ids, 3)]
+        #                 )
+        #             },
+        #             timeout=None,
+        #         )
+        #         for x in range(0, 5)
+        #     ]
+        #     result = await asyncio.gather(*coros)
 
-        prod = unpack(result)
-
-        {k: type(v) for k, v in prod[0].items()}
-
-        list(prod[0].keys())
-        prod[0]["dates"]
-        prod[0]["statuses"]
-        prod[0]["well_counts"]
-        prod[0]["production"]
-        prod[0]["products"]
-        prod[0]["production_type"]
+        # prod = unpack(result)
 
         ids = ["14207C017575"]
 
         result = await client.get("prod/h", params={"id": ",".join(ids)}, timeout=None,)
 
         result.status_code
-        result = result.json()
-        [x["api10"] for x in result["data"]]
-        # ProdRecord(**result["data"][0]["production"][0])
+        prod = result.json()["data"]
+
+        records = []
+        for x in prod:
+            records += ProdCalcSet(**x, well_count=len(prod)).records()
+
+        # len(
+        #     [
+        #         x["statuses"]["current"]
+        #         for x in prod
+        #         if x["statuses"]["current"] == "ACTIVE"
+        #     ]
+        # )
+
+        # [x["api10"] for x in prod]
+        # list(prod[0].keys())
+        # prod[0]["dates"]
+        # prod[0]["statuses"]
+        # prod[0]["well_counts"]
+        # prod[1]["production"]
+        # prod[0]["products"]
+        # prod[0]["production_type"]
+
+        # df: pd.DataFrame = pd.DataFrame()
+        # records: List[Dict] = []
+        # meta: pd.DataFrame = pd.DataFrame()
+        # for p in prod:
+        #     # p = prod[2]
+        #     apply_to_monthly = {
+        #         "api10": p["api10"],
+        #         "api14": p["api14"],
+        #         "entity": p["entity"],
+        #         "entity12": p["entity12"],
+        #         "perf_upper": p["perf_upper"],
+        #         "perf_lower": p["perf_lower"],
+        #         "perfll": p["perfll"],
+        #         "products": p["products"],
+        #         "wells": wellcount,
+        #     }
+        #     monthly = p["production"]
+        #     for x in monthly:
+        #         x.update(**apply_to_monthly)
+
+        #     # data = ProdCalcSet(production=monthly).dict()
+        #     if monthly:
+        #         x = ProdCalcSet(production=monthly).df().reset_index()
+        #         df = df.append(x)
+        #         records.append(ProdCalcSet(production=monthly).dict())
+        #         apply_to_monthly["first_prod"] = x.prod_date.min()
+        #         apply_to_monthly["last_prod"] = x.prod_date.max()
+        #     else:
+        #         apply_to_monthly["first_prod"] = None
+        #         apply_to_monthly["last_prod"] = None
+
+        #     apply_to_monthly["prod_count"] = len(monthly)
+        #     meta = meta.append(pd.DataFrame([apply_to_monthly]))
+
+        # df.iloc[0]
+
+        # df.groupby("entity12").sum().T
+
+        # df.to_clipboard()
+
+        # results = await client.get(
+        #     "well/h",
+        #     params={"api14": ",".join(meta.api14.unique().tolist())},
+        #     timeout=None,
+        # )
+
+        # z = [{**{"api14": x["api14"]}, **x["dates"]} for x in results.json()["data"]]
+
+        # meta.merge(pd.DataFrame(z), on="api14").sort_values("prod_count").to_clipboard()
