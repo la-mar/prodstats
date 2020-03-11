@@ -65,7 +65,7 @@ def upgrade():
         ),
         sa.Column("api10", sa.String(length=10), nullable=False),
         sa.Column("name", sa.String(length=50), nullable=False),
-        sa.Column("value", sa.Float(), nullable=True),
+        sa.Column("value", sa.Numeric(precision=19, scale=2), nullable=True),
         sa.Column("property_name", sa.String(length=50), nullable=True),
         sa.Column("aggregate_type", sa.String(length=25), nullable=True),
         sa.Column("is_peak_norm", sa.Boolean(), nullable=True),

@@ -75,7 +75,7 @@ class ProdStat(Base):
 
     api10 = db.Column(db.String(10), primary_key=True)
     name = db.Column(db.String(50), primary_key=True)
-    value = db.Column(db.Float())
+    value = db.Column(db.Numeric(19, 2))
     property_name = db.Column(db.String(50))
     aggregate_type = db.Column(db.String(25))
     is_peak_norm = db.Column(db.Boolean())

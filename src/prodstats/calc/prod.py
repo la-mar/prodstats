@@ -1,6 +1,6 @@
 import itertools
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -43,6 +43,7 @@ class ProdSet:
 
 CALC_MONTHS: List[Optional[int]] = [1, 3, 6, 12, 18, 24]
 CALC_NORM_VALUES = [
+    (None, None),
     (1000, "1k"),
     (3000, "3k"),
     (5000, "5k"),
@@ -51,7 +52,7 @@ CALC_NORM_VALUES = [
 ]
 CALC_INTERVALS = ProdStatInterval.members()
 CALC_AGG_TYPES = ["sum"]
-CALC_INCLUDE_ZEROES = [True, False]
+CALC_INCLUDE_ZEROES = [True]
 
 
 def _validate_required_columns(required: List[str], columns: List[str]):
@@ -120,6 +121,119 @@ class ProdStats:
             k: f"{k}_{agg_type}{range_label}{norm_by_label}{nonzero}" for k in columns
         }
 
+    @staticmethod
+    def get_monthly_range(
+        monthly: pd.DataFrame, range_name: ProdStatInterval, months: int = None
+    ):
+        """ Get a named range from the monthly production of each api10 in the given dataframe.
+            This method will correctly handle monthly production that has already been filtered
+            (e.g. removed records containing zero/na) """
+        _validate_required_columns(["peak_norm_month"], monthly.columns)
+        _validate_required_columns(["api10", "prod_date"], monthly.index.names)
+
+        if range_name == ProdStatInterval.ALL and months is not None:
+            raise ValueError("Must not specify months when range_name is set to ALL")
+
+        if range_name == ProdStatInterval.FIRST:
+            df = monthly.groupby(level=0).head(months)
+        elif range_name == ProdStatInterval.LAST:
+            df = monthly.groupby(level=0).tail(months)
+        elif range_name == ProdStatInterval.PEAKNORM:
+            df = (
+                monthly.loc[monthly.peak_norm_month > 0, :]
+                .groupby(level=0)
+                .head(months)
+            )
+        else:
+            df = monthly
+
+        return df
+
+    @staticmethod
+    def get_start_and_end_by_group(monthly: pd.DataFrame):
+
+        _validate_required_columns(["prod_month"], monthly.columns)
+        _validate_required_columns(["api10", "prod_date"], monthly.index.names)
+
+        df = pd.DataFrame(index=monthly.groupby(level=0).first().index)
+
+        df["start_month"] = monthly.groupby(level=0).prod_month.min()
+        df["end_month"] = monthly.groupby(level=0).prod_month.max()
+        df["start_date"] = monthly.reset_index(level=1).groupby(level=0).prod_date.min()
+        df["end_date"] = monthly.reset_index(level=1).groupby(level=0).prod_date.max()
+
+        return df
+
+    @staticmethod
+    def melt(df: pd.DataFrame, prodstat_names: Iterable[str]):
+
+        _validate_required_columns(["api10"], df.index.names)
+
+        return df.reset_index().melt(
+            id_vars=[c for c in df.columns if c not in prodstat_names] + ["api10"],
+            var_name="name",
+            value_name="value",
+        )
+
+    @staticmethod
+    def aggregate_range(
+        monthly: pd.DataFrame,
+        range_name: ProdStatInterval,
+        agg_map: Dict[str, str],
+        alias_map: Dict[str, str],
+        include_zeroes: bool,
+        months: int = None,
+    ):
+        """ Iteratively calculate an aggregate for each provided column that excludes zero and na values
+            prior to computing the range included in the aggregate. """
+
+        if not monthly.index.is_monotonic_increasing:
+            # force sorting prior to function call for performance reasons
+            raise ValueError(
+                f"DataFrame index is not monotonic. Is the DataFrame sorted in ascending order?"
+            )
+
+        df = monthly
+
+        if include_zeroes:
+            # iterate provided columns and drop 0/na rows on in the context of
+            # each column's aggregate
+            result = pd.DataFrame()
+            for name, agg in agg_map.items():
+                df = monthly[monthly[name] > 0]
+                df = df.prodstats.get_monthly_range(
+                    monthly=df, range_name=range_name, months=months
+                )
+
+                # aggregate the current column
+                aggregated = (
+                    df[name].to_frame().groupby(level=0).agg({name: agg_map[name]})
+                ).rename(columns=alias_map)
+
+                # capture group ranges here since range can change between iterations
+                aggregated = aggregated.join(
+                    df.prodstats.get_start_and_end_by_group(df)
+                )
+
+                # melt to EAV=type schema
+                aggregated = df.prodstats.melt(
+                    aggregated, prodstat_names=alias_map.values()
+                )
+
+                result = result.append(aggregated)
+        else:
+            # aggregate all target columns
+            aggregated = df.groupby(level=0).agg(agg_map).rename(columns=alias_map)
+            aggregated = aggregated.join(df.prodstats.get_start_and_end_by_group(df))
+
+            # melt to EAV=type schema
+            aggregated = df.prodstats.melt(
+                aggregated, prodstat_names=alias_map.values()
+            )
+            result = aggregated
+
+        return result.set_index(["api10", "name"])
+
     def interval(
         self,
         monthly: pd.DataFrame,
@@ -130,16 +244,12 @@ class ProdStats:
         include_zeroes: bool = True,
         norm_by_ll: int = None,
         norm_by_label: str = None,
-        melt: bool = True,
     ) -> pd.DataFrame:
 
         if not isinstance(range_name, ProdStatInterval):
             raise TypeError(
                 f"inverval must be of type ProdStatInterval, not {type(range_name)}"
             )
-
-        if range_name == range_name.ALL and months is not None:
-            raise ValueError("Must not specify months when range_name is set to ALL")
 
         if norm_by_ll is not None and not norm_by_label:
             raise ValueError(
@@ -156,27 +266,20 @@ class ProdStats:
         )
 
         agg_map: Dict[str, str] = {k: agg_type for k in columns}
-        mask: pd.Series = None
-        if range_name == ProdStatInterval.FIRST:
-            mask = monthly.prod_month <= months
-        elif range_name == ProdStatInterval.LAST:
-            mask = (self._obj.prod_months - monthly.prod_month) <= months
-        elif range_name == ProdStatInterval.PEAKNORM:
-            mask = (monthly.peak_norm_month >= 0) & (monthly.peak_norm_month <= months)
-        else:
-            mask = monthly.prod_month.notnull()
 
-        df = monthly.loc[mask, columns + ["prod_month", "peak_norm_month"]]
+        aggregated = monthly.prodstats.aggregate_range(
+            monthly=monthly,
+            range_name=range_name,
+            months=months,
+            agg_map=agg_map,
+            alias_map=alias_map,
+            include_zeroes=include_zeroes,
+        )
 
-        aggregated = df.groupby(level=0).agg(agg_map).rename(columns=alias_map)
-        aggregated["start_month"] = df.groupby(level=0).prod_month.min()
-        aggregated["end_month"] = df.groupby(level=0).prod_month.max()
-        aggregated["start_date"] = (
-            df.reset_index(level=1).groupby(level=0).prod_date.min()
-        )
-        aggregated["end_date"] = (
-            df.reset_index(level=1).groupby(level=0).prod_date.max()
-        )
+        if norm_by_ll is not None:
+            factors = self._obj.perfll / norm_by_ll
+            aggregated.value = aggregated.value.div(factors, axis=0)
+
         aggregated["includes_zeroes"] = include_zeroes
 
         aggregated["ll_norm_value"] = norm_by_ll or np.nan
@@ -185,6 +288,12 @@ class ProdStats:
             True if range_name == ProdStatInterval.PEAKNORM else False
         )
         aggregated["aggregate_type"] = agg_type
+        aggregated["property_name"] = (
+            aggregated.reset_index(level=1)
+            .name.str.split("_")
+            .apply(lambda x: x[0] if x else None)
+            .values
+        )
         aggregated["comments"] = None
 
         api10 = ""
@@ -195,20 +304,13 @@ class ProdStats:
             f"{api10} calculated prodstats: {list(alias_map.values())}",
             extra={"api10": api10, **alias_map},
         )
-        if melt:
-            return aggregated.reset_index().melt(
-                id_vars=[c for c in aggregated.columns if c not in alias_map.values()]
-                + ["api10"],
-                var_name="name",
-                value_name="value",
-            )
-        else:
-            return aggregated
+
+        return aggregated
 
     @staticmethod
     def _generate_option_sets(
         months: List[Optional[int]] = CALC_MONTHS,
-        norm_values: List[Tuple[int, str]] = CALC_NORM_VALUES,
+        norm_values: List[Tuple[Optional[int], Optional[str]]] = CALC_NORM_VALUES,
         range_names: List[ProdStatInterval] = CALC_INTERVALS,
         agg_types: List[str] = CALC_AGG_TYPES,
         include_zeroes: List[bool] = CALC_INCLUDE_ZEROES,
@@ -239,7 +341,7 @@ class ProdStats:
     def generate_option_sets(
         cls,
         months: List[Optional[int]] = CALC_MONTHS,
-        norm_values: List[Tuple[int, str]] = CALC_NORM_VALUES,
+        norm_values: List[Tuple[Optional[int], Optional[str]]] = CALC_NORM_VALUES,
         range_names: List[ProdStatInterval] = CALC_INTERVALS,
         agg_types: List[str] = CALC_AGG_TYPES,
         include_zeroes: List[bool] = CALC_INCLUDE_ZEROES,
@@ -341,7 +443,7 @@ class ProdStats:
         monthly["peak_norm_month"] = monthly.prod_month - header.peak30_month + 1
         monthly["oil_percent"] = monthly.oil.div(monthly.boe).mul(100)
         monthly["peak_norm_days"] = (
-            monthly[monthly.peak_norm_month >= 0]
+            monthly[monthly.peak_norm_month > 0]
             .groupby(level=[0, 1])
             .sum()
             .groupby(level=[0])
@@ -368,10 +470,10 @@ class ProdStats:
         monthly = monthly.join(monthly.prodcalc.norm_to_ll(value=5000, suffix="5k"))
         monthly = monthly.join(monthly.prodcalc.norm_to_ll(value=7500, suffix="7500"))
         monthly = monthly.join(monthly.prodcalc.norm_to_ll(value=10000, suffix="10k"))
-        monthly = monthly.drop(columns=["perfll"])
 
         stats = header.prodstats.stats(monthly, melt=False)
 
+        monthly = monthly.drop(columns=["perfll"])
         return ProdSet(header=header, monthly=monthly, stats=stats)
 
 
@@ -454,21 +556,36 @@ if __name__ == "__main__":
         ts = timer()
         ids = await IHSClient.get_ids("tx-upton", path=IHSPath.prod_h_ids)
 
-        ids = random.choices(ids, k=5)
+        ids = random.choices(ids, k=25)
 
         df = await pd.DataFrame.prodstats.from_ihs(entities=ids, path=IHSPath.prod_h)
+        download_time = round(timer() - ts, 2)
+        ts = timer()
 
         ps = df.prodstats.calc()
+        process_time = round(timer() - ts, 2)
 
         from db import db
         from db.models import ProdHeader, ProdMonthly, ProdStat
 
         await db.startup()
+        ts = timer()
+
         await ProdHeader.bulk_upsert(ps.header, batch_size=100)
         await ProdMonthly.bulk_upsert(ps.monthly, batch_size=100)
-        await ProdStat.bulk_upsert(ps.stats, reset_index=False, batch_size=1000)
-        exc_time = round(timer() - ts, 2)
-        print(f"exc_time: {exc_time}")
+        await ProdStat.bulk_upsert(ps.stats, batch_size=1000)
+        persist_time = round(timer() - ts, 2)
+        total_time = round(download_time + process_time + persist_time, 2)
+
+        print(
+            f"\n{download_time=:>5}s\n{process_time=:>5}s\n{persist_time=:>5}s\n{total_time=:>5}s\n"
+        )
+
+        # self = ps.header.prodstats
+        # monthly = ps.monthly
+        # ps.monthly.groupby(level=0).tail(6).head(100)
+        # 4246134936
+        # 4246135660
         # prodstats = prodstats.replace({np.nan: None})
 
         # aggregate prodstats
