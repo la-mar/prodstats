@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from enum import Enum
 from timeit import default_timer as timer
-from typing import Dict, List
+from typing import Coroutine, Dict, List, Union
 
+import numpy as np
+import pandas as pd
 from asyncpg.exceptions import DataError, UniqueViolationError
 from sqlalchemy.dialects.postgresql.dml import Insert
 from sqlalchemy.exc import IntegrityError
@@ -26,28 +29,75 @@ logger = logging.getLogger(__name__)
 
 class BulkIOMixin(object):
     @classmethod
+    async def execute_statement(
+        cls,
+        stmt,
+        records: List[Dict] = None,
+        op_name: str = None,
+        update_on_conflict: bool = True,
+        ignore_on_conflict: bool = False,
+    ) -> int:
+        try:
+
+            if records:
+                n = len(records)
+            else:
+                n = -1
+
+            ts = timer()
+            await stmt.gino.load(cls).all()
+            exc_time = round(timer() - ts, 2)
+            cls.log_operation(op_name, n, exc_time)
+
+        except (IntegrityError, UniqueViolationError, DataError) as ie:
+            logger.debug(ie.args[0])
+
+            # fragment and reprocess
+            if n > 1:
+                first_half = records[: n // 2]
+                second_half = records[n // 2 :]
+                await cls.bulk_upsert(
+                    records=first_half,
+                    batch_size=len(first_half) // 4,
+                    update_on_conflict=update_on_conflict,
+                    ignore_on_conflict=ignore_on_conflict,
+                )
+                await cls.bulk_upsert(
+                    records=second_half,
+                    batch_size=len(second_half) // 4,
+                    update_on_conflict=update_on_conflict,
+                    ignore_on_conflict=ignore_on_conflict,
+                )
+        except Exception as e:
+            logger.error(f"{e.__class__}: {e} -- {e.args}")
+            raise e
+
+        return n
+
+    @classmethod
     async def bulk_upsert(
         cls,
         records: List[Dict],
-        batch_size: int = None,
+        batch_size: int = 100,
         exclude_cols: list = None,
         update_on_conflict: bool = True,
         ignore_on_conflict: bool = False,
+        concurrency: int = 50
         # fetch_result: bool = False,
     ) -> int:
-        op_name = "bulk_upsert"
-        affected: int = 0
         batch_size = batch_size or len(records)
         exclude_cols = exclude_cols or []
-        for chunk in util.chunks(records, batch_size):
-            ts = timer()
+        coros: List[Coroutine] = []
+
+        for idx, chunk in enumerate(util.chunks(records, batch_size)):
+            op_name = "bulk_upsert"
             chunk = list(chunk)
             stmt = Insert(cls).values(chunk)
 
             # update these columns when a conflict is encountered
             if ignore_on_conflict:
                 stmt = stmt.on_conflict_do_nothing(constraint=cls.__table__.primary_key)
-                op_name = op_name + "_ignore_on_conflict"
+                op_name = op_name + " (ignore_on_conflict)"
             elif update_on_conflict:
                 on_conflict_update_cols = [
                     c.name
@@ -60,45 +110,26 @@ class BulkIOMixin(object):
                         k: getattr(stmt.excluded, k) for k in on_conflict_update_cols
                     },
                 )
-                op_name = op_name + "_update_on_conflict"
+                op_name = op_name + " (update_on_conflict)"
 
-            try:
-                # if fetch_result:
-                #     stmt = stmt.returning(cls.__table__)
-                # result = await stmt.gino.load(cls).all()
-                n = len(chunk)
-                await stmt.gino.load(cls).all()
-                exc_time = round(timer() - ts, 2)
-                cls.log_operation("upsert", op_name, n, exc_time)
-                affected += n
+            coros.append(
+                cls.execute_statement(
+                    stmt,
+                    records=chunk,
+                    op_name=op_name,
+                    update_on_conflict=update_on_conflict,
+                    ignore_on_conflict=ignore_on_conflict,
+                )
+            )
 
-            except (IntegrityError, UniqueViolationError, DataError) as ie:
-                logger.debug(ie.args[0])
+        result: int = 0
+        for idx, chunk in enumerate(util.chunks(coros, concurrency)):
+            result += sum(await asyncio.gather(*chunk))
 
-                # fragment and reprocess
-                if n > 1:
-                    first_half = records[: n // 2]
-                    second_half = records[n // 2 :]
-                    await cls.bulk_upsert(
-                        records=first_half,
-                        batch_size=len(first_half) // 4,
-                        update_on_conflict=update_on_conflict,
-                        ignore_on_conflict=ignore_on_conflict,
-                    )
-                    await cls.bulk_upsert(
-                        records=second_half,
-                        batch_size=len(second_half) // 4,
-                        update_on_conflict=update_on_conflict,
-                        ignore_on_conflict=ignore_on_conflict,
-                    )
-            except Exception as e:
-                logger.error(f"{e.__class__}: {e} -- {e.args}")
-                raise e
-
-        return affected
+        return result
 
     @classmethod
-    async def bulk_insert(cls, records: List[Dict], batch_size: int = None) -> int:
+    async def bulk_insert(cls, records: List[Dict], batch_size: int = 100) -> int:
 
         affected: int = 0
         batch_size = batch_size or len(records)
@@ -109,32 +140,68 @@ class BulkIOMixin(object):
             exc_time = round(timer() - ts, 2)
             n = len(chunk)
             await stmt.gino.load(cls).all()
-            cls.log_operation("insert", "insert", n, exc_time)
+            cls.log_operation("insert", n, exc_time)
             affected += n
         return affected
 
     @classmethod
-    def log_operation(cls, method_type: str, method: str, n: int, exc_time: float):
-        op_name = method_type.lower()
+    def log_operation(cls, method: str, n: int, exc_time: float):
+        op_name = method.lower()
         measurements = {
             "tablename": cls.__table__.name,
             "method": method,
-            f"{op_name}s": n,
             f"{op_name}_time": exc_time,
         }
 
-        if exc_time > 0:
-            measurements[f"{op_name}s_per_second"] = n / exc_time or 1
+        if n > 0:
+            measurements[f"{op_name}s"] = n
+
+            if exc_time > 0:
+                measurements[f"{op_name}s_per_second"] = n / exc_time or 1
 
         logger.info(
-            f"{cls.__table__.name}.{method}: {op_name}ed {n} records ({exc_time}s)",
+            f"{cls.__table__.name}.{method}: {op_name} {n} records ({exc_time}s)",
             extra=measurements,
         )
 
 
+class DataFrameMixin(BulkIOMixin):
+    @staticmethod
+    def _prepare(df: pd.DataFrame, reset_index: bool) -> List[Dict]:
+
+        df = df.replace({np.nan: None})  # nan to None
+
+        if reset_index:
+            df = df.reset_index()
+
+        return df.to_dict(orient="records")
+
+    @classmethod
+    async def bulk_upsert(
+        cls, df: Union[pd.DataFrame, List[Dict]], reset_index: bool = True, **kwargs
+    ) -> int:
+        records: List[Dict] = []
+        if isinstance(df, pd.DataFrame):
+            records = cls._prepare(df=df, reset_index=reset_index)
+        else:
+            records = df
+        return await super().bulk_upsert(records, **kwargs)
+
+    @classmethod
+    async def bulk_insert(
+        cls, df: Union[pd.DataFrame, List[Dict]], reset_index: bool = True, **kwargs
+    ) -> int:
+        records: List[Dict] = []
+        if isinstance(df, pd.DataFrame):
+            records = cls._prepare(df=df, reset_index=reset_index)
+        else:
+            records = df
+        return await super().bulk_insert(records, **kwargs)
+
+
 if __name__ == "__main__":
 
-    async def placeholder():
+    async def async_wrapper():
 
         from db import db, DATABASE_CONFIG
         from db.models import User, Model  # noqa

@@ -18,6 +18,10 @@
 
 # prodstat methodology
 
+# calcs
+
+- boe = oil + gas / 6
+
 ## header inputs
 
 - api10
@@ -77,7 +81,7 @@
 #### peak30
 
 1.  calculate peak30: calculate the peak 30 day oil value within the first 12 months
-    global: PEAK_NORM_LIMIT_MONTHS = 12
+    global: PEAK_NORM_LIMIT_MONTHS = 6
 
     inputs: prod_monthly
 
@@ -86,8 +90,8 @@
     - api10
     - peak30_date
     - peak30_prod_month
-    - oil_peak30
-    - gas_peak30
+    - peak30_oil
+    - peak30_gas
 
 2.  calculate peak_norm_month: ordinal like prod_month, but 1 begins at peak_prod_month. (prod_date - peak30_prod_date).months (perhaps +1)
 

@@ -1,16 +1,17 @@
 """empty message
 
-Revision ID: ab6594ca99a6
+Revision ID: bb5936d7f5d4
 Revises: 244869cf6945
-Create Date: 2020-03-08 15:11:06.202382
+Create Date: 2020-03-10 21:58:38.694224
 
 """
 import geoalchemy2
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = "ab6594ca99a6"
+revision = "bb5936d7f5d4"
 down_revision = "244869cf6945"
 branch_labels = None
 depends_on = None
@@ -49,34 +50,6 @@ def upgrade():
     op.create_index(op.f("ix_depths_api14"), "depths", ["api14"], unique=False)
     op.create_index(op.f("ix_depths_name"), "depths", ["name"], unique=False)
     op.create_table(
-        "prodstat_header",
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=True,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=True,
-        ),
-        sa.Column("api10", sa.String(length=10), nullable=False),
-        sa.Column("api14s", sa.ARRAY(sa.Integer()), nullable=True),
-        sa.Column("prod_date_first", sa.Date(), nullable=True),
-        sa.Column("prod_date_last", sa.Date(), nullable=True),
-        sa.Column("prod_months", sa.Integer(), nullable=True),
-        sa.Column("prod_days", sa.Integer(), nullable=True),
-        sa.Column("peak_norm_months", sa.Integer(), nullable=True),
-        sa.Column("peak_norm_days", sa.Integer(), nullable=True),
-        sa.Column("peak30_oil", sa.Integer(), nullable=True),
-        sa.Column("peak30_gas", sa.Integer(), nullable=True),
-        sa.Column("peak30_date", sa.Date(), nullable=True),
-        sa.Column("peak30_month", sa.Integer(), nullable=True),
-        sa.PrimaryKeyConstraint("api10"),
-    )
-    op.create_table(
         "prodstats",
         sa.Column(
             "created_at",
@@ -95,15 +68,69 @@ def upgrade():
         sa.Column("value", sa.Float(), nullable=True),
         sa.Column("property_name", sa.String(length=50), nullable=True),
         sa.Column("aggregate_type", sa.String(length=25), nullable=True),
-        sa.Column("is_peak_normalized", sa.Boolean(), nullable=True),
-        sa.Column("is_lateral_length_normalized", sa.Boolean(), nullable=True),
+        sa.Column("is_peak_norm", sa.Boolean(), nullable=True),
+        sa.Column("is_ll_norm", sa.Boolean(), nullable=True),
+        sa.Column("ll_norm_value", sa.Integer(), nullable=True),
         sa.Column("includes_zeroes", sa.Boolean(), nullable=True),
         sa.Column("start_date", sa.Date(), nullable=True),
         sa.Column("end_date", sa.Date(), nullable=True),
         sa.Column("start_month", sa.Integer(), nullable=True),
         sa.Column("end_month", sa.Integer(), nullable=True),
-        sa.Column("comments", sa.String(), nullable=True),
+        sa.Column(
+            "comments",
+            postgresql.JSONB(astext_type=sa.Text()),
+            server_default="{}",
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint("api10", "name"),
+    )
+    op.create_table(
+        "production_header",
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=True,
+        ),
+        sa.Column("api10", sa.String(length=10), nullable=False),
+        sa.Column("primary_api14", sa.String(length=14), nullable=True),
+        sa.Column("entity12", sa.String(length=12), nullable=False),
+        sa.Column("status", sa.String(), nullable=True),
+        sa.Column("prod_date_first", sa.Date(), nullable=True),
+        sa.Column("prod_date_last", sa.Date(), nullable=True),
+        sa.Column("prod_months", sa.Integer(), nullable=True),
+        sa.Column("prod_days", sa.Integer(), nullable=True),
+        sa.Column("peak_norm_months", sa.Integer(), nullable=True),
+        sa.Column("peak_norm_days", sa.Integer(), nullable=True),
+        sa.Column("peak30_oil", sa.Integer(), nullable=True),
+        sa.Column("peak30_gas", sa.Integer(), nullable=True),
+        sa.Column("peak30_date", sa.Date(), nullable=True),
+        sa.Column("peak30_month", sa.Integer(), nullable=True),
+        sa.Column("perfll", sa.Integer(), nullable=True),
+        sa.Column("perf_upper", sa.Integer(), nullable=True),
+        sa.Column("perf_lower", sa.Integer(), nullable=True),
+        sa.Column("products", sa.String(), nullable=True),
+        sa.Column("provider", sa.String(), nullable=True),
+        sa.Column("provider_last_update_at", sa.DateTime(), nullable=True),
+        sa.Column(
+            "related_wells",
+            postgresql.JSONB(astext_type=sa.Text()),
+            server_default="[]",
+            nullable=False,
+        ),
+        sa.Column(
+            "comments",
+            postgresql.JSONB(astext_type=sa.Text()),
+            server_default="[]",
+            nullable=False,
+        ),
+        sa.PrimaryKeyConstraint("api10"),
     )
     op.create_table(
         "production_monthly",
@@ -120,31 +147,46 @@ def upgrade():
             nullable=True,
         ),
         sa.Column("api10", sa.String(length=10), nullable=False),
-        sa.Column("prod_date", sa.Date(), nullable=True),
+        sa.Column("prod_date", sa.Date(), nullable=False),
         sa.Column("prod_month", sa.Integer(), nullable=True),
         sa.Column("days_in_month", sa.Integer(), nullable=True),
         sa.Column("prod_days", sa.Integer(), nullable=True),
         sa.Column("peak_norm_month", sa.Integer(), nullable=True),
         sa.Column("peak_norm_days", sa.Integer(), nullable=True),
-        sa.Column("oil", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("gas", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("water", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("boe", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("oil_norm_1k", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("gas_norm_1k", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("boe_norm_1k", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("gas_norm_5k", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("oil_norm_5k", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("boe_norm_5k", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("gas_norm_7500", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("oil_norm_7500", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("boe_norm_7500", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("gas_norm_10k", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("oil_norm_10k", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("boe_norm_10k", sa.Numeric(precision=19, scale=2), nullable=True),
-        sa.Column("oil_percent", sa.Float(), nullable=True),
-        sa.Column("gor", sa.Float(), nullable=True),
-        sa.PrimaryKeyConstraint("api10"),
+        sa.Column("oil", sa.Integer(), nullable=True),
+        sa.Column("gas", sa.Integer(), nullable=True),
+        sa.Column("water", sa.Integer(), nullable=True),
+        sa.Column("boe", sa.Integer(), nullable=True),
+        sa.Column("water_cut", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("oil_percent", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("gor", sa.Integer(), nullable=True),
+        sa.Column("oil_norm_1k", sa.Integer(), nullable=True),
+        sa.Column("gas_norm_1k", sa.Integer(), nullable=True),
+        sa.Column("water_norm_1k", sa.Integer(), nullable=True),
+        sa.Column("boe_norm_1k", sa.Integer(), nullable=True),
+        sa.Column("gas_norm_5k", sa.Integer(), nullable=True),
+        sa.Column("oil_norm_5k", sa.Integer(), nullable=True),
+        sa.Column("water_norm_5k", sa.Integer(), nullable=True),
+        sa.Column("boe_norm_5k", sa.Integer(), nullable=True),
+        sa.Column("gas_norm_7500", sa.Integer(), nullable=True),
+        sa.Column("oil_norm_7500", sa.Integer(), nullable=True),
+        sa.Column("water_norm_7500", sa.Integer(), nullable=True),
+        sa.Column("boe_norm_7500", sa.Integer(), nullable=True),
+        sa.Column("gas_norm_10k", sa.Integer(), nullable=True),
+        sa.Column("oil_norm_10k", sa.Integer(), nullable=True),
+        sa.Column("water_norm_10k", sa.Integer(), nullable=True),
+        sa.Column("boe_norm_10k", sa.Integer(), nullable=True),
+        sa.Column("oil_avg_daily", sa.Integer(), nullable=True),
+        sa.Column("gas_avg_daily", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("water_avg_daily", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column("boe_avg_daily", sa.Numeric(precision=19, scale=2), nullable=True),
+        sa.Column(
+            "comments",
+            postgresql.JSONB(astext_type=sa.Text()),
+            server_default="[]",
+            nullable=False,
+        ),
+        sa.PrimaryKeyConstraint("api10", "prod_date"),
     )
     op.create_table(
         "shapes",
@@ -396,8 +438,8 @@ def downgrade():
     op.drop_index(op.f("ix_shapes_api14"), table_name="shapes")
     op.drop_table("shapes")
     op.drop_table("production_monthly")
+    op.drop_table("production_header")
     op.drop_table("prodstats")
-    op.drop_table("prodstat_header")
     op.drop_index(op.f("ix_depths_name"), table_name="depths")
     op.drop_index(op.f("ix_depths_api14"), table_name="depths")
     op.drop_table("depths")

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
@@ -19,8 +19,8 @@ class ProductionRecord(ProdBase):
 
     prod_date: date = Field(..., alias="first_date")
     days_in_month: Optional[int] = Field(..., alias="last_day")
-    oil: Optional[int]
-    oil_uom: Optional[str]
+    oil: Optional[int] = Field(..., alias="liquid")
+    oil_uom: Optional[str] = Field(..., alias="liquid_uom")
     gas: Optional[int]
     gas_uom: Optional[str]
     water: Optional[int]
@@ -36,6 +36,8 @@ class ProductionWell(ProdBase):
     entity: str
     entity12: str = Field(..., min_length=12, max_length=12)
     status: str
+    provider: str
+    provider_last_update_at: datetime = Field(..., alias="last_update_at")
     perf_upper: Optional[int] = Field(..., alias="perf_upper_max")
     perf_lower: Optional[int] = Field(..., alias="perf_lower_min")
     perfll: Optional[int]

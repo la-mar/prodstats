@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Union
 
 import pytz
 from geoalchemy2 import Geometry
-import geoalchemy2
 from gino.dialects.asyncpg import JSONB
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import UUID
@@ -13,7 +12,7 @@ from sqlalchemy_utils import ChoiceType, EmailType, URLType
 
 import util.jsontools
 from db import db
-from db.mixins import BulkIOMixin
+from db.mixins import DataFrameMixin
 from util.deco import classproperty
 
 db.JSONB, db.UUID, db.EmailType, db.URLType, db.ChoiceType, db.Geometry = (
@@ -31,7 +30,7 @@ def utcnow():
     return datetime.now().astimezone(pytz.utc)
 
 
-class Base(db.Model, BulkIOMixin):
+class Base(db.Model, DataFrameMixin):
     """ Data model base class """
 
     __abstract__ = True
