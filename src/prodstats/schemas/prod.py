@@ -38,8 +38,8 @@ class ProductionWell(ProdBase):
     status: str
     provider: str
     provider_last_update_at: datetime = Field(..., alias="last_update_at")
-    perf_upper: Optional[int] = Field(..., alias="perf_upper_max")
-    perf_lower: Optional[int] = Field(..., alias="perf_lower_min")
+    perf_upper: Optional[int] = Field(..., alias="perf_upper_min")
+    perf_lower: Optional[int] = Field(..., alias="perf_lower_max")
     perfll: Optional[int]
     products: Optional[str]
     production: List[ProductionRecord]
