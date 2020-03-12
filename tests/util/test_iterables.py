@@ -10,7 +10,7 @@ def queryable():
             "enabled": True,
             "exclude": [],
             "model": "ProdStat",
-            "path": "/path/to/rock/endpoint",
+            "path": "/path/to/endpoint",
             "aliases": {"key": "value", "key2": "value2"},
             "tasks": [
                 {

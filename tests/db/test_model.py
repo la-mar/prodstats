@@ -2,10 +2,10 @@ import logging
 
 import pytest
 from sqlalchemy import String
+from tests.utils import rand_str
 
 from db.models import ProdStat as Model
 from db.models.bases import Base
-from tests.utils import rand_str
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class TestModel:
     @pytest.mark.asyncio
     async def test_create_instance(self, bind):
         x = rand_str(length=10)
-        result = await Model.create(api10=x)
+        result = await Model.create(api10=x, name=rand_str(length=20))
         assert result.to_dict()["api10"] == x
 
     def test_model_repr(self):
@@ -31,25 +31,25 @@ class TestModel:
 
 class TestPrimaryKeyProxy:
     def test_access_pk_names(self, bind):
-        assert Model.pk.names == ["api10"]
+        assert Model.pk.names == ["api10", "name"]
 
     def test_pk_repr(self, bind):
-        assert repr(Model.pk) == '[\n    "api10"\n]'
+        assert repr(Model.pk)
 
     @pytest.mark.asyncio
     async def test_pk_values(self, bind):
-        ids = [rand_str(length=10) for i in range(1, 5)]
-        for i in ids:
-            await Model.create(api10=i)
+        ids = [(rand_str(length=10), rand_str(length=20)) for i in range(1, 5)]
+        for i, v in ids:
+            await Model.create(api10=i, name=v)
         assert sorted(await Model.pk.values) == sorted(ids)
 
 
 class TestAggregateProxy:
     @pytest.mark.asyncio
     async def test_agg_count(self, bind):
-        ids = [rand_str(length=10) for i in range(1, 5)]
-        for i in ids:
-            await Model.create(api10=i)
+        ids = [(rand_str(length=10), rand_str(length=20)) for i in range(1, 5)]
+        for i, v in ids:
+            await Model.create(api10=i, name=v)
         result = await Model.agg.count()
         assert result == len(ids)
 

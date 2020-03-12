@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseSettings, SecretStr
 
-__all__ = ["BasicAuth", "ClientCredentials", "RockAuth"]
+__all__ = ["BasicAuth", "ClientCredentials"]
 
 
 class HTTPAuth(BaseSettings):
@@ -31,8 +31,8 @@ class ClientCredentials(HTTPAuth):
     client_secret: Optional[SecretStr] = None
 
 
-class RockAuth(BasicAuth):
+class ClientAppAuth(BasicAuth):
     class Config:
-        env_prefix = "rock_"
+        env_prefix = "client_app_"
 
     persisted: bool = False

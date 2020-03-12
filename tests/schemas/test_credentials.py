@@ -1,4 +1,4 @@
-from schemas.credentials import BasicAuth, ClientCredentials, HTTPAuth, RockAuth
+from schemas.credentials import BasicAuth, ClientCredentials, HTTPAuth
 
 
 class TestHTTPAuth:
@@ -40,25 +40,3 @@ class TestClientCredentials:
             str(ClientCredentials(**data).dict(reveal=True))
             == "{'client_id': 'name', 'client_secret': 'pass'}"
         )
-
-
-class TestRockAuth:
-    def test_no_envs(self, monkeypatch):
-        monkeypatch.delenv("ROCK_USERNAME", raising=False)
-        monkeypatch.delenv("ROCK_PASSWORD", raising=False)
-
-        assert RockAuth().dict() == {
-            "username": None,
-            "password": None,
-            "persisted": False,
-        }
-
-    def test_read_from_envs(self, monkeypatch):
-        monkeypatch.setenv("ROCK_USERNAME", "test_username")
-        monkeypatch.setenv("ROCK_PASSWORD", "test_password")
-
-        assert RockAuth().dict(reveal=True) == {
-            "username": "test_username",
-            "password": "test_password",
-            "persisted": False,
-        }

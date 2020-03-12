@@ -128,6 +128,16 @@ class IHSClient(AsyncClient):
             response.raise_for_status()
             return response.json()["data"][0]["ids"]
 
+    @classmethod
+    async def get_areas(cls, path: IHSPath, name_only: bool = True):
+        async with cls() as client:
+            response = await client.get(f"{path.value}", params={"exclude": "ids"})
+            response.raise_for_status()
+            data = response.json()["data"]
+            if name_only:
+                data = [x["name"] for x in data]
+            return data
+
 
 if __name__ == "__main__":
 
@@ -157,10 +167,12 @@ if __name__ == "__main__":
 
         # ids = await IHSClient.get_ids("tx-upton", path=IHSPath.prod_h_ids)
         # ids = random.choices(ids, k=1)
-        data = await IHSClient.get_production_wells(
+        await IHSClient.get_production_wells(
             entity12s=ids, path=IHSPath.prod_h, params={"related": False}
         )
-        data[0]
+
+        await IHSClient.get_areas(path=IHSPath.prod_h_ids)
+
         # TODO: add indexes to entity12
 
         # async for r in IHSClient.iter_get(coros):

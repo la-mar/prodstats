@@ -159,14 +159,14 @@ class TestCLISlow:
         for line in captured.out.split("\n"):
             logger.info(line)
 
-    def test_db_recreate(
-        self, capfd, tmpdir, conf, sa_engine
-    ):  # TODO: needs validation
-        db.drop_all(sa_engine)
+    # def test_db_recreate(
+    #     self, capfd, tmpdir, conf, sa_engine
+    # ):  # TODO: needs validation
+    #     db.drop_all(sa_engine)
 
-        with working_directory(tmpdir):
-            manage.recreate("")
-            captured = capfd.readouterr()
+    #     with working_directory(tmpdir):
+    #         manage.recreate("")
+    #         captured = capfd.readouterr()
 
-        for line in captured.out.split("\n"):
-            logger.info(line)
+    #     for line in captured.out.split("\n"):
+    #         logger.info(line)

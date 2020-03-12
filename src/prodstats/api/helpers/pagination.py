@@ -43,7 +43,7 @@ class Pagination:
         self.model: Model = None
 
     async def count(self, filter: Optional[Union[str, TextClause]] = None) -> int:
-        q = db.select([db.func.count(*self.model.pk)])
+        q = db.select([db.func.count([x for x in self.model.pk][0])])
         filter = filter if filter is not None else self.filter
         if filter is not None:
             if not isinstance(filter, TextClause):

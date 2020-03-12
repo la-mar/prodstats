@@ -32,7 +32,7 @@ def port():
 @pytest.fixture
 async def seed_model(bind):
     for x in range(0, 15):
-        await Model.create(api10=rand_str(length=10))
+        await Model.create(api10=rand_str(length=10), name=rand_str(length=20))
 
 
 app = FastAPI()
@@ -115,7 +115,7 @@ def server():
         daemon=True,
     )
     process.start()
-    time.sleep(2)
+    time.sleep(3)
 
     yield httpx.URL(f"http://{host}:{port}")
     process.kill()

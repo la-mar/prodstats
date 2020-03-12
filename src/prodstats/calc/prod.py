@@ -25,10 +25,7 @@ class ProdStatInterval(str, Enum):
 
 class ProdSet:
     def __init__(
-        self,
-        header: pd.DataFrame = None,
-        monthly: pd.DataFrame = None,
-        stats: pd.DataFrame = None,
+        self, header: pd.DataFrame, monthly: pd.DataFrame, stats: pd.DataFrame,
     ):
         self.header = header
         self.monthly = monthly
@@ -39,6 +36,13 @@ class ProdSet:
         m = self.monthly.shape[0]
         s = self.stats.shape[0]
         return f"header={h} monthly={m} stats={s}"
+
+    def describe(self) -> Dict[str, int]:
+        return dict(
+            header=self.header.shape[0],
+            monthly=self.monthly.shape[0],
+            stats=self.stats.shape[0],
+        )
 
 
 CALC_MONTHS: List[Optional[int]] = [1, 3, 6, 12, 18, 24]
@@ -67,6 +71,8 @@ def _validate_required_columns(required: List[str], columns: List[str]):
 
 @pd.api.extensions.register_dataframe_accessor("prodstats")
 class ProdStats:
+    peak_norm_limit: int = conf.PEAK_NORM_LIMIT
+
     def __init__(self, obj: PandasObject):
         # self._validate(obj)
         self._obj: PandasObject = obj
@@ -437,7 +443,7 @@ class ProdStats:
             .days_in_month.cumsum()
         )
 
-        peak30 = monthly.prodcalc.peak30()
+        peak30 = monthly.prodstats.peak30()
         header = header.join(peak30)
 
         monthly["peak_norm_month"] = monthly.prod_month - header.peak30_month + 1
@@ -466,24 +472,15 @@ class ProdStats:
             monthly.reset_index(level=1).groupby(level=0).prod_date.max()
         )
 
-        monthly = monthly.join(monthly.prodcalc.norm_to_ll(value=1000, suffix="1k"))
-        monthly = monthly.join(monthly.prodcalc.norm_to_ll(value=5000, suffix="5k"))
-        monthly = monthly.join(monthly.prodcalc.norm_to_ll(value=7500, suffix="7500"))
-        monthly = monthly.join(monthly.prodcalc.norm_to_ll(value=10000, suffix="10k"))
+        monthly = monthly.join(monthly.prodstats.norm_to_ll(value=1000, suffix="1k"))
+        monthly = monthly.join(monthly.prodstats.norm_to_ll(value=5000, suffix="5k"))
+        monthly = monthly.join(monthly.prodstats.norm_to_ll(value=7500, suffix="7500"))
+        monthly = monthly.join(monthly.prodstats.norm_to_ll(value=10000, suffix="10k"))
 
         stats = header.prodstats.stats(monthly, melt=False)
 
         monthly = monthly.drop(columns=["perfll"])
         return ProdSet(header=header, monthly=monthly, stats=stats)
-
-
-@pd.api.extensions.register_dataframe_accessor("prodcalc")
-class ProductionCalculator:
-    peak_norm_limit: int = conf.PEAK_NORM_LIMIT
-
-    def __init__(self, obj: PandasObject):
-        # self._validate(obj)
-        self._obj: PandasObject = obj
 
     def norm_to_ll(
         self,
@@ -503,7 +500,9 @@ class ProductionCalculator:
 
     def peak30(self) -> pd.DataFrame:
         """ Generate peak30 statistics, bounded by the configured peak_norm_limit """
+
         _validate_required_columns(["oil", "prod_month"], self._obj.columns)
+
         peak_range = self._obj.prod_month <= self.peak_norm_limit
         df = self._obj.loc[peak_range, :]
 
@@ -525,13 +524,29 @@ class ProductionCalculator:
         return peak30[["peak30_date", "peak30_oil", "peak30_gas", "peak30_month"]]
 
 
+# @pd.api.extensions.register_dataframe_accessor("prodcalc")
+# class ProductionCalculator:
+#     peak_norm_limit: int = conf.PEAK_NORM_LIMIT
+
+#     def __init__(self, obj: PandasObject):
+#         # self._validate(obj)
+#         self._obj: PandasObject = obj
+
+
 if __name__ == "__main__":
 
     import loggers
-    import random
 
-    # import util
+    # import random
+
+    import util
     from timeit import default_timer as timer
+
+    from db import db
+    from db.models import ProdHeader, ProdMonthly, ProdStat
+
+    # from typing import Coroutine
+    import asyncio
 
     loggers.config(level=20)
 
@@ -553,33 +568,95 @@ if __name__ == "__main__":
         #     "14207C020251",
         # ]
 
-        ts = timer()
-        ids = await IHSClient.get_ids("tx-upton", path=IHSPath.prod_h_ids)
-
-        ids = random.choices(ids, k=25)
-
-        df = await pd.DataFrame.prodstats.from_ihs(entities=ids, path=IHSPath.prod_h)
-        download_time = round(timer() - ts, 2)
-        ts = timer()
-
-        ps = df.prodstats.calc()
-        process_time = round(timer() - ts, 2)
-
-        from db import db
-        from db.models import ProdHeader, ProdMonthly, ProdStat
-
         await db.startup()
-        ts = timer()
 
-        await ProdHeader.bulk_upsert(ps.header, batch_size=100)
-        await ProdMonthly.bulk_upsert(ps.monthly, batch_size=100)
-        await ProdStat.bulk_upsert(ps.stats, batch_size=1000)
-        persist_time = round(timer() - ts, 2)
-        total_time = round(download_time + process_time + persist_time, 2)
+        # ids = random.choices(ids, k=100)
 
-        print(
-            f"\n{download_time=:>5}s\n{process_time=:>5}s\n{persist_time=:>5}s\n{total_time=:>5}s\n"
-        )
+        # for chunk in util.chunks(ids, n=100):
+
+        async def process(ids: List[str], return_data: bool = True) -> Dict:
+            ts = timer()
+
+            df = await pd.DataFrame.prodstats.from_ihs(
+                entities=ids, path=IHSPath.prod_h
+            )
+            download_time = round(timer() - ts, 2)
+            ts = timer()
+
+            ps = df.prodstats.calc()
+            process_time = round(timer() - ts, 2)
+
+            ts = timer()
+
+            await ProdHeader.bulk_upsert(ps.header, batch_size=100)
+            await ProdMonthly.bulk_upsert(ps.monthly, batch_size=100)
+            await ProdStat.bulk_upsert(ps.stats, batch_size=1000)
+            persist_time = round(timer() - ts, 2)
+            total_time = round(download_time + process_time + persist_time, 2)
+
+            logger.warning(
+                f"\n{download_time=:>5}s\n{process_time=:>5}s\n{persist_time=:>5}s\n{total_time=:>5}s\n"  # noqa
+            )
+
+            result = {
+                "times": {
+                    "download": download_time,
+                    "process": process_time,
+                    "persist": persist_time,
+                },
+                "counts": ps.describe(),
+            }
+
+            if return_data:
+                result["data"] = ps
+
+            return result
+
+        async def run(batch_size: int, return_data: bool):
+            ids = await IHSClient.get_ids("tx-upton", path=IHSPath.prod_h_ids)
+            # ids = ids[:10]
+            results: List[Dict] = []
+            for chunk in util.chunks(ids, n=batch_size):
+                results.append(await process(chunk, return_data))
+
+            return results
+
+        # results = asyncio.run_until_complete
+        loop = asyncio.get_event_loop()
+
+        batch_size = 1000
+        return_data = False
+
+        result = loop.run_until_complete(run(batch_size, return_data))
+
+        def metrics(data: List[Dict[str, Dict]]):
+            times = (
+                pd.DataFrame([x["times"] for x in result])
+                .sum()
+                .rename("seconds")
+                .to_frame()
+            )
+            times.index.name = "metric"
+            times["minutes"] = times.seconds / 60
+            times["time_percent"] = times.seconds / times.seconds.sum() * 100
+
+            c = pd.DataFrame([x["counts"] for x in result]).sum().to_dict()
+            counts = pd.DataFrame(index=times.index, data=[c] * 3)
+
+            rates = counts.T / times.seconds
+            rates = rates.T
+            rates.columns = [f"{x}_per_sec" for x in rates.columns]
+            rates = rates.astype(int)
+
+            counts.columns = [f"{x}_count" for x in counts.columns]
+            composite = times.join(counts).join(rates).T.astype(int)
+
+            return composite
+
+        metrics(result)
+
+        # async for coro in aiter(ids):
+        #     return await coro
 
         # self = ps.header.prodstats
         # monthly = ps.monthly

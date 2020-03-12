@@ -140,4 +140,4 @@ class AggregateProxy:
         return f"AggregateProxy: {self.model.__module__}"
 
     async def count(self) -> int:
-        return await db.func.count(*self.model.pk).gino.scalar()
+        return await db.func.count([x for x in self.model.pk][0]).gino.scalar()
