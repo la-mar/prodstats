@@ -45,11 +45,6 @@ class IHSClient(AsyncClient):
             base_url=base_url or self.base_url, headers=headers, params=params, **kwargs
         )
 
-    # @staticmethod
-    # async def aiter(coros):
-    #     for coro in coros:
-    #         yield await coro
-
     @classmethod
     async def get_production_wells(
         cls,
@@ -60,6 +55,7 @@ class IHSClient(AsyncClient):
         entity12s: Union[str, List[str]] = None,
         timeout: Optional[int] = None,
         concurrency: int = 50,
+        **kwargs,
     ) -> List[Dict[str, Any]]:
         """Fetch production records from the internal IHS service.
 
@@ -102,7 +98,7 @@ class IHSClient(AsyncClient):
 
         params = params or {}
 
-        async with cls() as client:
+        async with cls(**kwargs) as client:
             coros: List[Coroutine] = []
             for id in ids:
                 coro = client.get(
@@ -122,15 +118,17 @@ class IHSClient(AsyncClient):
         return data
 
     @classmethod
-    async def get_ids(cls, area: str, path: IHSPath):
-        async with cls() as client:
+    async def get_ids(cls, area: str, path: IHSPath, **kwargs) -> List[str]:
+        async with cls(**kwargs) as client:
             response = await client.get(f"{path.value}/{area}")
             response.raise_for_status()
             return response.json()["data"][0]["ids"]
 
     @classmethod
-    async def get_areas(cls, path: IHSPath, name_only: bool = True):
-        async with cls() as client:
+    async def get_areas(
+        cls, path: IHSPath, name_only: bool = True, **kwargs
+    ) -> List[str]:
+        async with cls(**kwargs) as client:
             response = await client.get(f"{path.value}", params={"exclude": "ids"})
             response.raise_for_status()
             data = response.json()["data"]

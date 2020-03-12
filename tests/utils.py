@@ -14,6 +14,7 @@ class MockBaseDispatch:
     def __init__(
         self, body=b"", status_code=200, headers=None, cookie=None, assert_func=None,
     ):
+        self._original_body = body
         if headers is None:
             headers = {}
         if isinstance(body, (dict, list)):
