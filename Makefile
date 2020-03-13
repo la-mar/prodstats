@@ -17,6 +17,9 @@ smoke-test:
 cov:
 	export CI=false && poetry run pytest -x --cov src/prodstats tests/ --cov-report html:./coverage/coverage.html --log-cli-level 30 --log-level 20 -vv
 
+pscov:
+	export CI=false && poetry run pytest -x --cov src/prodstats tests/calc/test_prod_calc.py --cov-report html:./coverage/coverage.html --log-cli-level 30 --log-level 20 -v
+
 cicov:
 	export CI=true && poetry run pytest -x --cov src/prodstats tests/ --cov-report html:./coverage/coverage.html --log-cli-level 10 --log-level 10 -vv
 

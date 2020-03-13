@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 PandasObject = Union[pd.DataFrame, pd.Series]
 
 
-class ProdStatInterval(str, Enum):
+class ProdStatRange(str, Enum):
     FIRST = "first"
     LAST = "last"
     PEAKNORM = "peaknorm"
@@ -54,7 +54,7 @@ CALC_NORM_VALUES = [
     (7500, "7500"),
     (10000, "10k"),
 ]
-CALC_INTERVALS = ProdStatInterval.members()
+CALC_INTERVALS = ProdStatRange.members()
 CALC_AGG_TYPES = ["sum"]
 CALC_INCLUDE_ZEROES = [True]
 
@@ -72,6 +72,7 @@ def _validate_required_columns(required: List[str], columns: List[str]):
 @pd.api.extensions.register_dataframe_accessor("prodstats")
 class ProdStats:
     peak_norm_limit: int = conf.PEAK_NORM_LIMIT
+    ranges = ProdStatRange
 
     def __init__(self, obj: PandasObject):
         # self._validate(obj)
@@ -106,20 +107,23 @@ class ProdStats:
         wellset = ProductionWellSet(wells=data)
         return wellset.df(create_index=create_index)
 
+    @staticmethod
     def make_aliases(
-        self,
         columns: List[str],
         agg_type: str,
         include_zeroes: bool,
-        range_name: ProdStatInterval = None,
+        range_name: ProdStatRange,
         months: Union[int, str] = None,
         norm_by_label: str = None,
     ) -> Dict[str, str]:
+        """ Compose field names for the aggregate outputs of a list of columns
 
+            Example: oil -> oil_sum_peaknorm6mo_per1k
+        """
         nonzero = "_nonzero" if not include_zeroes else ""
         norm_by_label = f"_per{norm_by_label}" if norm_by_label else ""
         range_name = (
-            range_name.value if range_name != range_name.ALL else ""  # type:ignore
+            range_name.value if range_name != ProdStatRange.ALL else ""  # type:ignore
         )
         range_label = f"_{range_name}{months}mo" if months and range_name else ""
 
@@ -129,7 +133,7 @@ class ProdStats:
 
     @staticmethod
     def get_monthly_range(
-        monthly: pd.DataFrame, range_name: ProdStatInterval, months: int = None
+        monthly: pd.DataFrame, range_name: ProdStatRange, months: int = None
     ):
         """ Get a named range from the monthly production of each api10 in the given dataframe.
             This method will correctly handle monthly production that has already been filtered
@@ -137,14 +141,14 @@ class ProdStats:
         _validate_required_columns(["peak_norm_month"], monthly.columns)
         _validate_required_columns(["api10", "prod_date"], monthly.index.names)
 
-        if range_name == ProdStatInterval.ALL and months is not None:
+        if range_name == ProdStatRange.ALL and months is not None:
             raise ValueError("Must not specify months when range_name is set to ALL")
 
-        if range_name == ProdStatInterval.FIRST:
+        if range_name == ProdStatRange.FIRST:
             df = monthly.groupby(level=0).head(months)
-        elif range_name == ProdStatInterval.LAST:
+        elif range_name == ProdStatRange.LAST:
             df = monthly.groupby(level=0).tail(months)
-        elif range_name == ProdStatInterval.PEAKNORM:
+        elif range_name == ProdStatRange.PEAKNORM:
             df = (
                 monthly.loc[monthly.peak_norm_month > 0, :]
                 .groupby(level=0)
@@ -155,9 +159,8 @@ class ProdStats:
 
         return df
 
-    @staticmethod
-    def get_start_and_end_by_group(monthly: pd.DataFrame):
-
+    def get_start_and_end_by_group(self):
+        monthly = self._obj
         _validate_required_columns(["prod_month"], monthly.columns)
         _validate_required_columns(["api10", "prod_date"], monthly.index.names)
 
@@ -184,7 +187,7 @@ class ProdStats:
     @staticmethod
     def aggregate_range(
         monthly: pd.DataFrame,
-        range_name: ProdStatInterval,
+        range_name: ProdStatRange,
         agg_map: Dict[str, str],
         alias_map: Dict[str, str],
         include_zeroes: bool,
@@ -243,7 +246,7 @@ class ProdStats:
     def interval(
         self,
         monthly: pd.DataFrame,
-        range_name: ProdStatInterval,
+        range_name: ProdStatRange,
         months: int = None,
         columns: List[str] = ["oil", "gas", "water", "boe"],
         agg_type: str = "sum",
@@ -252,9 +255,9 @@ class ProdStats:
         norm_by_label: str = None,
     ) -> pd.DataFrame:
 
-        if not isinstance(range_name, ProdStatInterval):
+        if not isinstance(range_name, ProdStatRange):
             raise TypeError(
-                f"inverval must be of type ProdStatInterval, not {type(range_name)}"
+                f"inverval must be of type ProdStatRange, not {type(range_name)}"
             )
 
         if norm_by_ll is not None and not norm_by_label:
@@ -291,7 +294,7 @@ class ProdStats:
         aggregated["ll_norm_value"] = norm_by_ll or np.nan
         aggregated["is_ll_norm"] = pd.notnull(aggregated.ll_norm_value)
         aggregated["is_peak_norm"] = (
-            True if range_name == ProdStatInterval.PEAKNORM else False
+            True if range_name == ProdStatRange.PEAKNORM else False
         )
         aggregated["aggregate_type"] = agg_type
         aggregated["property_name"] = (
@@ -317,7 +320,7 @@ class ProdStats:
     def _generate_option_sets(
         months: List[Optional[int]] = CALC_MONTHS,
         norm_values: List[Tuple[Optional[int], Optional[str]]] = CALC_NORM_VALUES,
-        range_names: List[ProdStatInterval] = CALC_INTERVALS,
+        range_names: List[ProdStatRange] = CALC_INTERVALS,
         agg_types: List[str] = CALC_AGG_TYPES,
         include_zeroes: List[bool] = CALC_INCLUDE_ZEROES,
     ) -> List[Dict[str, Any]]:
@@ -348,11 +351,11 @@ class ProdStats:
         cls,
         months: List[Optional[int]] = CALC_MONTHS,
         norm_values: List[Tuple[Optional[int], Optional[str]]] = CALC_NORM_VALUES,
-        range_names: List[ProdStatInterval] = CALC_INTERVALS,
+        range_names: List[ProdStatRange] = CALC_INTERVALS,
         agg_types: List[str] = CALC_AGG_TYPES,
         include_zeroes: List[bool] = CALC_INCLUDE_ZEROES,
     ) -> List[Dict[str, Any]]:
-        bounded_intervals = [x for x in CALC_INTERVALS if x != ProdStatInterval.ALL]
+        bounded_intervals = [x for x in CALC_INTERVALS if x != ProdStatRange.ALL]
         bounded = cls._generate_option_sets(
             months=months,
             norm_values=norm_values,
@@ -363,7 +366,7 @@ class ProdStats:
         unbounded = cls._generate_option_sets(
             months=[None],
             norm_values=norm_values,
-            range_names=[ProdStatInterval.ALL],  # type: ignore
+            range_names=[ProdStatRange.ALL],  # type: ignore
             agg_types=agg_types,
             include_zeroes=include_zeroes,
         )
@@ -551,8 +554,8 @@ if __name__ == "__main__":
     loggers.config(level=20)
 
     async def async_wrapper():
-        # id = ["14207C017575", "14207C020251"]
-        # # id = ["14207C017575"]
+        # ids = ["14207C017575", "14207C020251"]
+        # ids = ["14207C0155111H", "14207C0155258418H"]
         # id = [
         #     "14207C0155111H",
         #     "14207C0155258418H",

@@ -2,6 +2,7 @@ import json
 import random
 import string
 from datetime import datetime, timedelta
+from typing import Dict, List
 
 from httpx import Response
 from httpx.dispatch.base import AsyncDispatcher, SyncDispatcher
@@ -134,7 +135,7 @@ def generator_map():
     }
 
 
-async def seed_model(model: Model, n: int = 10):
+def random_model_data(model: Model, n: int = 10) -> List[Dict]:
     items = []
     pytypes = model.columns.pytypes
     dtypes = model.columns.dtypes
@@ -159,6 +160,11 @@ async def seed_model(model: Model, n: int = 10):
                 item[col_name] = value
         items.append(item)
 
+    return items
+
+
+async def seed_model(model: Model, n: int = 10):
+    items = random_model_data(model=model, n=n)
     # from util.jsontools import to_string
 
     # print(to_string(items))
