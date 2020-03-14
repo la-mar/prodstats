@@ -20,7 +20,7 @@ class ProductionRecord(ProdBase):
     prod_date: date = Field(..., alias="first_date")
     days_in_month: Optional[int] = Field(..., alias="last_day")
     oil: Optional[int] = Field(..., alias="liquid")
-    oil_uom: Optional[str] = Field(..., alias="liquid_uom")
+    oil_uom: Optional[str] = Field(None, alias="liquid_uom")
     gas: Optional[int]
     gas_uom: Optional[str]
     water: Optional[int]

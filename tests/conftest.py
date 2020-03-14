@@ -22,6 +22,7 @@ import config
 from db import db
 from prodstats.main import app
 from tests.models import TestModel  # noqa
+from util.jsontools import load_json
 
 
 ECHO = False
@@ -70,6 +71,12 @@ def conf():
 @pytest.fixture
 async def client(bind) -> TestClient:
     yield TestClient(app)
+
+
+@pytest.fixture(scope="session")
+def json_fixture():
+
+    yield lambda x: load_json(f"tests/fixtures/{x}")
 
 
 @pytest.fixture
