@@ -373,7 +373,8 @@ class ProdStats:
         agg_types: List[str] = CALC_AGG_TYPES,
         include_zeroes: List[bool] = CALC_INCLUDE_ZEROES,
     ) -> List[Dict[str, Any]]:
-        bounded_intervals = [x for x in CALC_INTERVALS if x != ProdStatRange.ALL]
+        bounded_intervals = [x for x in range_names if x != ProdStatRange.ALL]
+        unbounded_intervals = [x for x in range_names if x == ProdStatRange.ALL]
         bounded = cls._generate_option_sets(
             months=months,
             norm_values=norm_values,
@@ -384,16 +385,14 @@ class ProdStats:
         unbounded = cls._generate_option_sets(
             months=[None],
             norm_values=norm_values,
-            range_names=[ProdStatRange.ALL],  # type: ignore
+            range_names=unbounded_intervals,
             agg_types=agg_types,
             include_zeroes=include_zeroes,
         )
 
         return bounded + unbounded
 
-    def stats(
-        self, option_sets: List[Dict[str, Any]] = None, melt: bool = True,
-    ) -> pd.DataFrame:
+    def stats(self, option_sets: List[Dict[str, Any]] = None, **kwargs) -> pd.DataFrame:
         """ Calcuate the aggregate production stats defined by the passed option sets.
             If no option sets are passed, self.generate_option_sets() is used to create them
             from the app configuration."""
@@ -403,7 +402,7 @@ class ProdStats:
 
         stats = pd.DataFrame()
         for opts in option_sets:
-            stats = stats.append(monthly.prodstats.interval(**opts))
+            stats = stats.append(monthly.prodstats.interval(**kwargs, **opts))
         return stats
 
     def preprocess(self) -> ProdSet:
@@ -467,13 +466,13 @@ class ProdStats:
         return ProdSet(header=header, monthly=monthly)
 
     def normalize_monthly_production(
-        self, option_sets: List[Tuple[Optional[int], Optional[str]]]
+        self, norm_sets: List[Tuple[Optional[int], Optional[str]]], **kwargs
     ):
         monthly = self._obj
-        for value, suffix in option_sets:
+        for value, suffix in norm_sets:
             if value is not None and suffix is not None:
                 monthly = monthly.join(
-                    monthly.prodstats.norm_to_ll(value=value, suffix=suffix)
+                    monthly.prodstats.norm_to_ll(value=value, suffix=suffix, **kwargs)
                 )
 
         return monthly
@@ -526,10 +525,10 @@ class ProdStats:
         header["prod_days"] = monthly.groupby(level=0).prod_days.max()
 
         monthly = monthly.prodstats.normalize_monthly_production(
-            option_sets=CALC_NORM_VALUES
+            norm_sets=CALC_NORM_VALUES
         )
 
-        stats = monthly.prodstats.stats(melt=False)
+        stats = monthly.prodstats.stats()
         # stats = header.prodstats.stats(monthly, melt=False)
 
         monthly = monthly.drop(columns=["perfll"])
@@ -547,10 +546,10 @@ class ProdStats:
         _validate_required_columns(
             columns + ["prod_month", "perfll"], self._obj.columns
         )
-
+        columns = [x for x in columns if x in self._obj.columns]
         alias_map = {k: f"{k}_norm_{suffix}" for k in columns}
         factors = (self._obj["perfll"] / value).values
-        return self._obj.div(factors, axis=0).loc[:, columns].rename(columns=alias_map)
+        return self._obj.loc[:, columns].div(factors, axis=0).rename(columns=alias_map)
 
     def peak30(self) -> pd.DataFrame:
         """ Generate peak30 statistics, bounded by the configured peak_norm_limit """

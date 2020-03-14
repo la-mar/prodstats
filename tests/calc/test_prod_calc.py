@@ -353,7 +353,7 @@ class TestProdStats:
             agg_types=["sum"],
             include_zeroes=[True],
         )
-        assert len(opts) == 14
+        assert len(opts) == 6
 
     def test_peak30(self, prod_df):
         prod_df["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
@@ -371,6 +371,127 @@ class TestProdStats:
         assert peak30.iloc[0].peak30_gas == 26699
         assert peak30.iloc[0].peak30_month == 2
 
+    def test_stats(self, prod_df):
+        months = [1, 6]
+        norm_values = [(None, None), (1000, "1k")]
+        range_names = [
+            ProdStatRange.PEAKNORM,
+        ]
+        agg_types = ["sum", "mean"]
+        include_zeroes = [True]
+        columns = ["oil", "gas"]
+
+        opts = pd.DataFrame.prodstats.generate_option_sets(
+            months=months,
+            norm_values=norm_values,
+            range_names=range_names,
+            agg_types=agg_types,
+            include_zeroes=include_zeroes,
+        )
+        prod_df["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
+        peak30 = prod_df.prodstats.peak30()
+        prod_df["peak_norm_month"] = prod_df.prod_month - peak30.peak30_month + 1
+
+        stats = prod_df.prodstats.stats(option_sets=opts, columns=columns)
+        assert stats.shape[0] == len(opts) * 6
+
+        unique_name_count = len({*stats.index.levels[1]})
+        expected_unique_name_count = (
+            len(columns)
+            * len(months)
+            * len(agg_types)
+            * len(range_names)
+            * len(norm_values)
+            * len(include_zeroes)
+        )
+
+        assert unique_name_count == expected_unique_name_count
+
+    def test_preprocess(self, prod_df):
+        prodset = prod_df.prodstats.preprocess()
+
+        assert {*prodset.header.columns} == {
+            "entity12",
+            "perf_lower",
+            "perf_upper",
+            "perfll",
+            "primary_api14",
+            "products",
+            "provider",
+            "provider_last_update_at",
+            "related_wells",
+            "status",
+        }
+
+        assert {*prodset.monthly.columns} == {
+            "boe",
+            "days_in_month",
+            "gas",
+            "gor",
+            "oil",
+            "oil_percent",
+            "perfll",
+            "prod_days",
+            "prod_month",
+            "water",
+            "water_cut",
+        }
+
+        assert prodset.stats is None
+
+    def test_norm_to_ll(self, prod_df):
+        prod_df["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
+        df = prod_df.prodstats.norm_to_ll(value=1000, suffix="1k", columns=["oil"])
+
+        assert df.index.names == ["api10", "prod_date"]
+        assert df.columns.tolist() == ["oil_norm_1k"]
+        assert prod_df.shape[0] == df.shape[0]
+        expected = prod_df.oil.div(prod_df.perfll / 1000).groupby(level=0).sum()
+        actual = df.groupby(level=0).sum()
+        merged = expected.to_frame("original").join(actual)
+        assert merged.original.sub(merged.oil_norm_1k).sum() == 0
+
+    def test_norm_to_ll_ignore_missing_prod_columns(self, prod_df):
+        prod_df["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
+        df = prod_df.prodstats.norm_to_ll(value=1000, suffix="1k", columns=["oil"])
+
+        assert df.index.names == ["api10", "prod_date"]
+        assert df.columns.tolist() == ["oil_norm_1k"]
+        assert prod_df.shape[0] == df.shape[0]
+
+    def test_norm_to_ll_catch_missing_prod_month(self, prod_df):
+        with pytest.raises(KeyError):
+            prod_df.prodstats.norm_to_ll(value=1000, suffix="1k", columns=["oil"])
+
+    def test_normalize_monthly_production(self, prod_df):
+        prod_df["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
+
+        norm_values = [(None, None), (1000, "1k")]
+        df = prod_df.prodstats.normalize_monthly_production(
+            norm_values, columns=["oil", "gas"]
+        )
+
+        for x in ["oil_norm_1k", "gas_norm_1k"]:
+            assert x in df.columns
+
+    def test_daily_avg_by_month(self, prod_df):
+        in_df = prod_df[["oil", "gas", "days_in_month"]]
+        df = in_df.prodstats.daily_avg_by_month(
+            columns=["oil", "gas"], days_column="days_in_month"
+        )
+
+        for x in ["oil_avg_daily", "gas_avg_daily"]:
+            assert x in df.columns
+
+        assert all(in_df.oil.div(in_df.days_in_month).values == df.oil_avg_daily.values)
+        assert all(in_df.gas.div(in_df.days_in_month).values == df.gas_avg_daily.values)
+
+    def test_calc(self, prod_df):
+        prodset = prod_df.xs("4246140916", drop_level=False).prodstats.calc()
+        assert prodset.header.shape[0] == 1
+        assert prodset.monthly.shape[0] == 14
+        assert prodset.stats.shape[0] == 456
+
 
 # if __name__ == "__main__":
 #     from util.jsontools import load_json
@@ -385,4 +506,4 @@ class TestProdStats:
 #     peak30 = monthly.prodstats.peak30()
 #     monthly["peak_norm_month"] = monthly.prod_month - peak30.peak30_month + 1
 #     columns = ["oil", "gas"]
-#     prod_df.prodstats.calc()
+#     # prod_df.prodstats.calc()
