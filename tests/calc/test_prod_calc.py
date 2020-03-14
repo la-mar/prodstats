@@ -356,6 +356,8 @@ class TestProdStats:
         assert len(opts) == 14
 
     def test_peak30(self, prod_df):
+        prod_df["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
+
         peak30 = prod_df.prodstats.peak30()
 
         assert peak30.columns.tolist() == [
