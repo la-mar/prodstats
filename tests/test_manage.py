@@ -83,16 +83,22 @@ class TestCLISlow:
         for c in commands:
             assert c in captured.out
 
-    def test_run_smoke_test(self, capfd):
+    def test_run_smoke_test_subprocess(self, capfd):
         autokill_subprocess("prodstats", "test", "smoke-test", delay=1)
         # captured = capfd.readouterr()
         # assert "verified" in captured.out
+
+    def test_run_smoke_test(self):
+        manage.smoke_test()
 
     def test_print_hr(self):
         manage.hr()
 
     def test_run_task_execute(self):
-        manage.task("test")
+        manage.task("task_namespace.task_name")
+
+    def test_run_task_catch_unqualified_name(self):
+        manage.task("task_name")
 
     def test_downgrades(self, sa_engine, capfd):
 

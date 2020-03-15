@@ -4,7 +4,7 @@ import logging
 import pytest
 from tests.utils import rand_str
 
-from loggers import ColorizingStreamHandler, config, get_formatter, mlevel
+from loggers import ColorizingStreamHandler, config, get_formatter, mlevel, mlevelname
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
@@ -38,8 +38,21 @@ class TestLogger:
             (50, 50),
         ],
     )
-    def test_qualifier_conversion(self, qualifier, expected):
+    def test_mlevel(self, qualifier, expected):
         assert mlevel(qualifier) == expected
+
+    @pytest.mark.parametrize(
+        "qualifier,expected",
+        [
+            (10, "debug"),
+            (20, "info"),
+            (30, "warning"),
+            (40, "error"),
+            (50, "critical"),
+        ],
+    )
+    def test_mlevelname(self, qualifier, expected):
+        assert mlevelname(qualifier) == expected.upper()
 
     @pytest.mark.parametrize("qualifier", ["", None, 100, "100"])
     def test_handle_bad_qualifier(self, qualifier):

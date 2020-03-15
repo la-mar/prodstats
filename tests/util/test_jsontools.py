@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from util.jsontools import DateTimeEncoder, ObjectEncoder
+from util.jsontools import DateTimeEncoder, ObjectEncoder, load_json, to_json
 
 logger = logging.getLogger(__name__)
 
@@ -111,3 +111,12 @@ class TestObjectEncoder:
         data = 1
         expected = "1"
         assert json.dumps(data, cls=ObjectEncoder) == expected
+
+
+class TestIO:
+    def test_json_file(self, tmpdir):
+        path = tmpdir.mkdir("test").join("test.json")
+        data = {"key": "value"}
+        to_json(data, path)
+        loaded = load_json(path)
+        assert data == loaded

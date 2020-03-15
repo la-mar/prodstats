@@ -25,6 +25,20 @@ def nested_dict():
     }
 
 
+@pytest.fixture
+def tmpyaml(tmpdir):
+    path = tmpdir.mkdir("test").join("yaml.yaml")
+    path.write(
+        """container:
+            example:
+                enabled: true
+                model: db.models.TestModel
+                ignore_unkown: true
+            """
+    )
+    yield path
+
+
 class TestGenericUtils:
     def test_chunks(self):
         values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -41,6 +55,10 @@ class TestGenericUtils:
         ]
         result = [list(x) for x in chunks(values, n=2)]
         assert result == expected
+
+    def test_safe_load_yaml(self, tmpyaml):
+        loaded = util.safe_load_yaml(tmpyaml)
+        assert "container" in loaded.keys()
 
     def test_load_config_from_yaml_file_no_exists(self, capsys):
         util.safe_load_yaml("/path/that/doesnt/exist/hopefully/test.yaml")

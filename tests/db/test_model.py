@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import String
 from tests.utils import rand_str
 
+from db.models import ProdHeader as SinglePKModel
 from db.models import ProdStat as Model
 from db.models.bases import Base
 
@@ -42,6 +43,13 @@ class TestPrimaryKeyProxy:
         for i, v in ids:
             await Model.create(api10=i, name=v)
         assert sorted(await Model.pk.values) == sorted(ids)
+
+    @pytest.mark.asyncio
+    async def test_pk_values_single_pk(self, bind):
+        ids = [(rand_str(length=10)) for i in range(1, 5)]
+        for i in ids:
+            await SinglePKModel.create(api10=i, entity12=i)
+        assert {*(await SinglePKModel.pk.values)} == {*ids}
 
 
 class TestAggregateProxy:

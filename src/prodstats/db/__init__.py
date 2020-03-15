@@ -34,9 +34,10 @@ def qsize():
 
 
 # set some properties for convenience
-db.qsize, db.startup, db.shutdown, db.url = (
+db.qsize, db.startup, db.shutdown, db.create_engine, db.url = (
     qsize,
     startup,
     shutdown,
+    create_engine,
     DATABASE_CONFIG.url,
 )

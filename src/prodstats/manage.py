@@ -78,7 +78,10 @@ def task(task: str):
         Ex. endpoint_name.task_name"""
 
     try:
-        typer.secho(f"{task=}")
+        if "." in task:
+            typer.secho(f"{task=}")
+        else:
+            raise ValueError
     except ValueError:
         typer.secho("Invalid task format. Try specifying ENDPOINT_NAME.TASK_NAME")
         return 0
@@ -118,7 +121,14 @@ def downgrade(revision: str = "-1", args: List[str] = None):
 @db_cli.command(
     help="Drop the current database and rebuild using the existing migrations"
 )
-def recreate(args: List[str] = None):
+def recreate(args: List[str] = None):  # nocover
+
+    if conf.ENV not in ["dev", "development"]:
+        logger.error(
+            f"""Cant recreate database when not in development mode. Set ENV=development as an environment variable to enable this feature."""  # noqa
+        )
+        sys.exit(0)
+
     from sqlalchemy_utils import create_database, database_exists, drop_database
 
     url = conf.ALEMBIC_CONFIG.url

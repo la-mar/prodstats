@@ -10,9 +10,7 @@ from typing import Coroutine, Dict, List, Union
 
 import numpy as np
 import pandas as pd
-from asyncpg.exceptions import DataError, UniqueViolationError
 from sqlalchemy.dialects.postgresql.dml import Insert
-from sqlalchemy.exc import IntegrityError
 
 import util
 
@@ -29,45 +27,16 @@ logger = logging.getLogger(__name__)
 
 class BulkIOMixin(object):
     @classmethod
-    async def execute_statement(
-        cls,
-        stmt,
-        records: List[Dict] = None,
-        op_name: str = None,
-        update_on_conflict: bool = True,
-        ignore_on_conflict: bool = False,
-    ) -> int:
-        try:
+    async def execute_statement(cls, stmt, records: List[Dict], op_name: str) -> int:
 
-            if records:
-                n = len(records)
-            else:
-                n = -1
+        try:
+            n = len(records)
 
             ts = timer()
             await stmt.gino.load(cls).all()
             exc_time = round(timer() - ts, 2)
             cls.log_operation(op_name, n, exc_time)
 
-        except (IntegrityError, UniqueViolationError, DataError) as ie:
-            logger.debug(ie.args[0])
-
-            # fragment and reprocess
-            if n > 1:
-                first_half = records[: n // 2]
-                second_half = records[n // 2 :]
-                await cls.bulk_upsert(
-                    records=first_half,
-                    batch_size=len(first_half) // 4,
-                    update_on_conflict=update_on_conflict,
-                    ignore_on_conflict=ignore_on_conflict,
-                )
-                await cls.bulk_upsert(
-                    records=second_half,
-                    batch_size=len(second_half) // 4,
-                    update_on_conflict=update_on_conflict,
-                    ignore_on_conflict=ignore_on_conflict,
-                )
         except Exception as e:
             logger.error(f"{e.__class__}: {e} -- {e.args}")
             raise e
@@ -112,15 +81,7 @@ class BulkIOMixin(object):
                 )
                 op_name = op_name + " (update_on_conflict)"
 
-            coros.append(
-                cls.execute_statement(
-                    stmt,
-                    records=chunk,
-                    op_name=op_name,
-                    update_on_conflict=update_on_conflict,
-                    ignore_on_conflict=ignore_on_conflict,
-                )
-            )
+            coros.append(cls.execute_statement(stmt, records=chunk, op_name=op_name))
 
         result: int = 0
         for idx, chunk in enumerate(util.chunks(coros, concurrency)):
@@ -146,21 +107,22 @@ class BulkIOMixin(object):
 
     @classmethod
     def log_operation(cls, method: str, n: int, exc_time: float):
-        op_name = method.lower()
+        method = method.lower()
+
         measurements = {
             "tablename": cls.__table__.name,
             "method": method,
-            f"{op_name}_time": exc_time,
+            f"{method}_time": exc_time,
         }
 
         if n > 0:
-            measurements[f"{op_name}s"] = n
+            measurements[f"{method}s"] = n
 
             if exc_time > 0:
-                measurements[f"{op_name}s_per_second"] = n / exc_time or 1
+                measurements[f"{method}s_per_second"] = n / exc_time or 1
 
         logger.info(
-            f"{cls.__table__.name}.{method}: {op_name} {n} records ({exc_time}s)",
+            f"{cls.__table__.name}.{method}: {method} {n} records ({exc_time}s)",
             extra=measurements,
         )
 
@@ -199,42 +161,42 @@ class DataFrameMixin(BulkIOMixin):
         return await super().bulk_insert(records, **kwargs)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    async def async_wrapper():
+#     async def async_wrapper():
 
-        from db import db, DATABASE_CONFIG
-        from db.models import User, Model  # noqa
+#         from db import db, DATABASE_CONFIG
+#         from db.models import User, Model  # noqa
 
-        await db.set_bind(DATABASE_CONFIG.url)
-        await User.agg.count()
-        await User.pk.values
-        await User.get(3)
-        User
-        # x = await User.query.gino.all()
-        # users = await User.query.gino.load(User).all()
-        [x.to_dict() for x in await User.query.limit(3).offset(2).gino.load(User).all()]
-        # d = await User.create(**dict(api10="yolo", last_name="swag"))
-        # Query specific columns
-        # await User.query.gino.load((User.id, User.api10)).all()
+#         await db.set_bind(DATABASE_CONFIG.url)
+#         await User.agg.count()
+#         await User.pk.values
+#         await User.get(3)
+#         User
+#         # x = await User.query.gino.all()
+#         # users = await User.query.gino.load(User).all()
+#         [x.to_dict() for x in await User.query.limit(3).offset(2).gino.load(User).all()]
+#         # d = await User.create(**dict(api10="yolo", last_name="swag"))
+#         # Query specific columns
+#         # await User.query.gino.load((User.id, User.api10)).all()
 
-        # await User.query.gino.load(User).all()
-        await db.func.count(User.columns.names).gino.scalar()
+#         # await User.query.gino.load(User).all()
+#         await db.func.count(User.columns.names).gino.scalar()
 
-        from sqlalchemy.sql.functions import count
-        from sqlalchemy import select
+#         from sqlalchemy.sql.functions import count
+#         from sqlalchemy import select
 
-        count_col = count().label("count")
-        user_count = (
-            select([User.api10, User.last_name, count_col])
-            .group_by(User.api10, User.last_name)
-            .alias()
-        )
-        query = user_count.select()
-        await query.gino.all()
+#         count_col = count().label("count")
+#         user_count = (
+#             select([User.api10, User.last_name, count_col])
+#             .group_by(User.api10, User.last_name)
+#             .alias()
+#         )
+#         query = user_count.select()
+#         await query.gino.all()
 
-        count_col = count(User.pk).label("count")
-        user_count = select([count_col]).alias()
-        query = user_count.select()
+#         count_col = count(User.pk).label("count")
+#         user_count = select([count_col]).alias()
+#         query = user_count.select()
 
-        # await User.query.with_only_columns().gino.all()
+#         # await User.query.with_only_columns().gino.all()

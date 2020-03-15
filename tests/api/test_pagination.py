@@ -133,6 +133,20 @@ class TestPaginationResponse:
 
             assert len(responses) == 3
 
+    async def test_set_headers(self, request_obj):
+
+        response = Pagination(request_obj).set_headers(
+            Response(""),
+            {
+                "x-total-count": 30,
+                "link": ["path/to/resource/1", "path/to/resource/2"],
+            },
+        )
+        assert dict(response.headers) == {
+            "x-total-count": "30",
+            "link": "path/to/resource/1,path/to/resource/2",
+        }
+
 
 class TestPaginationCore:
     async def test_no_prev_link_on_first_page(self, bind, request_obj):
