@@ -487,7 +487,7 @@ class ProdStats:
 
         return monthly
 
-    def calc(self) -> ProdSet:
+    def calc(self, columns: List[str] = ["oil", "gas", "water", "boe"]) -> ProdSet:
         header, monthly, _ = self.preprocess()
 
         peak30 = monthly.prodstats.peak30()
@@ -503,7 +503,7 @@ class ProdStats:
         )
 
         monthly = monthly.prodstats.daily_avg_by_month(
-            columns=["oil", "gas", "water", "boe"], days_column="days_in_month"
+            columns=columns, days_column="days_in_month"
         )
 
         header["peak_norm_months"] = monthly.groupby(level=0).peak_norm_month.max()

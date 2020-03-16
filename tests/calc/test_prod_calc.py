@@ -42,7 +42,7 @@ def prod_dispatcher(ihs_producing_wells):
 
 @pytest.fixture
 def prod_df(ihs_producing_wells):
-    yield ProductionWellSet(wells=ihs_producing_wells).df()
+    yield ProductionWellSet(wells=ihs_producing_wells).df().copy(deep=True)
 
 
 def test_validate_required_columns_raise():
@@ -255,7 +255,7 @@ class TestProdStats:
         assert result.end_month.min() == result.end_month.max() == 6
 
     def test_aggregate_range_nonzero(self, prod_df):
-        prod_df = prod_df[["oil", "gas"]]
+        prod_df = prod_df[["oil", "gas"]].copy(deep=True)
         prod_df["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
         idx = prod_df.xs("2018-12-01", level=1, drop_level=False).index
         prod_df.loc[idx, ["oil", "gas"]] = 0
@@ -487,7 +487,10 @@ class TestProdStats:
         assert all(in_df.gas.div(in_df.days_in_month).values == df.gas_avg_daily.values)
 
     def test_calc(self, prod_df):
-        prodset = prod_df.xs("4246140916", drop_level=False).prodstats.calc()
+        df = prod_df.xs("4246140916", drop_level=False).copy(deep=True)
+        prodset = df.prodstats.calc(columns=["oil", "gas"])
+        # prod_df.prodstats.calc()
+        # prod_df.columns.tolist()
         assert prodset.header.shape[0] == 1
         assert prodset.monthly.shape[0] == 14
         assert prodset.stats.shape[0] == 456
@@ -502,8 +505,8 @@ class TestProdStats:
 
 #     ihs_producing_wells = load_json(f"tests/fixtures/ihs_prod.json")
 #     prod_df: pd.DataFrame = next(prod_df.__wrapped__(ihs_producing_wells))
-#     monthly["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
-#     peak30 = monthly.prodstats.peak30()
-#     monthly["peak_norm_month"] = monthly.prod_month - peak30.peak30_month + 1
-#     columns = ["oil", "gas"]
-#     # prod_df.prodstats.calc()
+# monthly["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
+# peak30 = monthly.prodstats.peak30()
+# monthly["peak_norm_month"] = monthly.prod_month - peak30.peak30_month + 1
+# columns = ["oil", "gas"]
+# # prod_df.prodstats.calc()
