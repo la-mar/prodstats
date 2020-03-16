@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import pandas as pd
 import pytest
 from tests.utils import MockAsyncDispatch
@@ -14,25 +15,6 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="session")
 def ihs_producing_wells(json_fixture):
     yield json_fixture("ihs_prod.json")
-
-
-# @pytest.fixture
-# def proddf() -> pd.DataFrame:
-
-#     # idx = pd.date_range(start=datetime.now(), periods=12)
-#     # pd.DataFrame(index=idx)
-
-#     # from util.jsontools import to_json
-#     # to_json(p.records(), "tests/data/prod.json")
-
-#     df = pd.read_json("tests/data/prod.json")
-#     df.prod_date = pd.to_datetime(df.prod_date)
-#     yield df.set_index(["api10", "prod_date"])
-
-
-# @pytest.fixture
-# def prodrecords(proddf):
-#     yield orjson.loads(proddf.reset_index().to_json(orient="records"))
 
 
 @pytest.fixture
@@ -297,6 +279,7 @@ class TestProdStats:
 
     def test_inverval_calc_with_norm(self, prod_df):
         prod_df["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
+        prod_df["boe"] = prod_df.prodstats.boe()
 
         result = prod_df.prodstats.interval(
             columns=["oil", "gas"],
@@ -344,6 +327,32 @@ class TestProdStats:
                 include_zeroes=True,
                 norm_by_label="1k",
             )
+
+    def test_inverval_calc_mean(self, prod_df):
+        range_name = ProdStatRange.FIRST
+        months = 6
+        prod_df["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
+
+        actual = prod_df.prodstats.interval(
+            columns=["oil", "gas"],
+            range_name=range_name,
+            months=months,
+            agg_type="mean",
+            include_zeroes=True,
+        ).value
+
+        expected = (
+            prod_df.loc[:, ["oil", "gas"]]
+            .groupby(level=0)
+            .head(months)
+            .groupby(level=0)
+            .mean()
+            .reset_index()
+            .melt(id_vars=["api10"])
+            .set_index("api10")
+        ).value
+
+        assert {*actual.values} == {*expected.values}
 
     def test_generate_option_sets(self):  # TODO: better assertions
         opts = pd.DataFrame.prodstats.generate_option_sets(
@@ -476,7 +485,7 @@ class TestProdStats:
 
     def test_daily_avg_by_month(self, prod_df):
         in_df = prod_df[["oil", "gas", "days_in_month"]]
-        df = in_df.prodstats.daily_avg_by_month(
+        df = in_df.prodstats.daily_avg(
             columns=["oil", "gas"], days_column="days_in_month"
         )
 
@@ -486,14 +495,85 @@ class TestProdStats:
         assert all(in_df.oil.div(in_df.days_in_month).values == df.oil_avg_daily.values)
         assert all(in_df.gas.div(in_df.days_in_month).values == df.gas_avg_daily.values)
 
+    def test_daily_avg_by_well(self, prod_df):
+        in_df = prod_df[["oil", "gas", "days_in_month"]].groupby(level=0).sum()
+        df = in_df.prodstats.daily_avg(
+            columns=["oil", "gas"], days_column="days_in_month"
+        )
+
+        for x in ["oil_avg_daily", "gas_avg_daily"]:
+            assert x in df.columns
+
+        assert all(in_df.oil.div(in_df.days_in_month).values == df.oil_avg_daily.values)
+        assert all(in_df.gas.div(in_df.days_in_month).values == df.gas_avg_daily.values)
+
+    def test_pdp(self, prod_df):
+        prod_df["boe"] = prod_df.prodstats.boe()
+        pdp = prod_df.prodstats.pdp(
+            range_name=ProdStatRange.LAST, months=3, dollars_per_bbl=15, factor=0.6
+        )
+        series = pdp.iloc[0]
+        assert series.oil_pdp_last3mo_per15bbl == 3125
+        assert series.boe_pdp_last3mo_per15bbl == 4527
+
+    def test_pdp_handle_range_of_nan_values(self, prod_df):
+        prod_df = prod_df.loc[:, ["oil", "gas", "days_in_month"]]
+        prod_df["boe"] = prod_df.prodstats.boe()
+        prod_df.loc[
+            prod_df.groupby(level=0).tail(12).index, ["oil", "boe", "gas"]
+        ] = np.nan
+        pdp = prod_df.prodstats.pdp(
+            range_name=ProdStatRange.LAST, months=3, dollars_per_bbl=15, factor=0.6
+        )
+
+        assert pdp.shape == (0, 2)
+
+    def test_pdp_fitler_zero_prod_months(self, prod_df):
+        prod_df = prod_df.loc[:, ["oil", "gas", "days_in_month"]]
+        prod_df["boe"] = prod_df.prodstats.boe()
+        prod_df.loc[prod_df.groupby(level=0).tail(2).index, ["oil", "boe", "gas"]] = 0
+        pdp = prod_df.prodstats.pdp(
+            range_name=ProdStatRange.LAST, months=3, dollars_per_bbl=15, factor=0.6
+        )
+        expected = (
+            prod_df.prodstats.daily_avg(["oil", "boe"], "days_in_month")
+            .mul(15)
+            .mul(0.6)
+            .rename(columns={"oil_avg_daily": "oil_pdp", "boe_avg_daily": "boe_pdp"})
+        )
+        expected = (
+            expected[expected.oil > 0]
+            .groupby(level=0)
+            .tail(1)
+            .loc[:, ["oil_pdp", "boe_pdp"]]
+            .astype(int)
+        )
+
+        assert np.array_equal(pdp.values, expected.values)
+
     def test_calc(self, prod_df):
+        norm_opts = [(None, None), (1000, "1k")]
+        prodstat_opts = pd.DataFrame.prodstats.generate_option_sets(
+            months=[1, 6],
+            norm_values=norm_opts,
+            range_names=[ProdStatRange.PEAKNORM, ProdStatRange.ALL],
+            agg_types=["sum"],
+            include_zeroes=[True],
+        )
+
         df = prod_df.xs("4246140916", drop_level=False).copy(deep=True)
-        prodset = df.prodstats.calc(columns=["oil", "gas"])
+
+        prodset = df.prodstats.calc(
+            monthly_prod_columns=["oil", "gas"],
+            prodstat_columns=["oil", "gas"],
+            norm_option_sets=norm_opts,
+            prodstat_option_sets=prodstat_opts,
+        )
         # prod_df.prodstats.calc()
         # prod_df.columns.tolist()
         assert prodset.header.shape[0] == 1
         assert prodset.monthly.shape[0] == 14
-        assert prodset.stats.shape[0] == 456
+        assert prodset.stats.shape[0] == 12
 
 
 # if __name__ == "__main__":
@@ -505,8 +585,3 @@ class TestProdStats:
 
 #     ihs_producing_wells = load_json(f"tests/fixtures/ihs_prod.json")
 #     prod_df: pd.DataFrame = next(prod_df.__wrapped__(ihs_producing_wells))
-# monthly["prod_month"] = prod_df.groupby(level=0).cumcount() + 1
-# peak30 = monthly.prodstats.peak30()
-# monthly["peak_norm_month"] = monthly.prod_month - peak30.peak30_month + 1
-# columns = ["oil", "gas"]
-# # prod_df.prodstats.calc()

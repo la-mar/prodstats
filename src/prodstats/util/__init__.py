@@ -49,6 +49,23 @@ def hf_size(size_bytes: Union[str, int]) -> str:
     return f"{s} {suffixes[i]}"
 
 
+def hf_number(i: float, round: int = 0) -> str:
+    sign = "" if i >= 0 else "-"
+    i = float(abs(i))
+    M = 1000000.0
+    K = 1000.0
+    div = 1.0
+    divname = ""
+
+    if i >= M:
+        div = M
+        divname = "M"
+    elif i >= K:
+        div = K
+        divname = "K"
+    return f"{sign}{i/div:.{round}f}{divname}"
+
+
 def apply_transformation(
     data: dict, convert: Callable, keys: bool = False, values: bool = True
 ) -> Dict:

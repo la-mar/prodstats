@@ -3,7 +3,7 @@ import logging
 import pytest  # noqa
 
 import util
-from util import apply_transformation, chunks, hf_size, urljoin
+from util import apply_transformation, chunks, hf_number, hf_size, urljoin
 
 logger = logging.getLogger(__name__)
 
@@ -87,21 +87,33 @@ class TestGenericUtils:
         assert util.reduce(data) == expected
 
 
-class TestHFSize:
+class TestHumanize:
     def test_hf_size_zero_bytes(self):
         assert hf_size(0) == "0B"
 
     def test_hf_size_string_arg(self):
         assert hf_size("123") == "123.0 B"
 
-    def test_hf_format_kb(self):
-        assert hf_size(123456) == "120.56 KB"
+    @pytest.mark.parametrize(
+        "number,expected",
+        [(123456, "120.56 KB"), (1200000, "1.14 MB"), (1200000000, "1.12 GB")],
+    )
+    def test_hf_size_format(self, number, expected):
+        assert hf_size(number) == expected
 
-    def test_hf_format_mb(self):
-        assert hf_size(1200000) == "1.14 MB"
-
-    def test_hf_format_gb(self):
-        assert hf_size(1200000000) == "1.12 GB"
+    @pytest.mark.parametrize(
+        "number,round_digits,expected",
+        [
+            (1000, 0, "1K"),
+            (100000, 0, "100K"),
+            (1000000, 0, "1M"),
+            (1400, 1, "1.4K"),
+            (100400, 1, "100.4K"),
+            (1400000, 1, "1.4M"),
+        ],
+    )
+    def test_hf_number(self, number, round_digits, expected):
+        assert hf_number(number, round_digits) == expected
 
 
 class TestApplyTransformation:

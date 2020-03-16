@@ -9,6 +9,7 @@ import config as conf
 import const
 from collector import IHSClient, IHSPath
 from schemas import ProductionWellSet
+from util import hf_number
 from util.enums import Enum
 
 logger = logging.getLogger(__name__)
@@ -66,9 +67,10 @@ CALC_NORM_VALUES = [
     (7500, "7500"),
     (10000, "10k"),
 ]
-CALC_INTERVALS = ProdStatRange.members()
-CALC_AGG_TYPES = ["sum"]
-CALC_INCLUDE_ZEROES = [True]
+CALC_RANGES = ProdStatRange.members()
+CALC_AGG_TYPES = ["sum", "mean"]
+CALC_INCLUDE_ZEROES = [True, False]
+CALC_PROD_COLUMNS: List[str] = ["oil", "gas", "water", "boe"]
 
 
 def _validate_required_columns(required: List[str], columns: List[str]):
@@ -138,6 +140,7 @@ class ProdStats:
             range_name.value if range_name != ProdStatRange.ALL else ""  # type:ignore
         )
         range_label = f"_{range_name}{months}mo" if months and range_name else ""
+        agg_type = agg_type if agg_type != "mean" else "avg"
 
         return {
             k: f"{k}_{agg_type}{range_label}{norm_by_label}{nonzero}" for k in columns
@@ -258,8 +261,8 @@ class ProdStats:
         self,
         # monthly: pd.DataFrame,
         range_name: ProdStatRange,
+        columns: List[str],
         months: int = None,
-        columns: List[str] = ["oil", "gas", "water", "boe"],
         agg_type: str = "sum",
         include_zeroes: bool = True,
         norm_by_ll: int = None,
@@ -336,11 +339,11 @@ class ProdStats:
 
     @staticmethod
     def _generate_option_sets(
-        months: List[Optional[int]] = CALC_MONTHS,
-        norm_values: List[Tuple[Optional[int], Optional[str]]] = CALC_NORM_VALUES,
-        range_names: List[ProdStatRange] = CALC_INTERVALS,
-        agg_types: List[str] = CALC_AGG_TYPES,
-        include_zeroes: List[bool] = CALC_INCLUDE_ZEROES,
+        months: List[Optional[int]],
+        norm_values: List[Tuple[Optional[int], Optional[str]]],
+        range_names: List[ProdStatRange],
+        agg_types: List[str],
+        include_zeroes: List[bool],
     ) -> List[Dict[str, Any]]:
         interval_configs = list(
             itertools.product(
@@ -369,7 +372,7 @@ class ProdStats:
         cls,
         months: List[Optional[int]] = CALC_MONTHS,
         norm_values: List[Tuple[Optional[int], Optional[str]]] = CALC_NORM_VALUES,
-        range_names: List[ProdStatRange] = CALC_INTERVALS,
+        range_names: List[ProdStatRange] = CALC_RANGES,
         agg_types: List[str] = CALC_AGG_TYPES,
         include_zeroes: List[bool] = CALC_INCLUDE_ZEROES,
     ) -> List[Dict[str, Any]]:
@@ -404,6 +407,10 @@ class ProdStats:
         for opts in option_sets:
             stats = stats.append(monthly.prodstats.interval(**kwargs, **opts))
         return stats
+
+    def boe(self) -> pd.Series:
+        _validate_required_columns(["oil", "gas"], self._obj.columns)
+        return self._obj.oil + (self._obj.gas.div(const.MCF_TO_BBL_FACTOR))
 
     def preprocess(self) -> ProdSet:
 
@@ -449,7 +456,7 @@ class ProdStats:
                 "api14",
             ],
         ]
-        monthly["boe"] = monthly.oil + (monthly.gas.div(const.MCF_TO_BBL_FACTOR))
+        monthly["boe"] = monthly.prodstats.boe()
         monthly["oil_percent"] = monthly.oil.div(monthly.boe).mul(100)
 
         # monthly = monthly.sort_values("api14", ascending=False)
@@ -466,10 +473,10 @@ class ProdStats:
         return ProdSet(header=header, monthly=monthly)
 
     def normalize_monthly_production(
-        self, norm_sets: List[Tuple[Optional[int], Optional[str]]], **kwargs
+        self, norm_sets: List[Tuple[Optional[int], Optional[str]]] = None, **kwargs
     ):
         monthly = self._obj
-        for value, suffix in norm_sets:
+        for value, suffix in norm_sets or CALC_NORM_VALUES:
             if value is not None and suffix is not None:
                 monthly = monthly.join(
                     monthly.prodstats.norm_to_ll(value=value, suffix=suffix, **kwargs)
@@ -477,7 +484,7 @@ class ProdStats:
 
         return monthly
 
-    def daily_avg_by_month(
+    def daily_avg(
         self, columns: List[str], days_column: str,
     ):
 
@@ -487,11 +494,65 @@ class ProdStats:
 
         return monthly
 
-    def calc(self, columns: List[str] = ["oil", "gas", "water", "boe"]) -> ProdSet:
+    def pdp(
+        self,
+        range_name: ProdStatRange,
+        dollars_per_bbl: int,
+        factor: float,
+        months: int = None,
+    ) -> pd.DataFrame:
+
+        _validate_required_columns(["oil", "boe", "days_in_month"], self._obj.columns)
+
+        monthly = self._obj
+
+        alias_map = self.make_aliases(
+            columns=["oil", "boe"],
+            agg_type=f"pdp",
+            include_zeroes=True,
+            range_name=range_name,
+            months=months,
+            norm_by_label=f"{hf_number(dollars_per_bbl)}bbl",
+        )
+
+        monthly_nonzero_oil = (
+            monthly.prodstats.monthly_by_range(range_name, months)
+            .loc[monthly.oil > 0]
+            .loc[:, ["oil", "boe", "days_in_month"]]
+        )
+        pdp_by_well = (
+            monthly_nonzero_oil.groupby(level=0)
+            .sum()
+            .prodstats.daily_avg(columns=["oil", "boe"], days_column="days_in_month")
+            .loc[:, ["oil_avg_daily", "boe_avg_daily"]]
+            .rename(
+                columns={
+                    "oil_avg_daily": alias_map["oil"],
+                    "boe_avg_daily": alias_map["boe"],
+                }
+            )
+            .mul(dollars_per_bbl)
+            .mul(factor)
+        )
+
+        return pdp_by_well.astype(int)
+
+    def calc(
+        self,
+        monthly_prod_columns: List[str] = ["oil", "gas", "water", "boe"],
+        prodstat_columns: List[str] = ["oil", "gas", "water", "boe", "gor"],
+        norm_option_sets: List[Tuple[Optional[int], Optional[str]]] = None,
+        prodstat_option_sets: List[Dict[str, Any]] = None,
+    ) -> ProdSet:
         header, monthly, _ = self.preprocess()
 
         peak30 = monthly.prodstats.peak30()
         header = header.join(peak30)
+
+        pdp = monthly.prodstats.pdp(
+            range_name=ProdStatRange.LAST, months=3, dollars_per_bbl=30000, factor=0.75
+        )
+        header = header.join(pdp)
 
         monthly["peak_norm_month"] = monthly.prod_month - header.peak30_month + 1
         monthly["peak_norm_days"] = (
@@ -502,8 +563,8 @@ class ProdStats:
             .days_in_month.cumsum()
         )
 
-        monthly = monthly.prodstats.daily_avg_by_month(
-            columns=columns, days_column="days_in_month"
+        monthly = monthly.prodstats.daily_avg(
+            columns=monthly_prod_columns, days_column="days_in_month"
         )
 
         header["peak_norm_months"] = monthly.groupby(level=0).peak_norm_month.max()
@@ -525,22 +586,18 @@ class ProdStats:
         header["prod_days"] = monthly.groupby(level=0).prod_days.max()
 
         monthly = monthly.prodstats.normalize_monthly_production(
-            norm_sets=CALC_NORM_VALUES
+            norm_sets=norm_option_sets, columns=monthly_prod_columns
         )
 
-        stats = monthly.prodstats.stats()
-        # stats = header.prodstats.stats(monthly, melt=False)
+        stats = monthly.prodstats.stats(
+            columns=prodstat_columns, option_sets=prodstat_option_sets
+        )
 
         monthly = monthly.drop(columns=["perfll"])
 
         return ProdSet(header=header, monthly=monthly, stats=stats)
 
-    def norm_to_ll(
-        self,
-        value: int,
-        suffix: str,
-        columns: List[str] = ["oil", "gas", "water", "boe"],
-    ) -> pd.DataFrame:
+    def norm_to_ll(self, value: int, suffix: str, columns: List[str],) -> pd.DataFrame:
         """ Normalize to an arbitrary lateral length """
 
         _validate_required_columns(
@@ -596,7 +653,7 @@ if __name__ == "__main__":
 
     async def async_wrapper():
         # ids = ["14207C017575", "14207C020251"]
-        # ids = ["14207C0155111H", "14207C0155258418H"]
+        ids = ["14207C0155111H", "14207C0155258418H"]
         # id = [
         #     "14207C0155111H",
         #     "14207C0155258418H",
