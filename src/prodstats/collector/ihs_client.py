@@ -113,7 +113,8 @@ class IHSClient(AsyncClient):
 
         for r in responses:
             json: Dict = r.json()  # type: ignore
-            data += json["data"]
+            if "data" in json.keys():
+                data += json["data"]
 
         return data
 

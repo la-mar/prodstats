@@ -7,6 +7,7 @@ import pandas as pd
 
 import config as conf
 import const
+from calc.sets import ProdSet
 from collector import IHSClient, IHSPath
 from schemas import ProductionWellSet
 from util import hf_number
@@ -22,40 +23,6 @@ class ProdStatRange(str, Enum):
     LAST = "last"
     PEAKNORM = "peaknorm"
     ALL = "all"
-
-
-class ProdSet:
-
-    __slots__ = ("header", "monthly", "stats")
-
-    def __init__(
-        self,
-        header: pd.DataFrame = None,
-        monthly: pd.DataFrame = None,
-        stats: pd.DataFrame = None,
-    ):
-        self.header = header
-        self.monthly = monthly
-        self.stats = stats
-
-    def __repr__(self):
-        s = " ".join([f"{k}={v}" for k, v in self.describe().items()])
-        return s
-
-    def describe(self) -> Dict[str, int]:
-        result = {}
-        for x in self.__slots__:
-            value = getattr(self, x)
-            if value is not None:
-                result[x] = value.shape[0]
-            else:
-                result[x] = 0
-
-        return result
-
-    def __iter__(self):
-        for x in self.__slots__:
-            yield getattr(self, x)
 
 
 CALC_MONTHS: List[Optional[int]] = [1, 3, 6, 12, 18, 24]
@@ -115,6 +82,7 @@ class ProdStats:
         Returns:
             pd.DataFrame -- DataFrame of monthly production for the given ids
         """
+
         data = await IHSClient.get_production_wells(
             entities=entities, api10s=api10s, entity12s=entity12s, path=path, **kwargs
         )
@@ -634,170 +602,170 @@ class ProdStats:
         return peak30[["peak30_date", "peak30_oil", "peak30_gas", "peak30_month"]]
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    import loggers
+#     import loggers
 
-    # import random
+#     # import random
 
-    import util
-    from timeit import default_timer as timer
+#     import util
+#     from timeit import default_timer as timer
 
-    from db import db
-    from db.models import ProdHeader, ProdMonthly, ProdStat
+#     from db import db
+#     from db.models import ProdHeader, ProdMonthly, ProdStat
 
-    # from typing import Coroutine
-    import asyncio
+#     # from typing import Coroutine
+#     import asyncio
 
-    loggers.config(level=20)
+#     loggers.config(level=20)
 
-    async def async_wrapper():
-        # ids = ["14207C017575", "14207C020251"]
-        ids = ["14207C0155111H", "14207C0155258418H"]
-        # id = [
-        #     "14207C0155111H",
-        #     "14207C0155258418H",
-        #     "14207C0155258421H",
-        #     "14207C01552617H",
-        #     "14207C015535211H",
-        #     "14207C015535212H",
-        #     "14207C0155368001H",
-        #     "14207C0155368002H",
-        #     "14207C01558022H",
-        #     "14207C0155809H",
-        #     "14207C017575",
-        #     "14207C020251",
-        # ]
+#     async def async_wrapper():
+#         # ids = ["14207C017575", "14207C020251"]
+#         ids = ["14207C0155111H", "14207C0155258418H"]
+#         # id = [
+#         #     "14207C0155111H",
+#         #     "14207C0155258418H",
+#         #     "14207C0155258421H",
+#         #     "14207C01552617H",
+#         #     "14207C015535211H",
+#         #     "14207C015535212H",
+#         #     "14207C0155368001H",
+#         #     "14207C0155368002H",
+#         #     "14207C01558022H",
+#         #     "14207C0155809H",
+#         #     "14207C017575",
+#         #     "14207C020251",
+#         # ]
 
-        await db.startup()
+#         await db.startup()
 
-        # ids = random.choices(ids, k=100)
+#         # ids = random.choices(ids, k=100)
 
-        # for chunk in util.chunks(ids, n=100):
+#         # for chunk in util.chunks(ids, n=100):
 
-        async def process(ids: List[str], return_data: bool = True) -> Dict:
-            ts = timer()
+#         async def process(ids: List[str], return_data: bool = True) -> Dict:
 
-            df = await pd.DataFrame.prodstats.from_ihs(
-                entities=ids, path=IHSPath.prod_h
-            )
-            download_time = round(timer() - ts, 2)
-            ts = timer()
+#             ts = timer()
 
-            ps = df.prodstats.calc()
-            process_time = round(timer() - ts, 2)
+#             df = await pd.DataFrame.prodstats.from_ihs(
+#                 entities=ids, path=IHSPath.prod_h
+#             )
+#             download_time = round(timer() - ts, 2)
 
-            ts = timer()
+#             ts = timer()
+#             ps = df.prodstats.calc()
+#             process_time = round(timer() - ts, 2)
 
-            await ProdHeader.bulk_upsert(ps.header, batch_size=100)
-            await ProdMonthly.bulk_upsert(ps.monthly, batch_size=100)
-            await ProdStat.bulk_upsert(ps.stats, batch_size=1000)
-            persist_time = round(timer() - ts, 2)
-            total_time = round(download_time + process_time + persist_time, 2)
+#             ts = timer()
 
-            logger.warning(
-                f"\n{download_time=:>5}s\n{process_time=:>5}s\n{persist_time=:>5}s\n{total_time=:>5}s\n"  # noqa
-            )
+#             coros = []
+#             coros.append(ProdHeader.bulk_upsert(ps.header, batch_size=100))
+#             coros.append(ProdMonthly.bulk_upsert(ps.monthly, batch_size=100))
+#             coros.append(ProdStat.bulk_upsert(ps.stats, batch_size=1000))
+#             await asyncio.gather(*coros)
 
-            result = {
-                "times": {
-                    "download": download_time,
-                    "process": process_time,
-                    "persist": persist_time,
-                },
-                "counts": ps.describe(),
-            }
+#             persist_time = round(timer() - ts, 2)
+#             total_time = round(download_time + process_time + persist_time, 2)
 
-            if return_data:
-                result["data"] = ps
+#             result = {
+#                 "times": {
+#                     "download": download_time,
+#                     "process": process_time,
+#                     "persist": persist_time,
+#                 },
+#                 "counts": ps.describe(),
+#             }
+#             logger.warning(f"result: {total_time=} {result}")
+#             if return_data:
+#                 result["data"] = ps
+#             return result
 
-            return result
+#         async def run(
+#             batch_size: int,
+#             return_data: bool,
+#             area_name: str = None,
+#             ids: List[str] = None,
+#         ):
 
-        async def run(
-            batch_size: int,
-            return_data: bool,
-            area_name: str = None,
-            ids: List[str] = None,
-        ):
+#             if area_name and ids:
+#                 raise ValueError(f"Only one of 'area_name' and 'ids' can be specified")
+#             elif not area_name and not ids:
+#                 raise ValueError(f"One of 'area_name' and 'ids' must be specified")
 
-            if area_name and ids:
-                raise ValueError(f"Only one of 'area_name' and 'ids' can be specified")
-            elif not area_name and not ids:
-                raise ValueError(f"One of 'area_name' and 'ids' must be specified")
+#             if area_name:
+#                 ids = await IHSClient.get_ids(area_name, path=IHSPath.prod_h_ids)
 
-            if area_name:
-                ids = await IHSClient.get_ids(area_name, path=IHSPath.prod_h_ids)
+#             results: List[Dict] = []
+#             for chunk in util.chunks(ids, n=batch_size):
+#                 results.append(await process(chunk, return_data))
 
-            results: List[Dict] = []
-            for chunk in util.chunks(ids, n=batch_size):
-                results.append(await process(chunk, return_data))
+#             return results
 
-            return results
+#         # results = asyncio.run_until_complete
+#         loop = asyncio.get_event_loop()
 
-        # results = asyncio.run_until_complete
-        loop = asyncio.get_event_loop()
+#         batch_size = 50
+#         return_data = True
+#         area_name = "tx-upton"
+#         ids = None
+#         # ids = ["14207C0155258418H", "14207C0155258421H"]
 
-        batch_size = 1000
-        return_data = True
-        area_name = None
-        ids = ["14207C0155258418H", "14207C0155258421H"]
+#         results = loop.run_until_complete(
+#             run(
+#                 batch_size=batch_size,
+#                 return_data=return_data,
+#                 area_name=area_name,
+#                 ids=ids,
+#             )
+#         )
+#         # result[0]["data"].monthly.head(100)
 
-        result = loop.run_until_complete(
-            run(
-                batch_size=batch_size,
-                return_data=return_data,
-                area_name=area_name,
-                ids=ids,
-            )
-        )
-        # result[0]["data"].monthly.head(100)
+#         def metrics(data: List[Dict[str, Dict]]):
+#             times = (
+#                 pd.DataFrame([x["times"] for x in data])
+#                 .sum()
+#                 .rename("seconds")
+#                 .to_frame()
+#             )
+#             times.index.name = "metric"
+#             times["minutes"] = times.seconds / 60
+#             times["time_percent"] = times.seconds / times.seconds.sum() * 100
 
-        def metrics(data: List[Dict[str, Dict]]):
-            times = (
-                pd.DataFrame([x["times"] for x in result])
-                .sum()
-                .rename("seconds")
-                .to_frame()
-            )
-            times.index.name = "metric"
-            times["minutes"] = times.seconds / 60
-            times["time_percent"] = times.seconds / times.seconds.sum() * 100
+#             c = pd.DataFrame([x["counts"] for x in data]).sum().to_dict()
+#             counts = pd.DataFrame(index=times.index, data=[c] * 3)
 
-            c = pd.DataFrame([x["counts"] for x in result]).sum().to_dict()
-            counts = pd.DataFrame(index=times.index, data=[c] * 3)
+#             rates = counts.T / times.seconds
+#             rates = rates.T
+#             rates.columns = [f"{x}_per_sec" for x in rates.columns]
+#             rates = rates.astype(int)
 
-            rates = counts.T / times.seconds
-            rates = rates.T
-            rates.columns = [f"{x}_per_sec" for x in rates.columns]
-            rates = rates.astype(int)
+#             counts.columns = [f"{x}_count" for x in counts.columns]
+#             composite = times.join(counts).join(rates).T.astype(int)
 
-            counts.columns = [f"{x}_count" for x in counts.columns]
-            composite = times.join(counts).join(rates).T.astype(int)
+#             return composite
 
-            return composite
+#         print(metrics(pexec.metrics))
 
-        metrics(result)
+#         # async for coro in aiter(ids):
+#         #     return await coro
 
-        # async for coro in aiter(ids):
-        #     return await coro
+#         # self = ps.header.prodstats
+#         # monthly = ps.monthly
+#         # ps.monthly.groupby(level=0).tail(6).head(100)
+#         # 4246134936
+#         # 4246135660
+#         # prodstats = prodstats.replace({np.nan: None})
 
-        # self = ps.header.prodstats
-        # monthly = ps.monthly
-        # ps.monthly.groupby(level=0).tail(6).head(100)
-        # 4246134936
-        # 4246135660
-        # prodstats = prodstats.replace({np.nan: None})
+#         # aggregate prodstats
 
-        # aggregate prodstats
+#         # header.iloc[10]
+#         # header.head(25)
+#         # header.shape
 
-        # header.iloc[10]
-        # header.head(25)
-        # header.shape
+#         # monthly.iloc[10]
+#         # monthly.head(25)
+#         # monthly.shape
 
-        # monthly.iloc[10]
-        # monthly.head(25)
-        # monthly.shape
+#         # monthly.join()
 
-        # monthly.join()
-
-        # dir(monthly.groupby(level=[0, 1]))
+#         # dir(monthly.groupby(level=[0, 1]))

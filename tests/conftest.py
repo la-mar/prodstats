@@ -79,6 +79,16 @@ def json_fixture():
     yield lambda x: load_json(f"tests/fixtures/{x}")
 
 
+@pytest.fixture(scope="session")
+def ihs_producing_wells(json_fixture):
+    yield json_fixture("ihs_prod.json")
+
+
+@pytest.fixture
+def prod_df(ihs_producing_wells):
+    yield ProductionWellSet(wells=ihs_producing_wells).df().copy(deep=True)
+
+
 @pytest.fixture
 def random_string(length=8) -> str:
     return _random_string(length)

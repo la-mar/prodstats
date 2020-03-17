@@ -5,16 +5,10 @@ import pandas as pd
 import pytest
 from tests.utils import MockAsyncDispatch
 
-from calc.prod import ProdSet, ProdStatRange, _validate_required_columns
+from calc.prod import ProdStatRange, _validate_required_columns
 from collector import IHSPath
-from schemas import ProductionWellSet
 
 logger = logging.getLogger(__name__)
-
-
-@pytest.fixture(scope="session")
-def ihs_producing_wells(json_fixture):
-    yield json_fixture("ihs_prod.json")
 
 
 @pytest.fixture
@@ -22,38 +16,9 @@ def prod_dispatcher(ihs_producing_wells):
     yield MockAsyncDispatch({"data": ihs_producing_wells})
 
 
-@pytest.fixture
-def prod_df(ihs_producing_wells):
-    yield ProductionWellSet(wells=ihs_producing_wells).df().copy(deep=True)
-
-
 def test_validate_required_columns_raise():
     with pytest.raises(KeyError):
         _validate_required_columns(required=["a", "b"], columns=["a", "c", "d"])
-
-
-class TestProdSet:
-    def test_describe(self):
-        ps = ProdSet(
-            *[pd.DataFrame([*[{x: x} for x in range(0, x)]]) for x in range(1, 4)]
-        )
-
-        assert repr(ps) == "header=1 monthly=2 stats=3"
-        assert ps.describe() == {
-            "header": 1,
-            "monthly": 2,
-            "stats": 3,
-        }
-
-    def test_describe_handle_none(self):
-        records = [{"key": 1}, {"key": 1}]
-        ps = ProdSet(monthly=pd.DataFrame(records))
-        assert ps.describe() == {"header": 0, "monthly": 2, "stats": 0}
-
-    def test_iter(self):
-        df = pd.DataFrame([{"key": 1}, {"key": 1}])
-        ps = ProdSet(header=df, monthly=df, stats=df)
-        assert list(ps) == [df] * 3
 
 
 class TestProdStats:

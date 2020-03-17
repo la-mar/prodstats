@@ -73,6 +73,10 @@ class Base(db.Model, DataFrameMixin):
             cls._pk = PrimaryKeyProxy(cls)
         return cls._pk
 
+    @classproperty
+    def __model_name__(cls) -> str:
+        return f"{cls.__module__}.{cls.__name__}"
+
 
 class ColumnProxy:
     """ Proxy object for a data model's columns """
