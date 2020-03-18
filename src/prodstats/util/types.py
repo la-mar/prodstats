@@ -1,3 +1,3 @@
-# from typing import List, NewType
+from typing import List, NewType
 
-# StringArray = NewType("StringArray", List[str])
+StringArray = NewType("StringArray", List[str])

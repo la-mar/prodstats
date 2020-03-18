@@ -23,7 +23,7 @@ from db import db
 from prodstats.main import app
 from tests.models import TestModel  # noqa
 from util.jsontools import load_json
-
+from schemas import ProductionWellSet
 
 ECHO = False
 

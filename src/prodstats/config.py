@@ -15,7 +15,7 @@ from __future__ import annotations
 # import asyncio
 import socket
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 import uvloop
@@ -26,6 +26,7 @@ from starlette.datastructures import Secret
 from schemas.database_url import DatabaseURL
 from util.iterables import filter_by_prefix
 from util.toml import project, version
+from util.types import StringArray
 
 """ Optional Pandas display settings"""
 pd.options.display.max_rows = 100
@@ -149,61 +150,67 @@ def with_prefix(prefix: str, tolower: bool = True, strip: bool = True) -> Dict:
     return filter_by_prefix(items(), prefix, tolower=tolower, strip=strip)
 
 
+CELERY_LOG_LEVEL: str = conf("CELERY_LOG_LEVEL", cast=str, default=LOG_LEVEL)
+CELERY_LOG_FORMAT: str = conf("LOG_FORMAT", cast=str, default=LOG_FORMAT)
+
+
 # ---Celery------------------------------------------------------------------- #
-# class CeleryConfig:
 
-#     # custom
-#     db_pool_min_size: int = conf("CELERY_DB_MIN_POOL_SIZE", cast=int, default=2)
-#     db_pool_max_size: int = conf(
-#         "CELERY_DB_MAX_POOL_SIZE", cast=int, default=db_pool_min_size
-#     )
 
-#     # broker
-#     accept_content: List[str] = conf("", cast=StringArray, default=["json"])
-#     broker_url: str = conf("PRODSTATS_BROKER_URL", cast=str)
-#     broker_connection_timeout = 2
-#     broker_connection_max_retries = 1
+class CeleryConfig:
 
-#     # beat
-#     beat_scheduler = "redbeat.RedBeatScheduler"
-#     redbeat_redis_url = broker_url
+    # custom
+    db_pool_min_size: int = conf("CELERY_DB_MIN_POOL_SIZE", cast=int, default=2)
+    db_pool_max_size: int = conf(
+        "CELERY_DB_MAX_POOL_SIZE", cast=int, default=db_pool_min_size
+    )
 
-#     # task
-#     task_always_eager = conf("CELERY_TASK_ALWAYS_EAGER", cast=str, default=True)
-#     task_time_limit: int = conf("CELERYD_TASK_TIME_LIMIT", cast=int, default=3600 * 12)
-#     task_serializer: str = conf("CELERY_TASK_SERIALIZER", cast=str, default="json")
-#     task_default_queue: str = conf(
-#         "CELERY_DEFAULT_QUEUE", cast=str, default=f"{project}-default"
-#     )  # sqs default queue name
-#     task_routes: Optional[Tuple[str]] = conf("CELERY_ROUTES", cast=tuple, default=None)
-#     task_create_missing_queues: bool = conf(
-#         "CELERY_TASK_CREATE_MISSING_QUEUES", cast=bool, default=False
-#     )
+    # broker
+    accept_content: List[str] = conf("", cast=StringArray, default=["json"])
+    broker_url: str = conf("PRODSTATS_BROKER_URL", cast=str)
+    broker_connection_timeout = 2
+    broker_connection_max_retries = 1
 
-#     # worker
-#     worker_max_tasks_per_child: int = conf(
-#         "CELERYD_MAX_TASKS_PER_CHILD", cast=int, default=1000
-#     )
-#     worker_max_memory_per_child: int = conf(
-#         "CELERYD_MAX_MEMORY_PER_CHILD", cast=int, default=24000
-#     )  # 24mb
-#     worker_enable_remote_control: bool = conf(
-#         "CELERY_ENABLE_REMOTE_CONTROL", cast=bool, default=False
-#     )  # must be false for sqs
-#     worker_send_task_events: bool = conf(
-#         "CELERY_SEND_EVENTS", cast=bool, default=False
-#     )  # must be false for sqs
-#     worker_prefetch_multiplier: int = conf(
-#         "CELERYD_PREFETCH_MULTIPLIER", cast=int, default=4
-#     )
-#     worker_concurrency: int = conf("CELERYD_CONCURRENCY", cast=int, default=None)
+    # beat
+    beat_scheduler = "redbeat.RedBeatScheduler"
+    redbeat_redis_url = broker_url
 
-#     @classmethod
-#     def items(cls) -> Dict:
-#         """ Return all configuration items as a dictionary. Only items that are fully
-#             uppercased and do not begin with an underscore are included."""
-#         return {
-#             x: getattr(cls, x)
-#             for x in dir(cls)
-#             if not x.startswith("_") and x not in ["items"]
-#         }
+    # task
+    task_always_eager = conf("CELERY_TASK_ALWAYS_EAGER", cast=str, default=True)
+    task_time_limit: int = conf("CELERYD_TASK_TIME_LIMIT", cast=int, default=3600 * 12)
+    task_serializer: str = conf("CELERY_TASK_SERIALIZER", cast=str, default="json")
+    task_default_queue: str = conf(
+        "CELERY_DEFAULT_QUEUE", cast=str, default=f"{project}-default"
+    )  # sqs default queue name
+    task_routes: Optional[Tuple[str]] = conf("CELERY_ROUTES", cast=tuple, default=None)
+    task_create_missing_queues: bool = conf(
+        "CELERY_TASK_CREATE_MISSING_QUEUES", cast=bool, default=False
+    )
+
+    # worker
+    worker_max_tasks_per_child: int = conf(
+        "CELERYD_MAX_TASKS_PER_CHILD", cast=int, default=1000
+    )
+    worker_max_memory_per_child: int = conf(
+        "CELERYD_MAX_MEMORY_PER_CHILD", cast=int, default=24000
+    )  # 24mb
+    worker_enable_remote_control: bool = conf(
+        "CELERY_ENABLE_REMOTE_CONTROL", cast=bool, default=False
+    )  # must be false for sqs
+    worker_send_task_events: bool = conf(
+        "CELERY_SEND_EVENTS", cast=bool, default=False
+    )  # must be false for sqs
+    worker_prefetch_multiplier: int = conf(
+        "CELERYD_PREFETCH_MULTIPLIER", cast=int, default=4
+    )
+    worker_concurrency: int = conf("CELERYD_CONCURRENCY", cast=int, default=None)
+
+    @classmethod
+    def items(cls) -> Dict:
+        """ Return all configuration items as a dictionary. Only items that are fully
+            uppercased and do not begin with an underscore are included."""
+        return {
+            x: getattr(cls, x)
+            for x in dir(cls)
+            if not x.startswith("_") and x not in ["items"]
+        }

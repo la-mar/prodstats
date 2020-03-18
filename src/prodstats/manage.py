@@ -6,16 +6,17 @@ from pathlib import Path
 from typing import List
 
 import typer
-from prodstats.main import app
 
 import config as conf
 import loggers
+from prodstats.main import app
 
 loggers.config()
 
 logger = logging.getLogger()
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], ignore_unknown_options=True)
+CELERY_LOG_LEVEL_NAME: str = loggers.mlevelname(conf.CELERY_LOG_LEVEL)
 
 
 def get_terminal_columns():
@@ -66,6 +67,39 @@ def server(port: int = 8000):
 @run_cli.command(help="Launch a web process to serve the api")
 def web(port: int = 8000):
     cmd = ["uvicorn", "prodstats.main:app", "--port", str(port)]
+    if conf.TESTING:
+        print(subprocess.Popen(cmd).pid)
+    else:
+        subprocess.call(cmd)  # nocover
+
+
+@run_cli.command(help="Launch a background worker")
+def worker(loglevel: str = CELERY_LOG_LEVEL_NAME):
+    cmd = [
+        "celery",
+        "-E",
+        "-A",
+        "cq:celery_app",
+        "worker",
+        "--loglevel",
+        loggers.mlevelname(loglevel),
+    ]
+    if conf.TESTING:
+        print(subprocess.Popen(cmd).pid)
+    else:
+        subprocess.call(cmd)  # nocover
+
+
+@run_cli.command(help="Launch a scheduling process")
+def cron(loglevel: str = CELERY_LOG_LEVEL_NAME):
+    cmd = [
+        "celery",
+        "-A",
+        "cq:celery_app",
+        "beat",
+        "--loglevel",
+        loggers.mlevelname(loglevel),
+    ]
     if conf.TESTING:
         print(subprocess.Popen(cmd).pid)
     else:

@@ -7,7 +7,11 @@ x-defaults: &defaults
     dockerfile: Dockerfile
   restart: unless-stopped
   env_file:
-    - .env
+    - .env.compose
+  depends_on:
+    - redis
+  volumes:
+    - ./src/prodstats:/app/prodstats
 
 services:
   ihs:
@@ -31,3 +35,38 @@ services:
       DATABASE_PASSWORD: null
       LOG_LEVEL: 10
       LOG_FORMAT: layman
+
+  # web:
+  #   <<: *defaults
+  #   container_name: web
+  #   command: prodstats dev server
+  #   ports:
+  #     - 8000
+  # worker_1:
+  #   <<: *defaults
+  #   container_name: prodstats_worker_1
+  #   user: celeryuser
+  #   command: prodstats run worker
+  # worker_2:
+  #   <<: *defaults
+  #   container_name: prodstats_worker_2
+  #   user: celeryuser
+  #   command: prodstats run worker
+  cron:
+    <<: *defaults
+    container_name: prodstats_cron
+    user: celeryuser
+    command: prodstats run cron
+  redis:
+    container_name: prodstats_redis
+    image: redis
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    command: redis-server  --save "" --appendonly no --loglevel debug --bind 0.0.0.0
+    ports:
+      - 6379
+    # volumes:
+    #   - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    # command:
+    #   - /usr/local/etc/redis/redis.conf
