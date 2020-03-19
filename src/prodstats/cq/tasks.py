@@ -1,10 +1,10 @@
 import asyncio
-import itertools
-from typing import Coroutine, List
+from typing import List, Union
 
 from celery.utils.log import get_task_logger
 
 import calc.prod  # noqa
+import config as conf
 import ext.metrics as metrics
 import util
 import util.jsontools
@@ -37,16 +37,18 @@ def post_heartbeat():
 
 
 @celery_app.task
-def calc_prodstats_for_ids(ids: List[str]):
-    # print(f"ids {util.jsontools.to_string(ids)}" + "\n\n")
-    logger.info(f"processing {len(ids)} ids")
+def calc_prodstats(ids: List[str]):
+
+    logger.warning(f"task id count: {len(ids)}")
     pexec = ProdExecutor()
     pexec.run_sync(entities=ids)
     return len(ids)
 
 
 @celery_app.task
-def calc_all_prodstats():  # (ids: List[str]):
+def calc_all_prodstats(
+    path: Union[IHSPath, str], areas: List[str] = None
+):  # (ids: List[str]):
 
     """
         get areas
@@ -59,24 +61,22 @@ def calc_all_prodstats():  # (ids: List[str]):
             run_sync in each task
 
     """
-
-    async def get_ids():
-        areas = await IHSClient.get_areas(IHSPath.prod_h_ids)
-        areas = ["tx-upton", "tx-reagan"]
-
-        coros: List[Coroutine] = []
-        for area in areas:
-            coros.append(IHSClient.get_ids(area, path=IHSPath.prod_h_ids))
-
-        return await asyncio.gather(*coros)
-
+    logger.warning(f"path: {path}")
+    if not isinstance(path, IHSPath):
+        path = IHSPath(path)
     loop = asyncio.get_event_loop()
-    ids = loop.run_until_complete(get_ids())
-    ids = list(itertools.chain(*ids))
-
+    ids = loop.run_until_complete(IHSClient.get_all_ids(path=path, areas=areas))
     # ids = ["14207C0202511H", "14207C0205231H"]
-    ids = [[x] for x in list(util.chunks(ids, n=10))]
 
-    result = calc_prodstats_for_ids.chunks(ids, 10).apply_async()
+    max_ids_per_task = conf.CALC_MAX_IDS_PER_TASK
+    logger.warning(f"creating subtasks from {len(ids)} ids")
+    id_count = len(ids)
 
-    logger.warning(f"calculated prodstats for {len(result)} wells ")
+    # chunk ids into blocks of 10
+    ids = [[x] for x in list(util.chunks(ids, n=max_ids_per_task))]
+    task_count = len(ids)
+
+    # create a task for each block of ids
+    calc_prodstats.chunks(ids, 1).apply_async()
+    # logger.warning(f"results: {util.jsontools.to_string(ids)}")
+    logger.warning(f"calculated prodstats for {id_count} wells in {task_count} tasks")

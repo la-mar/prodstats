@@ -9,7 +9,7 @@ import pandas as pd
 import db.models as models
 import util
 from calc.sets import ProdSet
-from collector import IHSClient, IHSPath
+from collector import IHSPath
 from db import db
 
 logger = logging.getLogger(__name__)
@@ -146,22 +146,15 @@ class ProdExecutor(Executor):
 
     async def run(
         self,
-        area_name: str = None,
         entities: Union[str, List[str]] = None,
         api10s: Union[str, List[str]] = None,
         entity12s: Union[str, List[str]] = None,
-        batch_size: int = None,  # number of ids to process together
-        concurrency: int = None,
+        batch_size: int = None,  # max number of ids to process together
         return_data: bool = False,
     ) -> List[Tuple[int, Optional[ProdSet]]]:
 
         param_count = sum(
-            [
-                area_name is not None,
-                entities is not None,
-                api10s is not None,
-                entity12s is not None,
-            ]
+            [entities is not None, api10s is not None, entity12s is not None]
         )
 
         if param_count > 1:
@@ -175,13 +168,9 @@ class ProdExecutor(Executor):
             )
 
         batch_size = batch_size or 100
-        concurrency = concurrency or 20
 
         if not db.is_bound():
             await db.startup()
-
-        if area_name:
-            entities = await IHSClient.get_ids(area_name, path=IHSPath.prod_h_ids)
 
         if entities:
             ids = entities

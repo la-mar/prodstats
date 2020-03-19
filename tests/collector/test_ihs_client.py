@@ -2,9 +2,9 @@ import logging
 
 import httpx
 import pytest
-from tests.utils import MockAsyncDispatch
 
 from collector import IHSClient
+from tests.utils import MockAsyncDispatch
 
 logger = logging.getLogger(__name__)
 
@@ -72,14 +72,14 @@ class TestGetProduction:
 
 
 class TestGetOther:
-    async def test_get_ids(self, id_dispatcher):
+    async def test_get_ids_by_area(self, id_dispatcher):
 
         kwargs = {
             "path": IHSClient.paths.prod_h,
             "dispatch": id_dispatcher,
             "area": "placeholder",
         }
-        result = await IHSClient.get_ids(**kwargs)
+        result = await IHSClient.get_ids_by_area(**kwargs)
         logger.debug(result)
         assert result == ["a", "b", "c"]
 

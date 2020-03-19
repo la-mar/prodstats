@@ -110,6 +110,7 @@ def cron(loglevel: str = CELERY_LOG_LEVEL_NAME):
 def task(task: str):
     """Run a one-off task. Pass the name of the scoped task to run.
         Ex. endpoint_name.task_name"""
+    # from cq.tasks import sync_endpoint
 
     try:
         if "." in task:

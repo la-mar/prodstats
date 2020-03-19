@@ -3,10 +3,10 @@ import logging
 import numpy as np
 import pandas as pd
 import pytest
-from tests.utils import MockAsyncDispatch
 
 from calc.prod import ProdStatRange, _validate_required_columns
 from collector import IHSPath
+from tests.utils import MockAsyncDispatch
 
 logger = logging.getLogger(__name__)
 
@@ -449,7 +449,7 @@ class TestProdStats:
             assert x in df.columns
 
     def test_daily_avg_by_month(self, prod_df):
-        in_df = prod_df[["oil", "gas", "days_in_month"]]
+        in_df = prod_df.loc[:, ["oil", "gas", "days_in_month"]]
         df = in_df.prodstats.daily_avg(
             columns=["oil", "gas"], days_column="days_in_month"
         )

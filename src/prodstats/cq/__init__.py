@@ -6,6 +6,7 @@ import cq.signals
 import cq.tasks as tasks
 import db
 import loggers
+from collector import IHSPath
 from cq.worker import celery_app
 
 logger = logging.getLogger(__name__)
@@ -41,7 +42,9 @@ def _setup_heartbeat(sender, **kwargs):
 
 def _calc_all_prodstats(sender, **kwargs):
     sender.add_periodic_task(
-        900, tasks.calc_all_prodstats, name="calc_all_prodstats",
+        900,
+        tasks.calc_all_prodstats.s(IHSPath.prod_h_ids, ["tx-upton"]),
+        name="calc_all_prodstats",
     )
 
 

@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 import logging
 from typing import Any, Coroutine, Dict, List, Optional, Union
 
@@ -119,11 +120,24 @@ class IHSClient(AsyncClient):
         return data
 
     @classmethod
-    async def get_ids(cls, area: str, path: IHSPath, **kwargs) -> List[str]:
+    async def get_ids_by_area(cls, area: str, path: IHSPath, **kwargs) -> List[str]:
         async with cls(**kwargs) as client:
             response = await client.get(f"{path.value}/{area}")
             response.raise_for_status()
             return response.json()["data"][0]["ids"]
+
+    @classmethod
+    async def get_all_ids(
+        cls, path: IHSPath, areas: List[str] = None, **kwargs
+    ) -> List[str]:
+        areas = areas or await cls.get_areas(path, **kwargs)
+
+        coros: List[Coroutine] = []
+        for area in areas:
+            coros.append(cls.get_ids_by_area(area, path=path))
+
+        ids = await asyncio.gather(*coros)
+        return list(itertools.chain(*ids))
 
     @classmethod
     async def get_areas(
