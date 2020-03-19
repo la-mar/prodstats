@@ -271,9 +271,9 @@ class ProdStats:
         )
 
         if norm_by_ll is not None:
-            # factors = self._obj.perfll / norm_by_ll
-            factors = monthly.perfll / norm_by_ll
-            aggregated.value = aggregated.value.div(factors, axis=0)
+            factors = monthly.groupby(level=0).first().perfll / norm_by_ll
+            values = aggregated["value"].div(factors, axis=0)
+            aggregated["value"] = values
 
         aggregated["includes_zeroes"] = include_zeroes
 
@@ -291,16 +291,16 @@ class ProdStats:
         )
         aggregated["comments"] = None
 
-        api10 = ""
+        api10s = set()
         if (
             "api10" in {*aggregated.columns, *aggregated.index.names}
             and aggregated.shape[0] > 0
         ):
-            api10 = aggregated.reset_index().iloc[0].api10
+            api10s = {*aggregated.reset_index().api10.values.tolist()}
 
         logger.debug(
-            f"{api10} calculated prodstats: {list(alias_map.values())}",
-            extra={"api10": api10, **alias_map},
+            f"{api10s} calculated prodstats: {list(alias_map.values())}",
+            extra={"api10": api10s, **alias_map},
         )
 
         return aggregated

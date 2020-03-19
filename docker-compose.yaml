@@ -42,16 +42,16 @@ services:
   #   command: prodstats dev server
   #   ports:
   #     - 8000
-  # worker_1:
-  #   <<: *defaults
-  #   container_name: prodstats_worker_1
-  #   user: celeryuser
-  #   command: prodstats run worker
-  # worker_2:
-  #   <<: *defaults
-  #   container_name: prodstats_worker_2
-  #   user: celeryuser
-  #   command: prodstats run worker
+  worker_1:
+    <<: *defaults
+    container_name: prodstats_worker_1
+    user: celeryuser
+    command: prodstats run worker
+  worker_2:
+    <<: *defaults
+    container_name: prodstats_worker_2
+    user: celeryuser
+    command: prodstats run worker
   cron:
     <<: *defaults
     container_name: prodstats_cron
@@ -63,7 +63,7 @@ services:
     build:
       context: ./redis
       dockerfile: Dockerfile
-    command: redis-server  --save "" --appendonly no --loglevel debug --bind 0.0.0.0
+    command: redis-server  --save "" --appendonly no --loglevel notice --bind 0.0.0.0
     ports:
       - 6379
     # volumes:

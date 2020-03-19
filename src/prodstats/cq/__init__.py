@@ -39,9 +39,9 @@ def _setup_heartbeat(sender, **kwargs):
     )
 
 
-def _calc_prodstats(sender, **kwargs):
+def _calc_all_prodstats(sender, **kwargs):
     sender.add_periodic_task(
-        15, tasks.calc_prodstats, name="calc_prodstats",
+        900, tasks.calc_all_prodstats, name="calc_all_prodstats",
     )
 
 
@@ -49,4 +49,4 @@ def _calc_prodstats(sender, **kwargs):
 def setup_periodic_tasks(sender, **kwargs):
     _setup_collection_tasks(sender, **kwargs)
     _setup_heartbeat(sender, **kwargs)
-    _calc_prodstats(sender, **kwargs)
+    _calc_all_prodstats(sender, **kwargs)

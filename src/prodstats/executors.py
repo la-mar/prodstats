@@ -6,7 +6,6 @@ from typing import Coroutine, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
-import calc.prod  # noqa
 import db.models as models
 import util
 from calc.sets import ProdSet
@@ -132,11 +131,11 @@ class ProdExecutor(Executor):
         exec_id = uuid.uuid4().hex
         logger.warning(f"starting task: {exec_id}")
         try:
-            df = await pexec.download(
+            df = await self.download(
                 entities=entities, api10s=api10s, entity12s=entity12s
             )
-            ps = await pexec.process(df)
-            ct = await pexec.persist(ps)
+            ps = await self.process(df)
+            ct = await self.persist(ps)
             logger.warning(f"completed task: {exec_id}")
             return ct, ps if return_data else None
         except Exception as e:
@@ -154,7 +153,7 @@ class ProdExecutor(Executor):
         batch_size: int = None,  # number of ids to process together
         concurrency: int = None,
         return_data: bool = False,
-    ):
+    ) -> List[Tuple[int, Optional[ProdSet]]]:
 
         param_count = sum(
             [
@@ -169,12 +168,13 @@ class ProdExecutor(Executor):
             raise ValueError(
                 f"Only one of [area_name, api10s, entity12s, entities] can be specified"
             )
+
         elif param_count < 1:
             raise ValueError(
                 f"One of [area_name, api10s, entity12s, entities] must be specified"
             )
 
-        batch_size = batch_size or 10
+        batch_size = batch_size or 100
         concurrency = concurrency or 20
 
         if not db.is_bound():
@@ -195,8 +195,6 @@ class ProdExecutor(Executor):
         else:
             raise ValueError(f"Could not determine value of id_type")
 
-        # print()
-
         # generate coros for all chunks
         coros: List[Coroutine] = []
         for chunk in util.chunks(ids, n=batch_size):
@@ -205,49 +203,47 @@ class ProdExecutor(Executor):
         logger.info(f"created {len(coros)} coroutines from {len(ids)} {id_type}s")
 
         # schedule coros in batches according to concurrency limits
-        results: List[Tuple[int, Optional[ProdSet]]] = []
+        # results: List[Tuple[int, Optional[ProdSet]]] = []
         # for chunk in util.chunks(coros, n=concurrency):
         #     logger.info(f"scheduling {len(chunk)} tasks")
         #     results.append(await asyncio.gather(*chunk))
 
-        results.append(await asyncio.gather(*coros))
+        return await asyncio.gather(*coros)
 
-        return results
-
-    def run_sync(self, **kwargs):
-
+    def run_sync(self, **kwargs) -> List[Tuple[int, Optional[ProdSet]]]:
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(self.run(**kwargs))
 
 
-if __name__ == "__main__":
-    import loggers
+# if __name__ == "__main__":
+#     import loggers
+#     import calc.prod  # noqa
 
-    loggers.config(logger=logger, level=10)
+#     loggers.config(level=20)
 
-    ids = ["14207C0155111H", "14207C0155258418H"]
-    ids = ["14207C0202511H", "14207C0205231H"]
+#     ids = ["14207C0155111H", "14207C0155258418H"]
+#     ids = ["14207C0202511H", "14207C0205231H"]
 
-    pexec = ProdExecutor()
-    self = pexec
-    # pexec.run_sync(entities=ids, batch_size=1)
-    pexec.run_sync(area_name="tx-upton", batch_size=25)
-    # print(pexec.metrics)
+#     pexec = ProdExecutor()
+#     self = pexec
+#     pexec.run_sync(entities=ids, batch_size=1)
+# pexec.run_sync(area_name="tx-upton", batch_size=25)
+# print(pexec.metrics)
 
-    # import pandas as pd
-    # s = pd.Series([str(uuid.uuid4().hex) for x in range(0, 100000)])
-    # s[s.duplicated()]
-    # s
+# import pandas as pd
+# s = pd.Series([str(uuid.uuid4().hex) for x in range(0, 100000)])
+# s[s.duplicated()]
+# s
 
-    # area_name = None
-    # entities = None
-    # api10s = None
-    # entity12s = None
-    # batch_size = None
-    # concurrency = None
-    # return_data = False
+# area_name = None
+# entities = None
+# api10s = None
+# entity12s = None
+# batch_size = None
+# concurrency = None
+# return_data = False
 
-    # entities = ids
+# entities = ids
 
-    # df = await pd.DataFrame.prodstats.from_ihs(path=IHSPath.prod_h, entities=ids)
-    # df
+# df = await pd.DataFrame.prodstats.from_ihs(path=IHSPath.prod_h, entities=ids)
+# df

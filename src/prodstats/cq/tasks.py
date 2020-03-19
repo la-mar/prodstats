@@ -1,20 +1,21 @@
 import asyncio
+import itertools
+from typing import Coroutine, List
 
 from celery.utils.log import get_task_logger
 
+import calc.prod  # noqa
 import ext.metrics as metrics
+import util
 import util.jsontools
 from collector import IHSClient, IHSPath
 from cq.worker import celery_app
+from executors import ProdExecutor
 
 logger = get_task_logger(__name__)
 
 
 RETRY_BASE_DELAY = 15
-
-# async_to_sync(db.set_bind(conf.DATABASE_CONFIG.url))
-# FIXME: Use syncronous ORM within celery task if cant find a way to initialize
-# async bind once per worker process
 
 
 @celery_app.task
@@ -36,7 +37,16 @@ def post_heartbeat():
 
 
 @celery_app.task
-def calc_prodstats():  # (ids: List[str]):
+def calc_prodstats_for_ids(ids: List[str]):
+    # print(f"ids {util.jsontools.to_string(ids)}" + "\n\n")
+    logger.info(f"processing {len(ids)} ids")
+    pexec = ProdExecutor()
+    pexec.run_sync(entities=ids)
+    return len(ids)
+
+
+@celery_app.task
+def calc_all_prodstats():  # (ids: List[str]):
 
     """
         get areas
@@ -50,6 +60,23 @@ def calc_prodstats():  # (ids: List[str]):
 
     """
 
+    async def get_ids():
+        areas = await IHSClient.get_areas(IHSPath.prod_h_ids)
+        areas = ["tx-upton", "tx-reagan"]
+
+        coros: List[Coroutine] = []
+        for area in areas:
+            coros.append(IHSClient.get_ids(area, path=IHSPath.prod_h_ids))
+
+        return await asyncio.gather(*coros)
+
     loop = asyncio.get_event_loop()
-    result = loop.run_until_complete(IHSClient.get_areas(IHSPath.prod_h_ids))
-    logger.warning(f"prodstats result: {util.jsontools.to_string(result)}")
+    ids = loop.run_until_complete(get_ids())
+    ids = list(itertools.chain(*ids))
+
+    # ids = ["14207C0202511H", "14207C0205231H"]
+    ids = [[x] for x in list(util.chunks(ids, n=10))]
+
+    result = calc_prodstats_for_ids.chunks(ids, 10).apply_async()
+
+    logger.warning(f"calculated prodstats for {len(result)} wells ")
