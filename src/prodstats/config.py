@@ -174,10 +174,13 @@ class CeleryConfig:
 
     # beat
     beat_scheduler = "redbeat.RedBeatScheduler"
+
+    # redbeat
     redbeat_redis_url = broker_url
+    redbeat_key_prefix = project
 
     # task
-    task_always_eager = conf("CELERY_TASK_ALWAYS_EAGER", cast=str, default=True)
+    task_always_eager = conf("CELERY_TASK_ALWAYS_EAGER", cast=bool, default=False)
     task_time_limit: int = conf("CELERYD_TASK_TIME_LIMIT", cast=int, default=3600 * 12)
     task_serializer: str = conf("CELERY_TASK_SERIALIZER", cast=str, default="json")
     task_default_queue: str = conf(

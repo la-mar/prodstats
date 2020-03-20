@@ -74,9 +74,12 @@ def calc_all_prodstats(
 
     # chunk ids into blocks of 10
     ids = [[x] for x in list(util.chunks(ids, n=max_ids_per_task))]
+    # ids = [x for x in list(util.chunks(ids, n=max_ids_per_task))]
     task_count = len(ids)
 
     # create a task for each block of ids
     calc_prodstats.chunks(ids, 1).apply_async()
+    # for id in ids:
+    #     calc_prodstats.s(ids=ids).apply_async()
     # logger.warning(f"results: {util.jsontools.to_string(ids)}")
     logger.warning(f"calculated prodstats for {id_count} wells in {task_count} tasks")

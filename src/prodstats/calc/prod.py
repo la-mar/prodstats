@@ -189,10 +189,14 @@ class ProdStats:
             )
 
         df = monthly
+        df.loc[:, list(agg_map.keys())] = df.loc[:, list(agg_map.keys())].astype(float)
 
         if include_zeroes:
             # aggregate all target columns
-            df = df.prodstats.monthly_by_range(range_name=range_name, months=months)
+            df = df.prodstats.monthly_by_range(
+                range_name=range_name, months=months
+            ).copy(deep=True)
+
             aggregated = df.groupby(level=0).agg(agg_map).rename(columns=alias_map)
             aggregated = aggregated.join(df.prodstats.prod_bounds_by_well())
 
@@ -373,6 +377,7 @@ class ProdStats:
 
         stats = pd.DataFrame()
         for opts in option_sets:
+            # logger.warning(opts)
             stats = stats.append(monthly.prodstats.interval(**kwargs, **opts))
         return stats
 

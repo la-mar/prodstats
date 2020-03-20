@@ -10,12 +10,11 @@ import db.models as models
 import util
 from calc.sets import ProdSet
 from collector import IHSPath
-from db import db
 
 logger = logging.getLogger(__name__)
 
 
-class Executor:
+class BaseExecutor:
     def __init__(self):
         self.metrics: pd.DataFrame = pd.DataFrame(
             columns=["operation", "name", "time", "count"]
@@ -32,7 +31,7 @@ class Executor:
         )
 
 
-class ProdExecutor(Executor):
+class ProdExecutor(BaseExecutor):
     def __init__(
         self,
         header_kwargs: Dict = None,
@@ -89,6 +88,10 @@ class ProdExecutor(Executor):
         self, name: str, model: models.Model, df: pd.DataFrame, **kwargs
     ) -> int:
         ts = timer()
+
+        # if not db.is_bound():
+        #     await db.startup()
+
         count = await model.bulk_upsert(df, **kwargs)
         exc_time = round(timer() - ts, 2)
         logger.info(f"persisted {df.shape[0]} {name} records ({exc_time}s)")
@@ -169,9 +172,6 @@ class ProdExecutor(Executor):
 
         batch_size = batch_size or 100
 
-        if not db.is_bound():
-            await db.startup()
-
         if entities:
             ids = entities
             id_type = "entities"
@@ -204,18 +204,35 @@ class ProdExecutor(Executor):
         return loop.run_until_complete(self.run(**kwargs))
 
 
-# if __name__ == "__main__":
-#     import loggers
-#     import calc.prod  # noqa
+if __name__ == "__main__":
+    import loggers
+    import calc.prod  # noqa
 
-#     loggers.config(level=20)
+    loggers.config(level=20)
 
-#     ids = ["14207C0155111H", "14207C0155258418H"]
-#     ids = ["14207C0202511H", "14207C0205231H"]
+    ids = ["14207C0155111H", "14207C0155258418H"]
+    ids = ["14207C0202511H", "14207C0205231H"]
+    ids = [
+        "24207C241961",
+        "24207C242223",
+        "24207C242352",
+        "24207C243689",
+        "24207C243750",
+        "24207C243751",
+        "24207C243821",
+        "24207C244422",
+        "24207C245633",
+        "24207C246017",
+    ]
 
-#     pexec = ProdExecutor()
-#     self = pexec
-#     pexec.run_sync(entities=ids, batch_size=1)
+    # if not db.is_bound():
+    #     await db.startup()
+    pexec = ProdExecutor()
+    self = pexec
+    pexec.run_sync(entities=ids, batch_size=1)
+
+    # TODO: fractionalize failed batches
+
 # pexec.run_sync(area_name="tx-upton", batch_size=25)
 # print(pexec.metrics)
 
