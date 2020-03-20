@@ -40,11 +40,17 @@ def _setup_heartbeat(sender, **kwargs):
     )
 
 
-def _calc_all_prodstats(sender, **kwargs):
+def _calc_prodstats_for_area(sender, **kwargs):
     sender.add_periodic_task(
-        900,
-        tasks.calc_all_prodstats.s(IHSPath.prod_h_ids, ["tx-upton"]),
-        name="calc_all_prodstats",
+        90,
+        tasks.calc_prodstats_for_area.s(IHSPath.prod_h_ids, "tx-upton"),
+        name="calc_prodstats_for_area",
+    )
+
+
+def _sync_area_manifest(sender, **kwargs):
+    sender.add_periodic_task(
+        15, tasks.sync_area_manifest, name="sync_area_manifest",
     )
 
 
@@ -52,4 +58,5 @@ def _calc_all_prodstats(sender, **kwargs):
 def setup_periodic_tasks(sender, **kwargs):
     _setup_collection_tasks(sender, **kwargs)
     _setup_heartbeat(sender, **kwargs)
-    _calc_all_prodstats(sender, **kwargs)
+    _calc_prodstats_for_area(sender, **kwargs)
+    _sync_area_manifest(sender, **kwargs)

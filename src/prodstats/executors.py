@@ -7,6 +7,7 @@ from typing import Coroutine, Dict, List, Optional, Tuple, Union
 import pandas as pd
 
 import db.models as models
+import exc
 import util
 from calc.sets import ProdSet
 from collector import IHSPath
@@ -53,44 +54,51 @@ class ProdExecutor(BaseExecutor):
         create_index: bool = True,
         **kwargs,
     ) -> pd.DataFrame:
-        ts = timer()
-
-        df = await pd.DataFrame.prodstats.from_ihs(
-            entities=entities,
-            api10s=api10s,
-            entity12s=entity12s,
-            path=IHSPath.prod_h,
-            **kwargs,
-        )
-        exc_time = round(timer() - ts, 2)
-        logger.info(f"downloaded {df.shape[0]} records ({exc_time}s)")
-        self.add_metric(
-            operation="download", name="*", time=exc_time, count=df.shape[0],
-        )
-        return df
+        try:
+            ts = timer()
+            df = await pd.DataFrame.prodstats.from_ihs(
+                entities=entities,
+                api10s=api10s,
+                entity12s=entity12s,
+                path=IHSPath.prod_h,
+                **kwargs,
+            )
+            exc_time = round(timer() - ts, 2)
+            logger.info(f"downloaded {df.shape[0]} records ({exc_time}s)")
+            self.add_metric(
+                operation="download", name="*", time=exc_time, count=df.shape[0],
+            )
+            return df
+        except Exception as e:
+            logger.error(
+                f"Error during download: {entities=} {api10s=} {entity12s=} --{e}"
+            )
+            raise e
 
     async def process(self, df: pd.DataFrame, **kwargs) -> ProdSet:
-        ts = timer()
+        try:
+            ts = timer()
 
-        ps = df.prodstats.calc(**kwargs)
-        exc_time = round(timer() - ts, 2)
+            ps = df.prodstats.calc(**kwargs)
+            exc_time = round(timer() - ts, 2)
 
-        total_count = sum([x.shape[0] for x in list(ps) if x is not None])
-        for name, model, df in ps.items():
-            t = round(df.shape[0] * (exc_time / (total_count or 1)), 2)
-            logger.info(f"processed {df.shape[0]} {name} records ({t}s)")
-            self.add_metric(
-                operation="process", name=name, time=t, count=df.shape[0],
-            )
-        return ps
+            total_count = sum([x.shape[0] for x in list(ps) if x is not None])
+            for name, model, df in ps.items():
+                t = round(df.shape[0] * (exc_time / (total_count or 1)), 2)
+                logger.info(f"processed {df.shape[0]} {name} records ({t}s)")
+                self.add_metric(
+                    operation="process", name=name, time=t, count=df.shape[0],
+                )
+            return ps
+        except Exception as e:
+            api10s = df.prodstats.column_as_set("api10")
+            logger.error(f"Error during persistance: {api10s} -- {e}")
+            raise e
 
     async def _persist(
         self, name: str, model: models.Model, df: pd.DataFrame, **kwargs
     ) -> int:
         ts = timer()
-
-        # if not db.is_bound():
-        #     await db.startup()
 
         count = await model.bulk_upsert(df, **kwargs)
         exc_time = round(timer() - ts, 2)
@@ -108,20 +116,28 @@ class ProdExecutor(BaseExecutor):
         stats_kwargs: Dict = None,
     ) -> int:
 
-        coros = []
-        for name, model, df in ps.items():
-            kwargs = {}
-            if name == "header" and header_kwargs:
-                kwargs = header_kwargs
-            elif name == "monthly" and monthly_kwargs:
-                kwargs = monthly_kwargs
-            elif name == "stats" and stats_kwargs:
-                kwargs = stats_kwargs
+        try:
+            coros = []
+            for name, model, df in ps.items():
+                kwargs = {}
+                if name == "header" and header_kwargs:
+                    kwargs = header_kwargs
+                elif name == "monthly" and monthly_kwargs:
+                    kwargs = monthly_kwargs
+                elif name == "stats" and stats_kwargs:
+                    kwargs = stats_kwargs
 
-            coros.append(
-                self._persist(name, model, df, **{**self.model_kwargs[name], **kwargs})
-            )
-        return sum(await asyncio.gather(*coros))
+                coros.append(
+                    self._persist(
+                        name, model, df, **{**self.model_kwargs[name], **kwargs}
+                    )
+                )
+            return sum(await asyncio.gather(*coros))
+
+        except Exception as e:
+            api10s = ps.header.prodstats.column_as_set("api10")
+            logger.error(f"Error during persistance: {api10s} -- {e}")
+            raise e
 
     async def _run(
         self,
@@ -145,7 +161,7 @@ class ProdExecutor(BaseExecutor):
             logger.error(
                 f"{exec_id} run failed with {entities=} {api10s=} {entity12s=} -- {e}"
             )
-            return 0, None
+            raise e
 
     async def run(
         self,
@@ -154,7 +170,7 @@ class ProdExecutor(BaseExecutor):
         entity12s: Union[str, List[str]] = None,
         batch_size: int = None,  # max number of ids to process together
         return_data: bool = False,
-    ) -> List[Tuple[int, Optional[ProdSet]]]:
+    ) -> Tuple[List[Tuple[int, Optional[ProdSet]]], List[BaseException]]:
 
         param_count = sum(
             [entities is not None, api10s is not None, entity12s is not None]
@@ -191,65 +207,30 @@ class ProdExecutor(BaseExecutor):
 
         logger.info(f"created {len(coros)} coroutines from {len(ids)} {id_type}s")
 
-        # schedule coros in batches according to concurrency limits
-        # results: List[Tuple[int, Optional[ProdSet]]] = []
-        # for chunk in util.chunks(coros, n=concurrency):
-        #     logger.info(f"scheduling {len(chunk)} tasks")
-        #     results.append(await asyncio.gather(*chunk))
+        return exc.split_errors(await asyncio.gather(*coros, return_exceptions=True))
 
-        return await asyncio.gather(*coros)
-
-    def run_sync(self, **kwargs) -> List[Tuple[int, Optional[ProdSet]]]:
+    def run_sync(
+        self, **kwargs
+    ) -> Tuple[List[Tuple[int, Optional[ProdSet]]], List[BaseException]]:
         loop = asyncio.get_event_loop()
-        return loop.run_until_complete(self.run(**kwargs))
+        coro = self.run(**kwargs)
+        return loop.run_until_complete(coro)
 
 
 if __name__ == "__main__":
     import loggers
     import calc.prod  # noqa
+    from db import db  # noqa
 
     loggers.config(level=20)
 
     ids = ["14207C0155111H", "14207C0155258418H"]
     ids = ["14207C0202511H", "14207C0205231H"]
-    ids = [
-        "24207C241961",
-        "24207C242223",
-        "24207C242352",
-        "24207C243689",
-        "24207C243750",
-        "24207C243751",
-        "24207C243821",
-        "24207C244422",
-        "24207C245633",
-        "24207C246017",
-    ]
 
     # if not db.is_bound():
-    #     await db.startup()
+    # await db.startup()
     pexec = ProdExecutor()
     self = pexec
-    pexec.run_sync(entities=ids, batch_size=1)
+    results, errors = pexec.run_sync(entities=ids, batch_size=20, return_data=True)
 
-    # TODO: fractionalize failed batches
-
-# pexec.run_sync(area_name="tx-upton", batch_size=25)
-# print(pexec.metrics)
-
-# import pandas as pd
-# s = pd.Series([str(uuid.uuid4().hex) for x in range(0, 100000)])
-# s[s.duplicated()]
-# s
-
-# area_name = None
-# entities = None
-# api10s = None
-# entity12s = None
-# batch_size = None
-# concurrency = None
-# return_data = False
-
-# entities = ids
-
-# df = await pd.DataFrame.prodstats.from_ihs(path=IHSPath.prod_h, entities=ids)
-# df
+    affected, prodset = results[0]

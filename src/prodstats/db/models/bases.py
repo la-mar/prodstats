@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Any, Dict, List, Union
 
-import pytz
 from geoalchemy2 import Geometry
 from gino.dialects.asyncpg import JSONB
 from sqlalchemy import Column
@@ -14,6 +12,7 @@ import util.jsontools
 from db import db
 from db.mixins import DataFrameMixin
 from util.deco import classproperty
+from util.dt import utcnow
 
 db.JSONB, db.UUID, db.EmailType, db.URLType, db.ChoiceType, db.Geometry = (
     JSONB,
@@ -23,11 +22,6 @@ db.JSONB, db.UUID, db.EmailType, db.URLType, db.ChoiceType, db.Geometry = (
     ChoiceType,
     Geometry,
 )
-
-
-def utcnow():
-    """ Get the current datetime in utc as a datetime object with timezone information """
-    return datetime.now().astimezone(pytz.utc)
 
 
 class Base(db.Model, DataFrameMixin):

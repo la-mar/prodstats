@@ -1,13 +1,15 @@
 import asyncio
-from typing import List, Union
+import itertools
+from typing import Coroutine, Dict, List, Union
 
 from celery.utils.log import get_task_logger
 
 import calc.prod  # noqa
 import config as conf
+import cq.signals  # noqa
+import db.models as models
 import ext.metrics as metrics
 import util
-import util.jsontools
 from collector import IHSClient, IHSPath
 from cq.worker import celery_app
 from executors import ProdExecutor
@@ -39,47 +41,76 @@ def post_heartbeat():
 @celery_app.task
 def calc_prodstats(ids: List[str]):
 
-    logger.warning(f"task id count: {len(ids)}")
+    logger.info(f"task id count: {len(ids)}")
     pexec = ProdExecutor()
-    pexec.run_sync(entities=ids)
+    results, errors = pexec.run_sync(entities=ids)
+    if len(errors) > 0:
+        logger.info(f"task returned {len(errors)} errors: {errors}")
     return len(ids)
 
 
 @celery_app.task
-def calc_all_prodstats(
-    path: Union[IHSPath, str], areas: List[str] = None
-):  # (ids: List[str]):
+def calc_prodstats_for_area(path: Union[IHSPath, str], area: str):
+    max_ids_per_task = conf.CALC_MAX_IDS_PER_TASK
+    loop = asyncio.get_event_loop()
 
-    """
-        get areas
-        for area in areas:
-
-            get ids
-
-            chunk ids into separate tasks
-
-            run_sync in each task
-
-    """
-    logger.warning(f"path: {path}")
     if not isinstance(path, IHSPath):
         path = IHSPath(path)
-    loop = asyncio.get_event_loop()
-    ids = loop.run_until_complete(IHSClient.get_all_ids(path=path, areas=areas))
+
+    ids = loop.run_until_complete(IHSClient.get_ids_by_area(area=area, path=path))
     # ids = ["14207C0202511H", "14207C0205231H"]
 
-    max_ids_per_task = conf.CALC_MAX_IDS_PER_TASK
-    logger.warning(f"creating subtasks from {len(ids)} ids")
+    logger.info(f"creating subtasks from {len(ids)} ids")
     id_count = len(ids)
 
     # chunk ids into blocks of 10
     ids = [[x] for x in list(util.chunks(ids, n=max_ids_per_task))]
-    # ids = [x for x in list(util.chunks(ids, n=max_ids_per_task))]
     task_count = len(ids)
 
     # create a task for each block of ids
     calc_prodstats.chunks(ids, 1).apply_async()
-    # for id in ids:
-    #     calc_prodstats.s(ids=ids).apply_async()
-    # logger.warning(f"results: {util.jsontools.to_string(ids)}")
-    logger.warning(f"calculated prodstats for {id_count} wells in {task_count} tasks")
+
+    async def update_sync_manifest(path: IHSPath):
+        data_type = path.name.replace("_ids", "")
+        obj = await models.Area.get([data_type, area])
+        dt = util.dt.utcnow()
+        await obj.update(last_sync=dt).apply()
+        logger.info(f"Updated area manifest sync time: {data_type} -> {dt}")
+
+    loop.run_until_complete(update_sync_manifest(path))
+    logger.info(f"calculated prodstats for {id_count} wells in {task_count} tasks")
+
+
+@celery_app.task
+def calc_all_prodstats():
+    pass
+
+
+@celery_app.task
+def sync_area_manifest():
+    """ Ensure the local list of areas is up to date """
+
+    loop = asyncio.get_event_loop()
+
+    async def wrapper(path: IHSPath) -> List[Dict]:
+        records: List[Dict] = []
+        if path.name.endswith("ids"):
+            areas = await IHSClient.get_areas(path=path)
+            records = [
+                {"path": path.name.replace("_ids", ""), "area": a} for a in areas
+            ]
+        return records
+
+    coros: List[Coroutine] = []
+    for path in IHSPath.members():
+        if path.name.endswith("ids"):
+            coros.append(wrapper(path))
+
+    results = loop.run_until_complete(asyncio.gather(*coros))
+
+    area_records = list(itertools.chain(*results))
+
+    coro = models.Area.bulk_upsert(area_records, ignore_on_conflict=True)
+    affected = loop.run_until_complete(coro)
+
+    logger.info(f"synchronized manifest: refreshed {affected} areas")

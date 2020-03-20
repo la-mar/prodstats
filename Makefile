@@ -78,3 +78,6 @@ secret-key:
 
 post-from-file:
 	http POST :8000/api/v1/users < tests/data/users.json --follow
+
+create-db:
+	psql -h localhost -d postgres -c "create database well;"

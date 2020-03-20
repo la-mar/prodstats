@@ -8,7 +8,7 @@ class WellBase(Base):
 
 
 class WellHeader(WellBase):
-    __tablename__ = "well"
+    __tablename__ = "wells"
 
     api10 = db.Column(db.String(10), index=True)
     hole_direction = db.Column(db.String(1))
