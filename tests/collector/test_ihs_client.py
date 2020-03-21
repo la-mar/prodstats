@@ -43,7 +43,7 @@ def id_dispatcher():
 
 class TestGetProduction:
     @pytest.mark.parametrize("idname", ["api10s", "entities", "entity12s"])
-    async def test_get_production_wells(self, idname, well_dispatcher):
+    async def test_get_production(self, idname, well_dispatcher):
         ids = ["a", "b", "c"]
 
         kwargs = {
@@ -53,7 +53,7 @@ class TestGetProduction:
             idname: ids,
         }
 
-        result = await IHSClient.get_production_wells(**kwargs)
+        result = await IHSClient.get_production(**kwargs)
         logger.debug(result)
         x = sum([sum(x.values()) for x in result])
         assert x == 38 * len(ids)
@@ -62,11 +62,11 @@ class TestGetProduction:
 
     async def test_no_id_opt(self):
         with pytest.raises(ValueError):
-            await IHSClient.get_production_wells(path=IHSClient.paths.prod_h)
+            await IHSClient.get_production(path=IHSClient.paths.prod_h)
 
     async def test_too_many_id_opts(self):
         with pytest.raises(ValueError):
-            await IHSClient.get_production_wells(
+            await IHSClient.get_production(
                 path=IHSClient.paths.prod_h, api10s=["a"], entity12s=["b"]
             )
 

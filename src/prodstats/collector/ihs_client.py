@@ -31,7 +31,44 @@ class IHSClient(AsyncClient):
         )
 
     @classmethod
-    async def get_production_wells(
+    async def _get(
+        cls,
+        ids: Union[str, List[str]],
+        path: IHSPath,
+        param_name: str,
+        params: Dict = None,
+        timeout: Optional[int] = None,
+        concurrency: int = None,
+        **kwargs,
+    ) -> List[Dict[str, Any]]:
+        responses: List[httpx.Response] = []
+        ids = util.ensure_list(ids)
+        concurrency = concurrency or 50
+
+        params = params or {}
+
+        async with cls(**kwargs) as client:
+            coros: List[Coroutine] = []
+            for id in ids:
+                coro = client.get(
+                    path.value, params={param_name: id, **params}, timeout=timeout,
+                )
+                coros.append(coro)
+
+            for idx, chunk in enumerate(util.chunks(coros, concurrency)):
+                responses += await asyncio.gather(*chunk)
+
+        data: List[Dict[str, Any]] = []
+
+        for r in responses:
+            json: Dict = r.json()  # type: ignore
+            if "data" in json.keys():
+                data += json["data"]
+
+        return data
+
+    @classmethod
+    async def get_production(
         cls,
         path: IHSPath,
         params: Dict = None,
@@ -39,7 +76,7 @@ class IHSClient(AsyncClient):
         api10s: Union[str, List[str]] = None,
         entity12s: Union[str, List[str]] = None,
         timeout: Optional[int] = None,
-        concurrency: int = 50,
+        concurrency: int = None,
         **kwargs,
     ) -> List[Dict[str, Any]]:
         """Fetch production records from the internal IHS service.
@@ -78,30 +115,49 @@ class IHSClient(AsyncClient):
             ids = entity12s
             param_name = "entity12"
 
-        responses: List[httpx.Response] = []
-        ids = util.ensure_list(ids)
+        return await cls._get(
+            ids=ids,
+            path=path,
+            param_name=param_name,
+            params=params,
+            timeout=timeout,
+            concurrency=concurrency,
+            **kwargs,
+        )
 
-        params = params or {}
+    @classmethod
+    async def get_wells(
+        cls,
+        path: IHSPath,
+        params: Dict = None,
+        api14s: Union[str, List[str]] = None,
+        api10s: Union[str, List[str]] = None,
+        timeout: Optional[int] = None,
+        concurrency: int = 50,
+        **kwargs,
+    ) -> List[Dict[str, Any]]:
+        optcount = sum([api14s is not None, api10s is not None])
+        if optcount < 1:
+            raise ValueError("One of ['api14s', 'api10s'] must be specified")
+        if optcount > 1:
+            raise ValueError("Only one of ['api14s', 'api10s'] can be specified")
 
-        async with cls(**kwargs) as client:
-            coros: List[Coroutine] = []
-            for id in ids:
-                coro = client.get(
-                    path.value, params={param_name: id, **params}, timeout=timeout,
-                )
-                coros.append(coro)
+        if api14s is not None:
+            ids = api14s
+            param_name = "api14"
+        elif api10s is not None:
+            ids = api10s
+            param_name = "api10"
 
-            for idx, chunk in enumerate(util.chunks(coros, concurrency)):
-                responses += await asyncio.gather(*chunk)
-
-        data: List[Dict[str, Any]] = []
-
-        for r in responses:
-            json: Dict = r.json()  # type: ignore
-            if "data" in json.keys():
-                data += json["data"]
-
-        return data
+        return await cls._get(
+            ids=ids,
+            path=path,
+            param_name=param_name,
+            params=params,
+            timeout=timeout,
+            concurrency=concurrency,
+            **kwargs,
+        )
 
     @classmethod
     async def get_ids_by_area(cls, path: IHSPath, area: str, **kwargs) -> List[str]:
@@ -145,9 +201,8 @@ if __name__ == "__main__":
     loggers.config()
 
     async def async_wrapper():
-        ids = ["14207C017575", "14207C020251"]
-        # ids = ["14207C017575"]
-        ids = [
+        prod_ids = ["14207C017575", "14207C020251"]
+        prod_ids = [
             "14207C0155111H",
             "14207C0155258418H",
             "14207C0155258421H",
@@ -162,26 +217,33 @@ if __name__ == "__main__":
             "14207C020251",
         ]
 
-        # ids = await IHSClient.get_ids("tx-upton", path=IHSPath.prod_h_ids)
-        # ids = random.choices(ids, k=1)
-        await IHSClient.get_production_wells(
-            entity12s=ids, path=IHSPath.prod_h, params={"related": False}
+        well_ids = [
+            "42461409160000",
+            "42383406370000",
+            "42461412100000",
+            "42461412090000",
+            "42461411750000",
+            "42461411740000",
+            "42461411730000",
+            "42461411720000",
+            "42461411600000",
+            "42461411280000",
+            "42461411270000",
+            "42461411260000",
+            "42383406650000",
+            "42383406640000",
+            "42383406400000",
+            "42383406390000",
+            "42383406380000",
+            "42461412110000",
+            "42383402790000",
+        ]
+
+        await IHSClient.get_production(
+            entities=prod_ids, path=IHSPath.prod_h, params={"related": False}
         )
 
-        await IHSClient.get_areas(path=IHSPath.prod_h_ids)
+        await IHSClient.get_areas(path=IHSPath.well_h_ids)
+        await IHSClient.get_ids_by_area(path=IHSPath.well_h_ids, area="tx-upton")
 
-        # TODO: add indexes to entity12
-
-        # async for r in IHSClient.iter_get(coros):
-        #     print(r)
-        # pass  # work on doc
-
-
-# coros = [client.get(
-#                         path.value,
-#                         params={
-#                             "id": ",".join(util.ensure_list(id)),
-#                             **{**(params or {})},
-#                         },
-#                         timeout=timeout,
-#                     ) for x in range(0, 10)]
+        await IHSClient.get_wells(api14s=well_ids, path=IHSPath.well_h_ids)

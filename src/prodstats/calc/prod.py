@@ -83,7 +83,7 @@ class ProdStats:
             pd.DataFrame -- DataFrame of monthly production for the given ids
         """
 
-        data = await IHSClient.get_production_wells(
+        data = await IHSClient.get_production(
             entities=entities, api10s=api10s, entity12s=entity12s, path=path, **kwargs
         )
         wellset = ProductionWellSet(wells=data)
@@ -606,3 +606,28 @@ class ProdStats:
         if column_name in {*df.columns, *df.index.names} and df.shape[0] > 0:
             elements = {*df.reset_index()[column_name].values.tolist()}
         return elements
+
+
+# if __name__ == "__main__":
+
+#     async def wrapper():
+#         ids = ["14207C017575", "14207C020251"]
+#         # ids = ["14207C017575"]
+#         ids = [
+#             "14207C0155111H",
+#             "14207C0155258418H",
+#             "14207C0155258421H",
+#             "14207C01552617H",
+#             "14207C015535211H",
+#             "14207C015535212H",
+#             "14207C0155368001H",
+#             "14207C0155368002H",
+#             "14207C01558022H",
+#             "14207C0155809H",
+#             "14207C017575",
+#             "14207C020251",
+#         ]
+
+#         wells = await pd.DataFrame.prodstats.from_ihs(entities=ids, path=IHSPath.prod_h)
+
+#         wells.columns.tolist()
