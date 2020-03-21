@@ -1,6 +1,6 @@
 import asyncio
 import itertools
-from typing import Coroutine, Dict, List, Union
+from typing import Coroutine, Dict, List, Tuple, Union
 
 from celery.utils.log import get_task_logger
 
@@ -10,7 +10,8 @@ import cq.signals  # noqa
 import db.models as models
 import ext.metrics as metrics
 import util
-from collector import IHSClient, IHSPath
+from collector import IHSClient
+from const import EntityType, HoleDirection, IHSPath
 from cq.worker import celery_app
 from executors import ProdExecutor
 
@@ -39,7 +40,7 @@ def post_heartbeat():
 
 
 @celery_app.task
-def calc_prodstats(ids: List[str]):
+def calc_prodstats_for_ids(ids: List[str]):
 
     logger.info(f"task id count: {len(ids)}")
     pexec = ProdExecutor()
@@ -57,8 +58,8 @@ def calc_prodstats_for_area(path: Union[IHSPath, str], area: str):
     if not isinstance(path, IHSPath):
         path = IHSPath(path)
 
-    ids = loop.run_until_complete(IHSClient.get_ids_by_area(area=area, path=path))
-    # ids = ["14207C0202511H", "14207C0205231H"]
+    ids = loop.run_until_complete(IHSClient.get_ids_by_area(path=path, area=area))
+    ids = ["14207C0202511H", "14207C0205231H"]
 
     logger.info(f"creating subtasks from {len(ids)} ids")
     id_count = len(ids)
@@ -68,7 +69,7 @@ def calc_prodstats_for_area(path: Union[IHSPath, str], area: str):
     task_count = len(ids)
 
     # create a task for each block of ids
-    calc_prodstats.chunks(ids, 1).apply_async()
+    calc_prodstats_for_ids.chunks(ids, 1).apply_async()
 
     async def update_sync_manifest(path: IHSPath):
         data_type = path.name.replace("_ids", "")
@@ -82,8 +83,22 @@ def calc_prodstats_for_area(path: Union[IHSPath, str], area: str):
 
 
 @celery_app.task
-def calc_all_prodstats():
-    pass
+def calc_prodstats_for_hole_direction(hole_dir: HoleDirection):
+    loop = asyncio.get_event_loop()
+
+    async def get_areas(hole_dir: HoleDirection) -> List[Tuple]:
+
+        areas = await models.Area.query.where(
+            models.Area.hole_direction == hole_dir.value
+        ).gino.all()
+
+        params: List[Tuple] = []
+        for area in areas:
+            params.append((area.path, area.area))
+        return params
+
+    params = loop.run_until_complete(get_areas(hole_dir))
+    calc_prodstats_for_area.chunks(params, 2).apply_async()
 
 
 @celery_app.task
@@ -96,8 +111,15 @@ def sync_area_manifest():
         records: List[Dict] = []
         if path.name.endswith("ids"):
             areas = await IHSClient.get_areas(path=path)
+            etype, hole_dir = path.name.replace("_ids", "").split("_")
             records = [
-                {"path": path.name.replace("_ids", ""), "area": a} for a in areas
+                {
+                    "path": path,
+                    "area": a,
+                    "type": EntityType(etype),
+                    "hole_direction": HoleDirection(hole_dir),
+                }
+                for a in areas
             ]
         return records
 
@@ -114,3 +136,11 @@ def sync_area_manifest():
     affected = loop.run_until_complete(coro)
 
     logger.info(f"synchronized manifest: refreshed {affected} areas")
+
+
+if __name__ == "__main__":
+
+    async def wrapper():
+        from db import db
+
+        await db.startup()

@@ -10,7 +10,7 @@ import db.models as models
 import exc
 import util
 from calc.sets import ProdSet
-from collector import IHSPath
+from const import IHSPath
 
 logger = logging.getLogger(__name__)
 

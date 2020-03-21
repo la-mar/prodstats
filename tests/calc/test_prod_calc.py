@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from calc.prod import ProdStatRange, _validate_required_columns
-from collector import IHSPath
+from const import IHSPath
 from tests.utils import MockAsyncDispatch
 
 logger = logging.getLogger(__name__)

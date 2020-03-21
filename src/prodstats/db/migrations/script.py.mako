@@ -9,6 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 import sqlalchemy_utils
 import geoalchemy2
+import const
 ${imports if imports else ""}
 
 # revision identifiers, used by Alembic.

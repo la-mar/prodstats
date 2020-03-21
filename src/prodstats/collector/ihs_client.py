@@ -8,27 +8,11 @@ import httpx
 import config as conf
 import util
 from collector import AsyncClient
-from util.enums import Enum
+from const import Enum, IHSPath
 
 logger = logging.getLogger(__name__)
 
 __all__ = ["IHSPath", "IHSClient"]
-
-
-class IHSPath(str, Enum):
-    prod_h: str = "prod/h"
-    prod_v: str = "prod/v"
-    well_h: str = "well/h"
-    well_v: str = "well/v"
-
-    prod_h_ids: str = "prod/h/ids"
-    prod_v_ids: str = "prod/v/ids"
-    well_h_ids: str = "well/h/ids"
-    well_v_ids: str = "well/v/ids"
-
-    # def __repr__(self):
-    #     d = {k: v for k, v in IHSPaths.__dict__.items() if not k.startswith("_")}
-    #     return make_repr(d)
 
 
 class IHSClient(AsyncClient):

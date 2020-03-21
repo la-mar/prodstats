@@ -1,17 +1,20 @@
-"""empty message
+"""first major
 
-Revision ID: 9118989141b4
+Revision ID: 03d10d7b15e7
 Revises: 244869cf6945
-Create Date: 2020-03-20 15:42:51.617243
+Create Date: 2020-03-20 18:48:38.264950
 
 """
 import geoalchemy2
 import sqlalchemy as sa
+import sqlalchemy_utils
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
+import const
+
 # revision identifiers, used by Alembic.
-revision = "9118989141b4"
+revision = "03d10d7b15e7"
 down_revision = "244869cf6945"
 branch_labels = None
 depends_on = None
@@ -33,10 +36,24 @@ def upgrade():
             server_default=sa.text("now()"),
             nullable=True,
         ),
-        sa.Column("path", sa.String(length=25), nullable=False),
         sa.Column("area", sa.String(length=25), nullable=False),
+        sa.Column(
+            "type",
+            sqlalchemy_utils.types.choice.ChoiceType(const.EntityType),
+            nullable=False,
+        ),
+        sa.Column(
+            "hole_direction",
+            sqlalchemy_utils.types.choice.ChoiceType(const.HoleDirection),
+            nullable=False,
+        ),
+        sa.Column(
+            "path",
+            sqlalchemy_utils.types.choice.ChoiceType(const.IHSPath),
+            nullable=True,
+        ),
         sa.Column("last_sync", sa.DateTime(timezone=True), nullable=True),
-        sa.PrimaryKeyConstraint("path", "area"),
+        sa.PrimaryKeyConstraint("area", "type", "hole_direction"),
     )
     op.create_table(
         "depths",
