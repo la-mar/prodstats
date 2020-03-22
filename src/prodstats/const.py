@@ -7,6 +7,13 @@ MCF_TO_BBL_FACTOR: int = 6
 # ---Enums-------------------------------------------------------------------- #
 
 
+class ProdStatRange(str, Enum):
+    FIRST = "first"
+    LAST = "last"
+    PEAKNORM = "peaknorm"
+    ALL = "all"
+
+
 class HoleDirection(str, Enum):
     h = "h"
     v = "v"
@@ -27,3 +34,8 @@ class IHSPath(str, Enum):
     prod_v_ids = "prod/v/ids"
     well_h_ids = "well/h/ids"
     well_v_ids = "well/v/ids"
+
+    prod_h_geoms = "prod/h/geoms"
+    prod_v_geoms = "prod/v/geoms"
+    well_h_geoms = "well/h/geoms"
+    well_v_geoms = "well/v/geoms"

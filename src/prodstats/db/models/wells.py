@@ -15,35 +15,32 @@ class WellHeader(WellBase):
     status = db.Column(db.String(50))
     is_producing = db.Column(db.Boolean())
     operator = db.Column(db.String(), index=True)
-    # operator_alias = db.Column(db.String(50), index=True)
     hist_operator = db.Column(db.String(), index=True)
-    # hist_operator_alias = db.Column(db.String(50), index=True)
-    primary_product = db.Column(db.String(10))
     perfll = db.Column(db.Integer())
     lateral_length = db.Column(db.Integer())
-    frac_bbl = db.Column(db.Integer())
-    frac_lb = db.Column(db.Integer())
-    frac_bbl_ft = db.Column(db.Integer())
-    frac_lb_ft = db.Column(db.Integer())
-    frac_gen_int = db.Column(db.Integer())
-    frac_gen_str = db.Column(db.String())
     comp_date = db.Column(db.Date())
     spud_date = db.Column(db.Date())
     permit_date = db.Column(db.Date())
-    abandoned_date = db.Column(db.Date())  # abnd_date
     rig_release_date = db.Column(db.Date())  # rr_date
     last_activity_date = db.Column(db.Date())
     basin = db.Column(db.String(50), index=True)  # basin
     state = db.Column(db.String(50))  # state_name
     county = db.Column(db.String(50), index=True)  # county_name
-    shllon = db.Column(db.Float())  # long_shl
-    shllat = db.Column(db.Float())  # lat_shl
-    bhllon = db.Column(db.Float())  # long_bhl
-    bhllat = db.Column(db.Float())  # lat_bhl
     basin_holedir_isprod_idx = db.Index(
         "well_basin_holedir_isprod_idx", "basin", "hole_direction", "is_producing"
     )
     basin_status_idx = db.Index("well_basin_status_idx", "basin", "status")
+
+
+class FracParameters(WellBase):
+    __tablename__ = "frac_parameters"
+
+    fluid_bbl = db.Column(db.Integer())
+    proppant_lb = db.Column(db.Integer())
+    fluid_bbl_ft = db.Column(db.Integer())
+    proppant_lb_ft = db.Column(db.Integer())
+    gen_int = db.Column(db.Integer())
+    gen_str = db.Column(db.String(10))
 
 
 class WellStat(WellBase):
@@ -103,6 +100,10 @@ class WellLink(WellBase):
 class WellShape(WellBase):
     __tablename__ = "shapes"
 
+    shllon = db.Column(db.Float())  # long_shl
+    shllat = db.Column(db.Float())  # lat_shl
+    bhllon = db.Column(db.Float())  # long_bhl
+    bhllat = db.Column(db.Float())  # lat_bhl
     shl = db.Column(db.Geometry("POINT", srid=4326))
     kop = db.Column(db.Geometry("POINT", srid=4326))
     heel = db.Column(db.Geometry("POINT", srid=4326))
@@ -124,3 +125,33 @@ class WellShape(WellBase):
     stick_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
     bent_stick_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
     lateral_only_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
+
+
+class IPTest(WellBase):
+    test_number = db.Column(db.Integer(), primary_key=True)
+    test_date = db.Column(db.Date())
+    type_code = db.Column(db.String(10))
+    test_method = db.Column(db.String())
+    completion = db.Column(db.Integer())
+    oil = db.Column(db.Integer())
+    oil_uom = db.Column(db.String(10))
+    gas = db.Column(db.Integer())
+    gas_uom = db.Column(db.String(10))
+    water = db.Column(db.Integer())
+    water_uom = db.Column(db.String(10))
+    choke = db.Column(db.String(25))
+    depth_top = db.Column(db.Integer())
+    depth_top_uom = db.Column(db.String(10))
+    depth_base = db.Column(db.Integer())
+    depth_base_uom = db.Column(db.String(10))
+    sulfur = db.Column(db.Boolean())
+    oil_gravity = db.Column(db.Float())
+    oil_gravity_uom = db.Column(db.String(10))
+    gor = db.Column(db.Integer())
+    gor_uom = db.Column(db.String(10))
+    perf_upper = db.Column(db.Integer())
+    perf_upper_uom = db.Column(db.String(10))
+    perf_lower = db.Column(db.Integer())
+    perf_lower_uom = db.Column(db.String(10))
+    perfll = db.Column(db.Integer())
+    perfll_uom = db.Column(db.String(10))

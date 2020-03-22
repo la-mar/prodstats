@@ -6,6 +6,9 @@ environ["DATABASE_HOST"] = "localhost"
 environ["DATABASE_NAME"] = "circle_test"
 environ["LOG_LEVEL"] = "10"
 environ["LOG_HANDLER"] = "stream"
+environ["CELERY_BROKER_URL"] = "memory://"
+environ["CELERY_RESULT_BACKEND"] = "redis://"
+environ["CELERY_TASK_ALWAYS_EAGER"] = "True"
 
 import random
 import string
@@ -80,13 +83,28 @@ def json_fixture():
 
 
 @pytest.fixture(scope="session")
-def ihs_producing_wells(json_fixture):
+def ihs_prod(json_fixture):
     yield json_fixture("ihs_prod.json")
 
 
 @pytest.fixture
-def prod_df(ihs_producing_wells):
-    yield ProductionWellSet(wells=ihs_producing_wells).df().copy(deep=True)
+def prod_df(ihs_prod):
+    yield ProductionWellSet(wells=ihs_prod).df().copy(deep=True)
+
+
+@pytest.fixture(scope="session")
+def ihs_wells(json_fixture):
+    yield json_fixture("ihs_wells.json")
+
+
+@pytest.fixture
+def well_df(ihs_wells):
+    yield ProductionWellSet(wells=ihs_wells).df().copy(deep=True)
+
+
+@pytest.fixture(scope="session")
+def ihs_well_shapes(json_fixture):
+    yield json_fixture("ihs_well_shapes.json")
 
 
 @pytest.fixture

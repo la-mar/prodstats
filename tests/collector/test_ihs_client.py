@@ -71,6 +71,36 @@ class TestGetProduction:
             )
 
 
+class TestGetWells:
+    @pytest.mark.parametrize("idname", ["api10s", "api14s"])
+    async def test_get_wells(self, idname, well_dispatcher):
+        ids = ["a", "b", "c"]
+
+        kwargs = {
+            "path": IHSClient.paths.prod_h,
+            "params": {"related": False},
+            "dispatch": well_dispatcher,
+            idname: ids,
+        }
+
+        result = await IHSClient.get_wells(**kwargs)
+        logger.debug(result)
+        x = sum([sum(x.values()) for x in result])
+        assert x == 38 * len(ids)
+        assert isinstance(result, list)
+        assert isinstance(result[0], dict)
+
+    async def test_no_id_opt(self):
+        with pytest.raises(ValueError):
+            await IHSClient.get_wells(path=IHSClient.paths.prod_h)
+
+    async def test_too_many_id_opts(self):
+        with pytest.raises(ValueError):
+            await IHSClient.get_wells(
+                path=IHSClient.paths.prod_h, api10s=["a"], api14s=["b"]
+            )
+
+
 class TestGetOther:
     async def test_get_ids_by_area(self, id_dispatcher):
 

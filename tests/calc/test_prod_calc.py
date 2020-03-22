@@ -4,16 +4,16 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from calc.prod import ProdStatRange, _validate_required_columns
-from const import IHSPath
+from calc.prod import _validate_required_columns
+from const import IHSPath, ProdStatRange
 from tests.utils import MockAsyncDispatch
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def prod_dispatcher(ihs_producing_wells):
-    yield MockAsyncDispatch({"data": ihs_producing_wells})
+def prod_dispatcher(ihs_prod):
+    yield MockAsyncDispatch({"data": ihs_prod})
 
 
 def test_validate_required_columns_raise():
@@ -545,8 +545,8 @@ class TestProdStats:
 #     from util.jsontools import load_json
 
 #     @pytest.fixture
-#     def prod_df(ihs_producing_wells):
-#         yield ProductionWellSet(wells=ihs_producing_wells).df()
+#     def prod_df(ihs_prod):
+#         yield ProductionWellSet(wells=ihs_prod).df()
 
-#     ihs_producing_wells = load_json(f"tests/fixtures/ihs_prod.json")
-#     prod_df: pd.DataFrame = next(prod_df.__wrapped__(ihs_producing_wells))
+#     ihs_prod = load_json(f"tests/fixtures/ihs_prod.json")
+#     prod_df: pd.DataFrame = next(prod_df.__wrapped__(ihs_prod))

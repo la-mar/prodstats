@@ -44,7 +44,7 @@ class ProductionWell(ProdBase):
     products: Optional[str]
     production: List[ProductionRecord]
 
-    def records(self,) -> List[Dict[str, Any]]:
+    def records(self) -> List[Dict[str, Any]]:
         """ Return monthly production records with all other properties of the model
         as additional attributes on each record """
         # TODO: add params to toggle which features are included/excluded

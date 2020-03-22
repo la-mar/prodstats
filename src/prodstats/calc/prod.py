@@ -9,21 +9,13 @@ import config as conf
 import const
 from calc.sets import ProdSet
 from collector import IHSClient, IHSPath
+from const import ProdStatRange
 from schemas import ProductionWellSet
 from util import hf_number
-from util.enums import Enum
 
 logger = logging.getLogger(__name__)
 
 PandasObject = Union[pd.DataFrame, pd.Series]
-
-
-class ProdStatRange(str, Enum):
-    FIRST = "first"
-    LAST = "last"
-    PEAKNORM = "peaknorm"
-    ALL = "all"
-
 
 CALC_MONTHS: List[Optional[int]] = [1, 3, 6, 12, 18, 24]
 CALC_NORM_VALUES = [
