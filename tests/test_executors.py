@@ -16,6 +16,18 @@ def well_dispatcher(ihs_prod):
     yield MockAsyncDispatch({"data": ihs_prod})
 
 
+@pytest.fixture
+def prodstat_opts():
+    norm_opts = [(None, None), (1000, "1k")]
+    yield pd.DataFrame.prodstats.generate_option_sets(
+        months=[1, 6],
+        norm_values=norm_opts,
+        range_names=[ProdStatRange.PEAKNORM, ProdStatRange.ALL],
+        agg_types=["sum"],
+        include_zeroes=[True],
+    )
+
+
 class TestBaseExecutor:
     def test_executor_base(self):
         bexec = ex.BaseExecutor()
@@ -53,16 +65,8 @@ class TestProdExecutor:
         with pytest.raises(Exception):
             await pexec.download(entities=["a", "b", "c"])
 
-    async def test_process(self, prod_df):
+    async def test_process(self, prod_df, prodstat_opts):
         pexec = ex.ProdExecutor()
-        norm_opts = [(None, None), (1000, "1k")]
-        prodstat_opts = pd.DataFrame.prodstats.generate_option_sets(
-            months=[1, 6],
-            norm_values=norm_opts,
-            range_names=[ProdStatRange.PEAKNORM, ProdStatRange.ALL],
-            agg_types=["sum"],
-            include_zeroes=[True],
-        )
 
         ps = await pexec.process(
             prod_df,
@@ -88,16 +92,8 @@ class TestProdExecutor:
                 prodstat_option_sets=[None],
             )
 
-    async def test_persist(self, prod_df, bind):
+    async def test_persist(self, prod_df, bind, prodstat_opts):
         pexec = ex.ProdExecutor()
-        norm_opts = [(None, None), (1000, "1k")]
-        prodstat_opts = pd.DataFrame.prodstats.generate_option_sets(
-            months=[1, 6],
-            norm_values=norm_opts,
-            range_names=[ProdStatRange.PEAKNORM, ProdStatRange.ALL],
-            agg_types=["sum"],
-            include_zeroes=[True],
-        )
 
         ps = await pexec.process(
             prod_df,
@@ -106,13 +102,56 @@ class TestProdExecutor:
             norm_option_sets=[(1000, "1k")],
             prodstat_option_sets=prodstat_opts,
         )
-
-        actual = await pexec.persist(ps)
+        kwargs = {
+            "header_kwargs": {"batch_size": 1000},
+            "monthly_kwargs": {"batch_size": 1000},
+            "stats_kwargs": {"batch_size": 1000},
+        }
+        actual = await pexec.persist(ps, **kwargs)
         expected = ps.header.shape[0] + ps.monthly.shape[0] + ps.stats.shape[0]
         assert expected == actual
 
     @pytest.mark.parametrize("idname", ["api10s", "entities", "entity12s"])
-    async def run(self, well_dispatcher, bind, idname):
-        pexec = ex.ProdExecutor()
+    async def test_run(self, well_dispatcher, bind, idname, prodstat_opts):
         kwargs = {idname: ["a", "b", "c"]}
+        download_kwargs = {"dispatch": well_dispatcher}
+        process_kwargs = {
+            "monthly_prod_columns": ["oil"],
+            "prodstat_columns": ["oil"],
+            "norm_option_sets": [(1000, "1k")],
+            "prodstat_option_sets": prodstat_opts,
+        }
+        pexec = ex.ProdExecutor(
+            download_kwargs=download_kwargs, process_kwargs=process_kwargs
+        )
         await pexec.run(**kwargs)
+
+    async def test_run_too_many_args(self):
+        pexec = ex.ProdExecutor()
+        with pytest.raises(ValueError):
+            await pexec.run(api10s=["a"], entities=["b"])
+
+    async def test_run_too_few_args(self):
+        pexec = ex.ProdExecutor()
+        with pytest.raises(ValueError):
+            await pexec.run()
+
+    async def test_run_catch_emtpy_list_args(self):
+        pexec = ex.ProdExecutor()
+        with pytest.raises(ValueError):
+            await pexec.run(entities=[])
+
+    async def test_run_sync(self, well_dispatcher, bind, prodstat_opts):
+        kwargs = {"entities": ["a", "b", "c"]}
+        download_kwargs = {"dispatch": well_dispatcher}
+        process_kwargs = {
+            "monthly_prod_columns": ["oil"],
+            "prodstat_columns": ["oil"],
+            "norm_option_sets": [(1000, "1k")],
+            "prodstat_option_sets": prodstat_opts,
+        }
+        pexec = ex.ProdExecutor(
+            download_kwargs=download_kwargs, process_kwargs=process_kwargs
+        )
+        with pytest.raises(Exception):
+            pexec.run_sync(**kwargs)

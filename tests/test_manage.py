@@ -7,10 +7,10 @@ import pytest  # noqa
 from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
-from tests.utils import get_open_port
 
 import manage
 from db import db
+from tests.utils import get_open_port
 from util.context import working_directory
 
 logger = logging.getLogger(__name__)
@@ -74,6 +74,23 @@ class TestCLISlow:
         captured = capfd.readouterr()
         logger.info(captured)
         assert "Uvicorn running" in captured.err
+
+    def test_run_cron(self, capfd):
+        manage.cron()
+        captured = capfd.readouterr()
+        pid = int(captured.out.split("\n")[0])
+        autokill_pid(pid, delay=5)
+        captured = capfd.readouterr()
+        assert "beat: Starting..." in captured.err
+
+    def test_run_worker(self, capfd):
+        manage.worker()
+        captured = capfd.readouterr()
+        pid = int(captured.out.split("\n")[0])
+        autokill_pid(pid)
+        captured = capfd.readouterr()
+        logger.warning(captured)
+        assert "Connected to memory://" in captured.err
 
     def test_run_cli(self, capfd):
         autokill_subprocess("prodstats", delay=3)

@@ -2,11 +2,11 @@ import logging
 
 import pytest
 from sqlalchemy import String
-from tests.utils import rand_str
 
 from db.models import ProdHeader as SinglePKModel
 from db.models import ProdStat as Model
 from db.models.bases import Base
+from tests.utils import rand_str
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +28,9 @@ class TestModel:
 
     def test_base_repr(self):
         repr(Base)
+
+    def test_model_name(self):
+        assert Model.__model_name__ == "db.models.prod.ProdStat"
 
 
 class TestPrimaryKeyProxy:

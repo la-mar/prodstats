@@ -38,6 +38,8 @@ class ProdExecutor(BaseExecutor):
         header_kwargs: Dict = None,
         monthly_kwargs: Dict = None,
         stats_kwargs: Dict = None,
+        download_kwargs: Dict = None,
+        process_kwargs: Dict = None,
     ):
         super().__init__()
         self.model_kwargs = {
@@ -45,6 +47,8 @@ class ProdExecutor(BaseExecutor):
             "monthly": {**(monthly_kwargs or {})},
             "stats": {"batch_size": 1000, **(stats_kwargs or {})},
         }
+        self.download_kwargs = download_kwargs or {}
+        self.process_kwargs = process_kwargs or {}
 
     async def download(
         self,
@@ -54,6 +58,7 @@ class ProdExecutor(BaseExecutor):
         create_index: bool = True,
         **kwargs,
     ) -> pd.DataFrame:
+        kwargs = {**self.download_kwargs, **kwargs}
         try:
             ts = timer()
             df = await pd.DataFrame.prodstats.from_ihs(
@@ -76,6 +81,7 @@ class ProdExecutor(BaseExecutor):
             raise e
 
     async def process(self, df: pd.DataFrame, **kwargs) -> ProdSet:
+        kwargs = {**self.process_kwargs, **kwargs}
         try:
             ts = timer()
 

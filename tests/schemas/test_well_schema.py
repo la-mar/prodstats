@@ -101,6 +101,19 @@ class TestWellRecord:
         expected = {*obj.__fields__.keys()}
         assert expected == actual
 
+    def test_convert_to_record(self, ihs_wells):
+        data = ihs_wells[0]
+        obj = sch.WellRecord(**data)
+        record = obj.record()
+        fields = {
+            *sch.WellDates().__fields__.keys(),
+            *sch.WellElevations().__fields__.keys(),
+            *sch.FracParams.__fields__.keys(),
+        }
+        for field in fields:
+            assert field in record.keys()
+        assert "ip" not in record.keys()
+
 
 class TestIPTest:
     def test_aliases(self, ihs_wells):

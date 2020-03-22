@@ -176,8 +176,8 @@ class CeleryConfig:
     beat_scheduler = "redbeat.RedBeatScheduler"
 
     # redbeat
-    redbeat_redis_url = broker_url
-    redbeat_key_prefix = project
+    redbeat_redis_url: str = conf("PRODSTATS_BROKER_URL", cast=str)
+    redbeat_key_prefix: str = project
 
     # task
     task_always_eager = conf("CELERY_TASK_ALWAYS_EAGER", cast=bool, default=False)

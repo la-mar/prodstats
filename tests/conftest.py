@@ -5,10 +5,14 @@ environ["TESTING"] = "True"
 environ["DATABASE_HOST"] = "localhost"
 environ["DATABASE_NAME"] = "circle_test"
 environ["LOG_LEVEL"] = "10"
+environ["CELERY_LOG_LEVEL"] = "10"
 environ["LOG_HANDLER"] = "stream"
 environ["CELERY_BROKER_URL"] = "memory://"
 environ["CELERY_RESULT_BACKEND"] = "redis://"
-environ["CELERY_TASK_ALWAYS_EAGER"] = "True"
+environ["PRODSTATS_CRON_URL"] = "redis://"
+# environ["CELERY_TASK_ALWAYS_EAGER"] = "True"
+environ["DATABASE_POOL_SIZE_MIN"] = "5"
+environ["DATABASE_POOL_SIZE_MAX"] = "10"
 
 import random
 import string
@@ -29,6 +33,16 @@ from util.jsontools import load_json
 from schemas import ProductionWellSet
 
 ECHO = False
+
+
+@pytest.fixture(scope="session")
+def celery_config():
+    return config.CeleryConfig.items()
+
+
+@pytest.fixture(scope="session")
+def celery_worker_parameters():
+    return config.CeleryConfig.items()
 
 
 @pytest.fixture(scope="session")
