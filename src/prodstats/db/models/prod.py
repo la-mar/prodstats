@@ -27,7 +27,8 @@ class ProdHeader(Base):
     boe_pdp_last3mo_per30Kbbl = db.Column(db.Integer())
     products = db.Column(db.String())
     provider = db.Column(db.String())
-    provider_last_update_at = db.Column(db.DateTime())
+    provider_last_update_at = db.Column(db.DateTime(timezone=True))
+    related_well_count = db.Column(db.Integer())
     related_wells = db.Column(db.JSONB(), nullable=False, server_default="[]")
     comments = db.Column(db.JSONB(), nullable=False, server_default="[]")
 

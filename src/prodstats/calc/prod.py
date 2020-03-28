@@ -12,13 +12,14 @@ from collector import IHSClient, IHSPath
 from const import ProdStatRange
 from schemas import ProductionWellSet
 from util import hf_number
+from util.pd import validate_required_columns
+from util.types import PandasObject
 
 logger = logging.getLogger(__name__)
 
-PandasObject = Union[pd.DataFrame, pd.Series]
 
 CALC_MONTHS: List[Optional[int]] = [1, 3, 6, 12, 18, 24]
-CALC_NORM_VALUES = [
+CALC_NORM_VALUES = [  # change to List[int] now that the label can be derived
     (None, None),
     (1000, "1k"),
     (3000, "3k"),
@@ -30,16 +31,6 @@ CALC_RANGES = ProdStatRange.members()
 CALC_AGG_TYPES = ["sum", "mean"]
 CALC_INCLUDE_ZEROES = [True, False]
 CALC_PROD_COLUMNS: List[str] = ["oil", "gas", "water", "boe"]
-
-
-def _validate_required_columns(required: List[str], columns: List[str]):
-    missing = []
-    for x in required:
-        if x not in columns:
-            missing.append(x)
-
-    if len(missing) > 0:
-        raise KeyError(f"Missing columns: {missing}")
 
 
 @pd.api.extensions.register_dataframe_accessor("prodstats")
@@ -64,12 +55,15 @@ class ProdStats:
         """Fetch production records from the internal IHS service.
 
         Arguments:
-            id {Union[str, List[str]]} -- can be a single or list of producing entities or api10s
+            path {IHSPath} -- url resource bath (i.e. IHSPath.prod_h)
 
         Keyword Arguments:
-            params {Dict} -- additional params to pass to client.get() (default: None)
-            resource_path {str} -- url resource bath (default: "prod/h")
-            timeout {int} -- optional timeout period for production requests
+            entities {Union[str, List[str]]} -- can be a single or list of producing entities
+            api10s {Union[str, List[str]]} -- can be a single or list of API10 numbers
+            entity12s {Union[str, List[str]]} -- can be a single or list of 12-digit
+                producing entity numbers
+            create_index {bool} -- attempt to return the dataframe with the default
+                index applied [api10, prod_date] (default: True)
 
         Returns:
             pd.DataFrame -- DataFrame of monthly production for the given ids
@@ -112,10 +106,10 @@ class ProdStats:
             (e.g. removed records containing zero/na) """
 
         monthly = self._obj
-        _validate_required_columns(["api10", "prod_date"], monthly.index.names)
+        validate_required_columns(["api10", "prod_date"], monthly.index.names)
 
         if range_name == ProdStatRange.PEAKNORM:
-            _validate_required_columns(["peak_norm_month"], monthly.columns)
+            validate_required_columns(["peak_norm_month"], monthly.columns)
 
         if range_name == ProdStatRange.ALL and months is not None:
             raise ValueError("Must not specify months when range_name is set to ALL")
@@ -137,10 +131,10 @@ class ProdStats:
 
         return df
 
-    def prod_bounds_by_well(self):
+    def prod_bounds_by_well(self) -> pd.DataFrame:
         monthly = self._obj
-        _validate_required_columns(["prod_month"], monthly.columns)
-        _validate_required_columns(["api10", "prod_date"], monthly.index.names)
+        validate_required_columns(["prod_month"], monthly.columns)
+        validate_required_columns(["api10", "prod_date"], monthly.index.names)
 
         df = pd.DataFrame(index=monthly.groupby(level=0).first().index)
 
@@ -155,7 +149,7 @@ class ProdStats:
 
         df = self._obj
 
-        _validate_required_columns(["api10"], df.index.names)
+        validate_required_columns(["api10"], df.index.names)
 
         return df.reset_index().melt(
             id_vars=[c for c in df.columns if c not in prodstat_names] + ["api10"],
@@ -170,7 +164,7 @@ class ProdStats:
         alias_map: Dict[str, str],
         include_zeroes: bool,
         months: int = None,
-    ):
+    ) -> pd.DataFrame:
 
         monthly = self._obj
 
@@ -368,7 +362,7 @@ class ProdStats:
         return stats
 
     def boe(self) -> pd.Series:
-        _validate_required_columns(["oil", "gas"], self._obj.columns)
+        validate_required_columns(["oil", "gas"], self._obj.columns)
         return self._obj.oil + (self._obj.gas.div(const.MCF_TO_BBL_FACTOR))
 
     def preprocess(self) -> ProdSet:
@@ -393,12 +387,27 @@ class ProdStats:
             .rename(columns={"api14": "primary_api14"})
         )
 
-        header["related_wells"] = (
-            df.loc[:, ["api14", "entity", "status"]]
-            .reset_index(level=1, drop=True)
-            .drop_duplicates()
-            .groupby(level=0)
-            .apply(lambda x: x.to_dict(orient="records"))
+        # header["related_wells"] = (
+        #     df.loc[:, ["api14", "entity", "status"]]
+        #     .reset_index(level=1, drop=True)
+        #     .drop_duplicates()
+        #     .groupby(level=0)
+        #     .apply(lambda x: x.to_dict(orient="records"))
+        # )
+
+        related_wells = (
+            df.groupby(level=0)
+            .first()
+            .groupby("entity12")
+            .agg({"api14": "unique", "entity": "count"})
+        ).rename(columns={"api14": "related_wells", "entity": "related_well_count"})
+
+        related_wells.related_wells = related_wells.related_wells.apply(
+            lambda x: x.tolist()
+        )
+
+        header = (
+            header.reset_index().merge(related_wells, on="entity12").set_index("api10")
         )
 
         monthly = df.copy(deep=True)
@@ -433,7 +442,7 @@ class ProdStats:
 
     def normalize_monthly_production(
         self, norm_sets: List[Tuple[Optional[int], Optional[str]]] = None, **kwargs
-    ):
+    ) -> pd.DataFrame:
         monthly = self._obj
         for value, suffix in norm_sets or CALC_NORM_VALUES:
             if value is not None and suffix is not None:
@@ -443,9 +452,7 @@ class ProdStats:
 
         return monthly
 
-    def daily_avg(
-        self, columns: List[str], days_column: str,
-    ):
+    def daily_avg(self, columns: List[str], days_column: str,) -> pd.DataFrame:
 
         monthly = self._obj
         for col in columns:
@@ -461,7 +468,7 @@ class ProdStats:
         months: int = None,
     ) -> pd.DataFrame:
 
-        _validate_required_columns(["oil", "boe", "days_in_month"], self._obj.columns)
+        validate_required_columns(["oil", "boe", "days_in_month"], self._obj.columns)
 
         monthly = self._obj
 
@@ -559,9 +566,7 @@ class ProdStats:
     def norm_to_ll(self, value: int, suffix: str, columns: List[str],) -> pd.DataFrame:
         """ Normalize to an arbitrary lateral length """
 
-        _validate_required_columns(
-            columns + ["prod_month", "perfll"], self._obj.columns
-        )
+        validate_required_columns(columns + ["prod_month", "perfll"], self._obj.columns)
         columns = [x for x in columns if x in self._obj.columns]
         alias_map = {k: f"{k}_norm_{suffix}" for k in columns}
         factors = (self._obj["perfll"] / value).values
@@ -570,7 +575,7 @@ class ProdStats:
     def peak30(self) -> pd.DataFrame:
         """ Generate peak30 statistics, bounded by the configured peak_norm_limit """
 
-        _validate_required_columns(["oil", "prod_month"], self._obj.columns)
+        validate_required_columns(["oil", "prod_month"], self._obj.columns)
 
         peak_range = self._obj.prod_month <= self.peak_norm_limit
         df = self._obj.loc[peak_range, :]
@@ -600,26 +605,46 @@ class ProdStats:
         return elements
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     async def wrapper():
-#         ids = ["14207C017575", "14207C020251"]
-#         # ids = ["14207C017575"]
-#         ids = [
-#             "14207C0155111H",
-#             "14207C0155258418H",
-#             "14207C0155258421H",
-#             "14207C01552617H",
-#             "14207C015535211H",
-#             "14207C015535212H",
-#             "14207C0155368001H",
-#             "14207C0155368002H",
-#             "14207C01558022H",
-#             "14207C0155809H",
-#             "14207C017575",
-#             "14207C020251",
-#         ]
+    async def wrapper():
+        ids = ["14207C017575", "14207C020251"]
 
-#         wells = await pd.DataFrame.prodstats.from_ihs(entities=ids, path=IHSPath.prod_h)
+        # ids = ["14207C017575"]
+        # ids = [
+        #     "14207C0155111H",
+        #     "14207C0155258418H",
+        #     "14207C0155258421H",
+        #     # "14207C01552617H",
+        #     "14207C015535211H",
+        #     # "14207C015535212H",
+        #     # "14207C0155368001H",
+        #     # "14207C0155368002H",
+        #     # "14207C01558022H",
+        #     # "14207C0155809H",
+        #     # "14207C017575",
+        #     # "14207C020251",
+        # ]
+        entity12s = [x[:12] for x in ids]
 
-#         wells.columns.tolist()
+        # wells = await IHSClient.get_production(entity12s=entity12s, path=IHSPath.prod_h)
+
+        wells = await pd.DataFrame.prodstats.from_ihs(
+            entity12s=entity12s, path=IHSPath.prod_h
+        )
+        # wells.prodstats.calc()
+        # wells.entity12.unique()
+        # wells.groupby(level=0).first().count().entity12
+        related_wells = (
+            wells.groupby(level=0)
+            .first()
+            .groupby("entity12")
+            .agg({"api14": "unique", "entity": "count"})
+        ).rename(columns={"api14": "related_wells", "entity": "related_well_count"})
+
+        # from util.jsontools import to_json
+
+        # to_json(wells, "data/test.json")
+
+        wells = wells.merge(related_wells, on="entity12")
+        wells.related_wells.apply(lambda x: x.tolist())

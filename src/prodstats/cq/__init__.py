@@ -57,20 +57,20 @@ def _calc_prodstats_for_hole_direction(sender, **kwargs):
     sender.add_periodic_task(
         60,
         tasks.calc_prodstats_for_hole_direction.s(HoleDirection.h),
-        name="calc_prodstats_for_upton",
+        name="calc_prodstats_for_horizontals",
     )
 
 
-def _sync_area_manifest(sender, **kwargs):
-    sender.add_periodic_task(
-        15, tasks.sync_area_manifest, name="sync_area_manifest",
-    )
+# def _sync_area_manifest(sender, **kwargs):
+#     sender.add_periodic_task(
+#         15, tasks.sync_area_manifest, name="sync_area_manifest",
+#     )
 
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    _setup_collection_tasks(sender, **kwargs)
-    _setup_heartbeat(sender, **kwargs)
+    # _setup_collection_tasks(sender, **kwargs)
+    # _setup_heartbeat(sender, **kwargs)
     _calc_prodstats_for_hole_direction(sender, **kwargs)
-    _sync_area_manifest(sender, **kwargs)
+    # _sync_area_manifest(sender, **kwargs)
     # _calc_prodstats_for_area(sender, **kwargs)

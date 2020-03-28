@@ -1,6 +1,16 @@
 from db.models.bases import Base, db
 
-__all__ = ["WellHeader", "WellStat", "WellDepth", "WellLink", "WellShape"]
+__all__ = [
+    "WellHeader",
+    "WellStat",
+    "WellDepth",
+    "WellLink",
+    "WellLocation",
+    "IPTest",
+    "FracParameters",
+    "Survey",
+    "SurveyPoint",
+]
 
 
 class WellBase(Base):
@@ -21,11 +31,15 @@ class WellHeader(WellBase):
     comp_date = db.Column(db.Date())
     spud_date = db.Column(db.Date())
     permit_date = db.Column(db.Date())
+    permit_number = db.Column(db.String())
+    permit_status = db.Column(db.String())
     rig_release_date = db.Column(db.Date())  # rr_date
     last_activity_date = db.Column(db.Date())
     basin = db.Column(db.String(50), index=True)  # basin
     state = db.Column(db.String(50))  # state_name
     county = db.Column(db.String(50), index=True)  # county_name
+    provider = db.Column(db.String())
+    provider_last_update_at = db.Column(db.DateTime(timezone=True))
     basin_holedir_isprod_idx = db.Index(
         "well_basin_holedir_isprod_idx", "basin", "hole_direction", "is_producing"
     )
@@ -41,10 +55,16 @@ class FracParameters(WellBase):
     proppant_lb_ft = db.Column(db.Integer())
     gen_int = db.Column(db.Integer())
     gen_str = db.Column(db.String(10))
+    provider = db.Column(db.String())
+    provider_last_update_at = db.Column(db.DateTime(timezone=True))
 
 
 class WellStat(WellBase):
     __tablename__ = "wellstats"
+
+    # name = db.Column(db.String(50), primary_key=True)
+    # type = db.Column(db.String(50), primary_key=True)
+    # value = db.Column(db.Numeric(19, 2))
 
     wellbore_crow_length = db.Column(db.Integer())  # wellbore_linear_distance
     wellbore_direction = db.Column(db.String(1))  # wellbore_direction
@@ -97,37 +117,66 @@ class WellLink(WellBase):
     value = db.Column(db.String())
 
 
-class WellShape(WellBase):
-    __tablename__ = "shapes"
+class WellLocation(WellBase):
+    __tablename__ = "well_locations"
 
-    shllon = db.Column(db.Float())  # long_shl
-    shllat = db.Column(db.Float())  # lat_shl
-    bhllon = db.Column(db.Float())  # long_bhl
-    bhllat = db.Column(db.Float())  # lat_bhl
-    shl = db.Column(db.Geometry("POINT", srid=4326))
-    kop = db.Column(db.Geometry("POINT", srid=4326))
-    heel = db.Column(db.Geometry("POINT", srid=4326))
-    mid = db.Column(db.Geometry("POINT", srid=4326))
-    toe = db.Column(db.Geometry("POINT", srid=4326))
-    bhl = db.Column(db.Geometry("POINT", srid=4326))
+    name = db.Column(db.String(50), index=True, primary_key=True)
+    block = db.Column(db.String(50))
+    section = db.Column(db.String(50))
+    abstract = db.Column(db.String(50))
+    survey = db.Column(db.String(50))
+    metes_bounds = db.Column(db.String(50))
+    lon = db.Column(db.Float())
+    lat = db.Column(db.Float())
+    geom = db.Column(
+        db.Geometry("POINT", srid=4326)
+    )  # shl, bhl, pbhl, kop, heel, mid, toe
+    geom_webmercator = db.Column(db.Geometry("POINT", srid=3857))
+
+
+class Survey(WellBase):
+    __tablename__ = "surveys"
+
+    survey_type = db.Column(db.String(50))
+    survey_method = db.Column(db.String(50))
+    survey_date = db.Column(db.Date())
+    survey_top = db.Column(db.Integer())
+    survey_top_uom = db.Column(db.String(10))
+    survey_base = db.Column(db.Integer())
+    survey_base_uom = db.Column(db.String(10))
     wellbore = db.Column(db.Geometry("LINESTRING", srid=4326))
+    lateral_only = db.Column(db.Geometry("LINESTRING", srid=4326))
     stick = db.Column(db.Geometry("LINESTRING", srid=4326))
     bent_stick = db.Column(db.Geometry("LINESTRING", srid=4326))
-    lateral_only = db.Column(db.Geometry("LINESTRING", srid=4326))
-
-    shl_webmercator = db.Column(db.Geometry("POINT", srid=3857))
-    kop_webmercator = db.Column(db.Geometry("POINT", srid=3857))
-    heel_webmercator = db.Column(db.Geometry("POINT", srid=3857))
-    mid_webmercator = db.Column(db.Geometry("POINT", srid=3857))
-    toe_webmercator = db.Column(db.Geometry("POINT", srid=3857))
-    bhl_webmercator = db.Column(db.Geometry("POINT", srid=3857))
     wellbore_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
+    lateral_only_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
     stick_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
     bent_stick_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
-    lateral_only_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
+
+
+class SurveyPoint(WellBase):
+    __tablename__ = "survey_points"
+
+    md = db.Column(db.Integer(), primary_key=True)
+    tvd = db.Column(db.Integer())
+    dip = db.Column(db.Float())
+    sequence = db.Column(db.Integer())
+    theta = db.Column(db.Float())
+    is_in_lateral = db.Column(db.Boolean())
+    is_heel_point = db.Column(db.Boolean())
+    is_mid_point = db.Column(db.Boolean())
+    is_toe_point = db.Column(db.Boolean())
+    is_soft_corner = db.Column(db.Boolean())
+    is_hard_corner = db.Column(db.Boolean())
+    is_kop = db.Column(db.Boolean())
+
+    geom = db.Column(db.Geometry("POINT", srid=4326))
+    geom_webmercator = db.Column(db.Geometry("POINT", srid=3857))
 
 
 class IPTest(WellBase):
+    __tablename__ = "ip_tests"
+
     test_number = db.Column(db.Integer(), primary_key=True)
     test_date = db.Column(db.Date())
     type_code = db.Column(db.String(10))

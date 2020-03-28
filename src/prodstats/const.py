@@ -3,6 +3,7 @@ from util.enums import Enum
 
 MCF_TO_BBL_FACTOR: int = 6
 
+LATERAL_DIP_THRESHOLD: int = 85
 
 # ---Enums-------------------------------------------------------------------- #
 

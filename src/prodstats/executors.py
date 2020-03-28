@@ -232,11 +232,14 @@ if __name__ == "__main__":
 
     ids = ["14207C0155111H", "14207C0155258418H"]
     ids = ["14207C0202511H", "14207C0205231H"]
+    entity12s = {x[:12] for x in ids}
 
     # if not db.is_bound():
     # await db.startup()
     pexec = ProdExecutor()
     self = pexec
-    results, errors = pexec.run_sync(entities=ids, batch_size=20, return_data=True)
+    results, errors = pexec.run_sync(
+        entity12s=entity12s, batch_size=20, return_data=True
+    )
 
     affected, prodset = results[0]

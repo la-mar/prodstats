@@ -64,7 +64,7 @@ class ProductionWellSet(ProdBase):
     wells: List[ProductionWell]
 
     def records(self) -> List[Dict[str, Any]]:
-        """ Return the production records for each well combined into a single list """
+        """ Return the production records for each well as a single list """
         # TODO: add params to toggle which features are included/excluded
 
         records: List[Dict[str, Any]] = []

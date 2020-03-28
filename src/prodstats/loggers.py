@@ -19,6 +19,7 @@ LOG_LEVELS.update({str(k): k for k, v in logging._levelToName.items()})  # type:
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("boto3").setLevel(logging.WARNING)
 logging.getLogger("gino").setLevel(logging.WARNING)
+logging.getLogger("fiona").setLevel(logging.WARNING)
 logging.getLogger("botocore").setLevel(logging.CRITICAL)
 
 

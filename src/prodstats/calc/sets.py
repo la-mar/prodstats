@@ -1,4 +1,5 @@
-from typing import Any, Dict, Tuple
+from pathlib import Path
+from typing import Any, Dict, List, Tuple, Union
 
 import pandas as pd
 
@@ -37,6 +38,10 @@ class DataSet:
     def __iter__(self):
         for x in self.__data_slots__:
             yield getattr(self, x, None)
+
+    @property
+    def names(self):
+        return self.__data_slots__
 
     def describe(self) -> Dict[str, int]:
         result: Dict[str, Any] = {}
@@ -82,5 +87,118 @@ class ProdSet(DataSet):
         self.stats = stats
 
 
-class WellSet:
-    pass
+class WellSet(DataSet):
+    __data_slots__: Tuple = ("wells", "depths", "fracs", "stats", "ips")
+
+    def __init__(
+        self,
+        wells: pd.DataFrame = None,
+        depths: pd.DataFrame = None,
+        fracs: pd.DataFrame = None,
+        stats: pd.DataFrame = None,
+        ips: pd.DataFrame = None,
+    ):
+
+        super().__init__(
+            models={
+                "wells": db.models.WellHeader,
+                "depths": db.models.WellDepth,
+                "fracs": db.models.FracParameters,
+                "stats": db.models.WellStat,
+                "ips": db.models.IPTest,
+            }
+        )
+        self.wells = wells
+        self.depths = depths
+        self.fracs = fracs
+        self.stats = stats
+        self.ips = ips
+
+
+class WellGeometrySet(DataSet):
+    __data_slots__: Tuple = ("locations", "surveys", "points")
+
+    def __init__(
+        self,
+        locations: pd.DataFrame = None,
+        surveys: pd.DataFrame = None,
+        points: pd.DataFrame = None,
+    ):
+
+        super().__init__(
+            models={
+                "locations": db.models.WellLocation,
+                "surveys": db.models.Survey,
+                "points": db.models.SurveyPoint,
+            }
+        )
+        self.locations = locations
+        self.surveys = surveys
+        self.points = points
+
+    def to_geojson(
+        self,
+        output_dir: Union[str, Path],
+        suffix: str = None,
+        subset: List[str] = None,
+    ):
+        """ dump the underlying dataframes to geojson
+
+        Arguments:
+            output_dir {Union[str, Path]} -- directory to save the generated geojson files
+
+        Keyword Arguments:
+            suffix {str} -- add a suffix to the filename of each output file (default: {None})
+            subset {List[str]} -- export only a subset of the underlying
+                                  dataframes (default: {None})
+
+        Raises:
+            ValueError: [description]
+        """
+
+        subset = list(subset or self.__data_slots__)
+
+        for x in subset:
+            if x not in self.names:
+                raise ValueError(
+                    f"{x} is not a valid subset. Must be one of {self.names}"
+                )
+
+        if not isinstance(output_dir, Path):
+            output_dir = Path(output_dir)
+
+        if suffix:
+            suffix = f"_{suffix}"
+        else:
+            suffix = ""
+
+        if not output_dir.is_dir():
+            raise ValueError("output_dir must be a directory")
+
+        if "locations" in subset:
+            if self.locations is not None and not self.locations.empty:
+                self.locations.shapes.to_geojson(
+                    output_dir / f"well_locations{suffix}.geojson", geometry="geom"
+                )
+
+        if "surveys" in subset:
+            if self.surveys is not None and not self.surveys.empty:
+
+                self.surveys.loc[:, ["wellbore"]].shapes.to_geojson(
+                    output_dir / f"wellbores{suffix}.geojson", geometry="wellbore"
+                )
+                self.surveys.loc[:, ["lateral_only"]].shapes.to_geojson(
+                    output_dir / f"laterals{suffix}.geojson", geometry="lateral_only"
+                )
+                self.surveys.loc[:, ["stick"]].shapes.to_geojson(
+                    output_dir / f"sticks{suffix}.geojson", geometry="stick"
+                )
+                self.surveys.loc[:, ["bent_stick"]].shapes.to_geojson(
+                    output_dir / f"bent_sticks{suffix}.geojson", geometry="bent_stick"
+                )
+
+        if "points" in subset:
+            if self.points is not None and not self.points.empty:
+                self.points.shapes.to_geojson(
+                    output_dir / f"survey_points{suffix}.geojson", geometry="geom"
+                )

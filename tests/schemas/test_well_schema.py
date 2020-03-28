@@ -37,9 +37,9 @@ class TestFracParams:
         yield {"fluid_total": "737741", "proppant_total": "26738000"}
 
     def test_aliases(self, fracparms):
-        parsed = sch.FracParams(**fracparms).dict()
+        parsed = sch.FracParameters(**fracparms).dict()
         actual = {*parsed.keys()}
-        expected = {*sch.FracParams().__fields__.keys()}
+        expected = {*sch.FracParameters().__fields__.keys()}
         assert expected == actual
         for key, value in parsed.items():
             assert isinstance(value, int)
@@ -112,7 +112,22 @@ class TestWellRecord:
         }
         for field in fields:
             assert field in record.keys()
-        assert "ip" not in record.keys()
+
+
+class TestWellRecordSet:
+    def test_records(self, ihs_wells):
+        obj = sch.WellRecordSet(wells=ihs_wells)
+        records = obj.records()
+        assert isinstance(records, list)
+        assert isinstance(records[0], dict)
+        assert isinstance(records[0]["api14"], str)
+        assert len(records) == 2
+
+    def test_df(self, ihs_wells):
+        obj = sch.WellRecordSet(wells=ihs_wells)
+        df = obj.df()
+        assert df.shape[0] == 2
+        assert {*df.index.values} == {"42383406370000", "42461409160000"}
 
 
 class TestIPTest:

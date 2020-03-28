@@ -1,3 +1,4 @@
+*.code-search
 .terraform/
 .DS_Store
 env.tfvars

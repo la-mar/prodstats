@@ -42,21 +42,21 @@ services:
   #   command: prodstats dev server
   #   ports:
   #     - 8000
-  # worker_1:
-  #   <<: *defaults
-  #   container_name: prodstats_worker_1
-  #   user: celeryuser
-  #   command: prodstats run worker
-  # worker_2:
-  #   <<: *defaults
-  #   container_name: prodstats_worker_2
-  #   user: celeryuser
-  #   command: prodstats run worker
-  # cron:
-  #   <<: *defaults
-  #   container_name: prodstats_cron
-  #   user: celeryuser
-  #   command: prodstats run cron
+  worker_1:
+    <<: *defaults
+    container_name: prodstats_worker_1
+    user: celeryuser
+    command: prodstats run worker
+  worker_2:
+    <<: *defaults
+    container_name: prodstats_worker_2
+    user: celeryuser
+    command: prodstats run worker
+  cron:
+    <<: *defaults
+    container_name: prodstats_cron
+    user: celeryuser
+    command: prodstats run cron
   redis:
     container_name: prodstats_redis
     image: redis
