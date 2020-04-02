@@ -1,9 +1,9 @@
 import logging
 import os
-import subprocess  # noqa
+import subprocess
 
 import psutil
-import pytest  # noqa
+import pytest
 from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
@@ -24,7 +24,7 @@ def autokill_subprocess(*args, delay: int = 3):
         p.kill()
 
 
-def autokill_pid(pid: int, delay: int = 3):
+def autokill_pid(pid: int, delay: int = 5):
     p = psutil.Process(pid)
     try:
         p.wait(timeout=delay)
@@ -87,13 +87,13 @@ class TestCLISlow:
         manage.worker()
         captured = capfd.readouterr()
         pid = int(captured.out.split("\n")[0])
-        autokill_pid(pid)
+        autokill_pid(pid, delat=5)
         captured = capfd.readouterr()
         logger.warning(captured)
         assert "Connected to memory://" in captured.err
 
     def test_run_cli(self, capfd):
-        autokill_subprocess("prodstats", delay=3)
+        autokill_subprocess("prodstats", delay=5)
         captured = capfd.readouterr()
 
         commands = ["db", "delete", "dev", "run", "test"]
