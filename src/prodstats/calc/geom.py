@@ -12,7 +12,7 @@ import schemas as sch
 import util.geo as geo
 from calc.sets import WellGeometrySet
 from collector import IHSClient, IHSPath
-from util.pd import validate_required_columns
+from util.pd import column_as_set, validate_required_columns
 from util.types import PandasObject
 
 logger = logging.getLogger(__name__)
@@ -353,11 +353,7 @@ class Shapes:
         return df
 
     def column_as_set(self, column_name: str) -> set:
-        df = self._obj
-        elements = set()
-        if column_name in {*df.columns, *df.index.names} and df.shape[0] > 0:
-            elements = {*df.reset_index()[column_name].values.tolist()}
-        return elements
+        return column_as_set(self._obj, column_name)
 
 
 if __name__ == "__main__":
@@ -412,6 +408,10 @@ if __name__ == "__main__":
         sticks = points.shapes.as_stick()
         bent_sticks = points.shapes.as_bent_stick()
         surveys = surveys.join(laterals).join(sticks).join(bent_sticks)
+
+        """
+        extract depths and save to WellDepths model
+        """
 
         geomset = WellGeometrySet(locations=locations, surveys=surveys, points=points)
         # geomset.shapes_as_wkb().wkb_as_shapes()

@@ -2,7 +2,6 @@ from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-import pytz
 from pydantic import Field, validator
 
 from schemas.bases import CustomBaseModel
@@ -47,10 +46,7 @@ class ProductionWell(ProdBase):
 
     @validator("provider_last_update_at")
     def localize(cls, v):
-        try:
-            return pytz.utc.localize(v)
-        except Exception:
-            return v
+        return super().localize(v)
 
     def records(self) -> List[Dict[str, Any]]:
         """ Return monthly production records with all other properties of the model

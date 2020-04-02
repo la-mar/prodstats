@@ -40,3 +40,8 @@ class IHSPath(str, Enum):
     prod_v_geoms = "prod/v/geoms"
     well_h_geoms = "well/h/geoms"
     well_v_geoms = "well/v/geoms"
+
+
+class FracFocusPath(str, Enum):
+    api10 = "api10"
+    api14 = "api14"

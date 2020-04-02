@@ -55,8 +55,16 @@ class FracParameters(WellBase):
 
     @root_validator(pre=True)
     def preprocess(cls, values):
-        frac = values.get("frac", {})
+
+        if "frac" in values.keys():
+            frac = values.get("frac", {})
+        else:
+            frac = values
         return {**values, **frac}
+
+    @validator("provider_last_update_at")
+    def localize(cls, v: Any) -> Any:
+        return super().localize(v)
 
 
 class FracParameterSet(WellBase):
@@ -175,17 +183,20 @@ class WellRecord(WellBase):
     api10: str
     hole_direction: str
     status: str
+    county: Optional[str]
+    county_code: Optional[int]
+    state: Optional[str]
+    state_code: Optional[int]
+    basin: Optional[str]
+    sub_basin: Optional[str]
     is_producing: Optional[bool] = None
     operator: str
     operator_alias: Optional[str] = None
     hist_operator: str = Field(None, alias="operator_original")
     hist_operator_alias: str = Field(None, alias="operator_original_alias")
-
     permit_number: Optional[str] = None
     permit_status: Optional[str] = None
-
     perfll: Optional[int] = None
-
     provider: str
     provider_last_update_at: datetime = Field(..., alias="last_update_at")
 
@@ -197,6 +208,10 @@ class WellRecord(WellBase):
         for key in flatten_keys:
             data.update(data.pop(key, {}))
         return data
+
+    @validator("provider_last_update_at")
+    def localize(cls, v: Any) -> Any:
+        return super().localize(v)
 
 
 class WellRecordSet(WellBase):

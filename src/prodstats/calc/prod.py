@@ -12,7 +12,7 @@ from collector import IHSClient, IHSPath
 from const import ProdStatRange
 from schemas import ProductionWellSet
 from util import hf_number
-from util.pd import validate_required_columns
+from util.pd import column_as_set, validate_required_columns
 from util.types import PandasObject
 
 logger = logging.getLogger(__name__)
@@ -604,11 +604,7 @@ class ProdStats:
         return peak30[["peak30_date", "peak30_oil", "peak30_gas", "peak30_month"]]
 
     def column_as_set(self, column_name: str) -> set:
-        df = self._obj
-        elements = set()
-        if column_name in {*df.columns, *df.index.names} and df.shape[0] > 0:
-            elements = {*df.reset_index()[column_name].values.tolist()}
-        return elements
+        return column_as_set(self._obj, column_name)
 
 
 if __name__ == "__main__":
@@ -644,6 +640,7 @@ if __name__ == "__main__":
         prod = await pd.DataFrame.prodstats.from_ihs(
             entity12s=entity12s, path=IHSPath.prod_h
         )
+        prod.iloc[0]
 
         # force remove tzinfo then localize to UTC
         # prod.provider_last_update_at.dt.tz_localize(None).dt.tz_localize("utc")

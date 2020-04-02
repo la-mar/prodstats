@@ -5,7 +5,8 @@ import pandas as pd
 
 import schemas as sch
 from calc.sets import WellSet
-from collector import IHSClient, IHSPath
+from collector import FracFocusClient, IHSClient, IHSPath
+from util.pd import column_as_set
 from util.types import PandasObject
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,23 @@ class Well:
         ips = sch.IPTestSet(wells=data).df(create_index=create_index)
 
         return WellSet(wells=wells, depths=depths, fracs=fracs, stats=None, ips=ips)
+
+    @classmethod
+    async def from_fracfocus(
+        cls,
+        api14s: Union[str, List[str]] = None,
+        api10s: Union[str, List[str]] = None,
+        create_index: bool = True,
+        **kwargs,
+    ) -> pd.DataFrame:
+        """ Get frac job data for the given api14s/api10s from the Frac Focus service """
+
+        data = await FracFocusClient.get_jobs(api14s=api14s, api10s=api10s, **kwargs)
+        fracs = sch.FracParameterSet(wells=data).df(create_index=create_index)
+        return fracs
+
+    def column_as_set(self, column_name: str) -> set:
+        return column_as_set(self._obj, column_name)
 
 
 if __name__ == "__main__":
@@ -73,11 +91,13 @@ if __name__ == "__main__":
 
     async def async_wrapper():
 
-        wells, depths, fracs, stats, ips = await pd.DataFrame.wells.from_ihs(
+        wells, depths, fracs, _, ips = await pd.DataFrame.wells.from_ihs(
             IHSPath.well_h, api14s=api14s
         )
 
-        wells.iloc[0]
+        # fracs = fracs.dropna(how="any")
+        fracfocus: pd.DataFrame = await pd.DataFrame.wells.from_fracfocus(api14s=api14s)
+        fracs = fracs.combine_first(fracfocus)  # enrich frac params from fracfocus
 
         from db.models import WellHeader
 
@@ -89,10 +109,10 @@ if __name__ == "__main__":
         [c for c in df_cols if c not in model_cols]
 
         """
-            add county
-            add state
-            add basin
-            add lateral length?
+            change status to provider_status
+            determine real status
+            set is_producing flag
+            set status
 
-            extact fluid, proppant
+
         """
