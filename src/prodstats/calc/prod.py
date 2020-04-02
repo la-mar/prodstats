@@ -369,6 +369,12 @@ class ProdStats:
 
         df = self._obj.sort_values(["api14", "status"], ascending=False)
 
+        if "provider_last_update_at" in df.columns:
+            # force remove tzinfo then localize to UTC
+            df["provider_last_update_at"] = (
+                df["provider_last_update_at"].dt.tz_localize(None).dt.tz_localize("utc")
+            )
+
         header = (
             df.groupby(level=0)
             .agg(
@@ -607,8 +613,15 @@ class ProdStats:
 
 if __name__ == "__main__":
 
+    api10s = None
+    entities = None
+    ids = ["14207C017575", "14207C020251", "14207C0201501H"]
+    entity12s = [x[:12] for x in ids]
+    path = IHSPath.prod_h
+    kwargs: Dict = {}
+    kwargs
+
     async def wrapper():
-        ids = ["14207C017575", "14207C020251"]
 
         # ids = ["14207C017575"]
         # ids = [
@@ -625,18 +638,22 @@ if __name__ == "__main__":
         #     # "14207C017575",
         #     # "14207C020251",
         # ]
-        entity12s = [x[:12] for x in ids]
 
-        # wells = await IHSClient.get_production(entity12s=entity12s, path=IHSPath.prod_h)
+        # prod = await IHSClient.get_production(entity12s=entity12s, path=IHSPath.prod_h)
 
-        wells = await pd.DataFrame.prodstats.from_ihs(
+        prod = await pd.DataFrame.prodstats.from_ihs(
             entity12s=entity12s, path=IHSPath.prod_h
         )
-        # wells.prodstats.calc()
-        # wells.entity12.unique()
-        # wells.groupby(level=0).first().count().entity12
+
+        # force remove tzinfo then localize to UTC
+        # prod.provider_last_update_at.dt.tz_localize(None).dt.tz_localize("utc")
+        ts = prod.provider_last_update_at[0]
+        ts.tz_localize(None).tz_localize("utc")
+        prod.prodstats.calc()
+        # prod.entity12.unique()
+        # prod.groupby(level=0).first().count().entity12
         related_wells = (
-            wells.groupby(level=0)
+            prod.groupby(level=0)
             .first()
             .groupby("entity12")
             .agg({"api14": "unique", "entity": "count"})
@@ -644,7 +661,7 @@ if __name__ == "__main__":
 
         # from util.jsontools import to_json
 
-        # to_json(wells, "data/test.json")
+        # to_json(prod, "data/test.json")
 
-        wells = wells.merge(related_wells, on="entity12")
-        wells.related_wells.apply(lambda x: x.tolist())
+        prod = prod.merge(related_wells, on="entity12")
+        prod.related_wells.apply(lambda x: x.tolist())

@@ -57,6 +57,7 @@ def init_beat(**kwargs):
 
     loop = asyncio.get_event_loop()
 
+    # TODO: I dont think this is needed
     async def run():
         bind = await db.startup(
             pool_min_size=conf.CeleryConfig.db_pool_min_size,

@@ -12,6 +12,10 @@ from util.strings import StringProcessor  # noqa
 
 
 def ensure_list(value: Any) -> List[Any]:
+    """ Ensure the passed value is a list-like object. """
+
+    if isinstance(value, set):
+        value = list(value)
     if not issubclass(type(value), list):
         return [value]
     return value

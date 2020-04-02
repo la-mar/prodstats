@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
 
@@ -123,6 +125,7 @@ class WellGeometrySet(DataSet):
         locations: pd.DataFrame = None,
         surveys: pd.DataFrame = None,
         points: pd.DataFrame = None,
+        geometry_columns: Dict[str, List] = None,
     ):
 
         super().__init__(
@@ -135,6 +138,34 @@ class WellGeometrySet(DataSet):
         self.locations = locations
         self.surveys = surveys
         self.points = points
+
+        # merge defaults and passed values
+        self.geometry_columns = {
+            **{
+                "locations": ["geom"],
+                "surveys": ["wellbore", "lateral_only", "stick", "bent_stick"],
+                "points": ["geom"],
+            },
+            **(geometry_columns or {}),
+        }
+
+    def shapes_as_wkb(
+        self, geometry_columns: Dict[str, List] = None
+    ) -> WellGeometrySet:
+        geometry_columns = {**self.geometry_columns, **(geometry_columns or {})}
+        for name, model, df in self.items():
+            geom_cols: List[str] = geometry_columns[name]
+            setattr(self, name, df.shapes.shapes_to_wkb(geom_cols))
+        return self
+
+    def wkb_as_shapes(
+        self, geometry_columns: Dict[str, List] = None
+    ) -> WellGeometrySet:
+        geometry_columns = {**self.geometry_columns, **(geometry_columns or {})}
+        for name, model, df in self.items():
+            geom_cols: List[str] = geometry_columns[name]
+            setattr(self, name, df.shapes.wkb_to_shapes(geom_cols))
+        return self
 
     def to_geojson(
         self,

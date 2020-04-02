@@ -32,7 +32,13 @@ class TestBaseExecutor:
     def test_executor_base(self):
         bexec = ex.BaseExecutor()
         assert bexec.metrics.empty is True
-        assert {*bexec.metrics.columns} == {"operation", "name", "time", "count"}
+        assert {*bexec.metrics.columns} == {
+            "executor",
+            "operation",
+            "name",
+            "time",
+            "count",
+        }
 
     def test_add_metric(self):
         bexec = ex.BaseExecutor()
@@ -43,6 +49,7 @@ class TestBaseExecutor:
         assert bexec.metrics.empty is False
 
         expected = {
+            "executor": "base",
             "operation": "test_operation",
             "name": "test_name",
             "time": 30,

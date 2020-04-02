@@ -34,15 +34,19 @@ class TestWellDates:
 class TestFracParams:
     @pytest.fixture
     def fracparms(self):
-        yield {"fluid_total": "737741", "proppant_total": "26738000"}
+        yield {
+            "api14": "12345678900000",
+            "provider": "ihs",
+            "last_update_at": "2020-03-21T16:30:52.778000",
+            "fluid_total": "737741",
+            "proppant_total": "26738000",
+        }
 
     def test_aliases(self, fracparms):
         parsed = sch.FracParameters(**fracparms).dict()
         actual = {*parsed.keys()}
-        expected = {*sch.FracParameters().__fields__.keys()}
+        expected = {*sch.FracParameters(**fracparms).__fields__.keys()}
         assert expected == actual
-        for key, value in parsed.items():
-            assert isinstance(value, int)
 
 
 class TestWellElevations:
@@ -56,13 +60,15 @@ class TestWellElevations:
         expected = {*sch.WellElevations().__fields__.keys()}
         assert expected == actual
         for key, value in parsed.items():
-            assert isinstance(value, int)
+            if key not in ["api14"]:
+                assert isinstance(value, int)
 
 
 class TestWellDepths:
     @pytest.fixture
     def depths(self):
         yield {
+            "api14": "42461409160000",
             "tvd": "2200",
             "md": "2100",
             "perf_upper": "2200",
@@ -74,15 +80,17 @@ class TestWellDepths:
 
         parsed = sch.WellDepths(**depths).dict()
         actual = {*parsed.keys()}
-        expected = {*sch.WellDepths().__fields__.keys()}
+        expected = {*sch.WellDepths(**depths).__fields__.keys()}
         assert expected == actual
         for key, value in parsed.items():
-            assert isinstance(value, int)
+            if key not in ["api14"]:
+                assert isinstance(value, int)
 
     def test_extract_from_document(self, ihs_wells):
         data = ihs_wells[0]
         actual = sch.WellDepths(**data).dict()
         expected = {
+            "api14": "42461409160000",
             "tvd": 8503,
             "md": 19272,
             "perf_upper": 8805,
@@ -108,7 +116,6 @@ class TestWellRecord:
         fields = {
             *sch.WellDates().__fields__.keys(),
             *sch.WellElevations().__fields__.keys(),
-            *sch.FracParams.__fields__.keys(),
         }
         for field in fields:
             assert field in record.keys()

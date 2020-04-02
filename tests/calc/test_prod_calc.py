@@ -4,9 +4,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from calc.prod import _validate_required_columns
+import calc.prod  # noqa
 from const import IHSPath, ProdStatRange
 from tests.utils import MockAsyncDispatch
+from util.pd import validate_required_columns
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ def prod_dispatcher(ihs_prod):
 
 def test_validate_required_columns_raise():
     with pytest.raises(KeyError):
-        _validate_required_columns(required=["a", "b"], columns=["a", "c", "d"])
+        validate_required_columns(required=["a", "b"], columns=["a", "c", "d"])
 
 
 class TestProdStats:
@@ -393,6 +394,7 @@ class TestProdStats:
             "products",
             "provider",
             "provider_last_update_at",
+            "related_well_count",
             "related_wells",
             "status",
         }

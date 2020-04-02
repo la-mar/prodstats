@@ -61,7 +61,7 @@ class TestCLISlow:
         manage.web(get_open_port())
         captured = capfd.readouterr()
         pid = int(captured.out.split("\n")[0])
-        autokill_pid(pid, delay=2)
+        autokill_pid(pid, delay=5)
         captured = capfd.readouterr()
         logger.info(captured)
         assert "Uvicorn running" in captured.err
@@ -70,7 +70,7 @@ class TestCLISlow:
         manage.server(get_open_port())
         captured = capfd.readouterr()
         pid = int(captured.out.split("\n")[0])
-        autokill_pid(pid, delay=2)
+        autokill_pid(pid, delay=5)
         captured = capfd.readouterr()
         logger.info(captured)
         assert "Uvicorn running" in captured.err

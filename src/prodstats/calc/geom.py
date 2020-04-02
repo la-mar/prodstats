@@ -346,11 +346,18 @@ class Shapes:
             df[field] = df[field].apply(lambda x: geo.shape_to_wkb(x, srid=srid))
         return df
 
-    def wkb_to_shape(self, geometry_columns: List[str]) -> pd.DataFrame:
+    def wkb_to_shapes(self, geometry_columns: List[str]) -> pd.DataFrame:
         df = self._obj.copy(deep=True)
         for field in geometry_columns:
             df[field] = df[field].apply(geo.wkb_to_shape)
         return df
+
+    def column_as_set(self, column_name: str) -> set:
+        df = self._obj
+        elements = set()
+        if column_name in {*df.columns, *df.index.names} and df.shape[0] > 0:
+            elements = {*df.reset_index()[column_name].values.tolist()}
+        return elements
 
 
 if __name__ == "__main__":
@@ -407,6 +414,7 @@ if __name__ == "__main__":
         surveys = surveys.join(laterals).join(sticks).join(bent_sticks)
 
         geomset = WellGeometrySet(locations=locations, surveys=surveys, points=points)
+        # geomset.shapes_as_wkb().wkb_as_shapes()
 
         geomset.to_geojson(output_dir="data", subset=["xxxxxx"])
 

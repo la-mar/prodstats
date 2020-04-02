@@ -2,7 +2,8 @@ from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-from pydantic import Field
+import pytz
+from pydantic import Field, validator
 
 from schemas.bases import CustomBaseModel
 
@@ -44,6 +45,13 @@ class ProductionWell(ProdBase):
     products: Optional[str]
     production: List[ProductionRecord]
 
+    @validator("provider_last_update_at")
+    def localize(cls, v):
+        try:
+            return pytz.utc.localize(v)
+        except Exception:
+            return v
+
     def records(self) -> List[Dict[str, Any]]:
         """ Return monthly production records with all other properties of the model
         as additional attributes on each record """
@@ -78,3 +86,21 @@ class ProductionWellSet(ProdBase):
             df = df.set_index(["api10", "prod_date"])
 
         return df
+
+
+if __name__ == "__main__":
+    prodwell = {
+        "api10": "1234567890",
+        "api14": "12345678900000",
+        "entity": "12345678900000",
+        "entity12": "123456789000",
+        "provider": "12345678900000",
+        "status": "12345678900000",
+        "last_update_at": "2020-04-01T01:59:21.163000",
+        "perf_upper_min": 0,
+        "perf_lower_max": 0,
+        "production": [],
+    }
+
+    ProductionWell(**prodwell).dict()
+    datetime(2020, 4, 1, 1, 59, 21, 163000)
