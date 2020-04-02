@@ -87,7 +87,7 @@ class TestCLISlow:
         manage.worker()
         captured = capfd.readouterr()
         pid = int(captured.out.split("\n")[0])
-        autokill_pid(pid, delat=5)
+        autokill_pid(pid, delay=5)
         captured = capfd.readouterr()
         logger.warning(captured)
         assert "Connected to memory://" in captured.err
