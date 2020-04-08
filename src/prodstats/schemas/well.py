@@ -75,7 +75,7 @@ class FracParameterSet(WellBase):
 
     def df(self, create_index: bool = True) -> pd.DataFrame:
         df = pd.DataFrame(self.records())
-        if create_index:
+        if create_index and "api14" in df.columns:
             df = df.set_index("api14")
         return df
 
@@ -102,7 +102,7 @@ class WellDepthSet(WellBase):
 
     def df(self, create_index: bool = True) -> pd.DataFrame:
         df = pd.DataFrame(self.records())
-        if create_index:
+        if create_index and "api14" in df.columns:
             df = df.set_index("api14")
         return df
 
@@ -173,7 +173,7 @@ class IPTestSet(WellBase):
 
     def df(self, create_index: bool = True) -> pd.DataFrame:
         df = pd.DataFrame(self.records())
-        if create_index:
+        if create_index and "api14" in df.columns:
             df = df.set_index("api14")
         return df
 
@@ -226,7 +226,7 @@ class WellRecordSet(WellBase):
 
     def df(self, create_index: bool = True) -> pd.DataFrame:
         df = pd.DataFrame(self.records())
-        if create_index:
+        if create_index and "api14" in df.columns:
             df = df.set_index("api14")
 
         return df
@@ -270,7 +270,7 @@ class WellSurveySet(WellGeometryBase):
 
     def df(self, create_index: bool = True) -> pd.DataFrame:
         df = pd.DataFrame(self.records())
-        if create_index:
+        if create_index and "api14" in df.columns:
             df = df.set_index("api14")
         return df
 
@@ -317,15 +317,15 @@ class WellSurveyPoints(WellGeometryBase):
         api14 = values.get("api14")
         survey = values.get("survey", {})
         transformed: List[Dict] = []
-        if survey["points"]:
-            for pt in survey["points"]:
+        if survey.get("points"):
+            for idx, pt in enumerate(survey["points"]):
                 pt["geom"] = asShape(pt["geom"])
                 pt["api14"] = api14
                 try:
                     WellSurveyPoint(**pt)
                     transformed.append(pt)
-                except Exception:
-                    logger.debug(f"{api14}: filtered point from survey points")
+                except Exception as e:
+                    logger.debug(f"{api14}: filtered survey point #{idx} -- {e}")
 
         return {"points": transformed}
 
@@ -337,7 +337,7 @@ class WellSurveyPoints(WellGeometryBase):
 
     def df(self, create_index: bool = True) -> pd.DataFrame:
         df = pd.DataFrame(self.records())
-        if create_index:
+        if create_index and "api14" in df.columns:
             df = df.set_index("api14")
         return df
 
@@ -356,7 +356,7 @@ class WellSurveyPointSet(WellGeometryBase):
         self, create_index: bool = True, sort_by: str = "md", ascending: bool = True,
     ) -> pd.DataFrame:
         df = pd.DataFrame(self.records())
-        if create_index:
+        if create_index and "api14" in df.columns:
             df = df.set_index(["api14", "md"])
         return df
 
@@ -403,7 +403,7 @@ class WellLocationSet(WellGeometryBase):
 
     def df(self, create_index: bool = True) -> pd.DataFrame:
         df = pd.DataFrame(self.records())
-        if create_index:
+        if create_index and "api14" in df.columns:
             df = df.set_index(["api14", "name"])
         return df
 

@@ -127,7 +127,7 @@ class ProdExecutor(BaseExecutor):
                 )
             return ps
         except Exception as e:
-            api10s = df.prodstats.column_as_set("api10")
+            api10s = df.util.column_as_set("api10")
             logger.error(f"Error during processing: {api10s} -- {e}")
             raise e
 
@@ -171,7 +171,7 @@ class ProdExecutor(BaseExecutor):
             return sum(await asyncio.gather(*coros))
 
         except Exception as e:
-            api10s = ps.header.prodstats.column_as_set("api10")
+            api10s = ps.header.util.column_as_set("api10")
             logger.error(f"Error during persistance: {api10s} -- {e}")
             raise e
 
@@ -342,7 +342,7 @@ class WellGeomExecutor(BaseExecutor):
                 )
             return geomset
         except Exception as e:
-            api14s = locations.shapes.column_as_set("api14")
+            api14s = locations.util.column_as_set("api14")
             logger.error(f"Error during persistance: {api14s} -- {e}")
             raise e
 
@@ -374,7 +374,7 @@ class WellGeomExecutor(BaseExecutor):
             return sum(await asyncio.gather(*coros))
 
         except Exception as e:
-            api10s = geoms.locations.shapes.column_as_set("api10")
+            api10s = geoms.locations.util.column_as_set("api10")
             logger.error(f"Error during persistance: {api10s} -- {e}")
             raise e
 

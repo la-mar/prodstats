@@ -94,3 +94,7 @@ class ProdStat(Base):
     start_month = db.Column(db.Integer())
     end_month = db.Column(db.Integer())
     comments = db.Column(db.JSONB(), nullable=False, server_default="{}")
+
+    prodstat_api10_prop_agg_idx = db.Index(
+        "prodstat_api10_prop_agg_idx", "api10", "property_name", "aggregate_type"
+    )

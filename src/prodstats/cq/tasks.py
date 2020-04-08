@@ -61,7 +61,7 @@ def calc_prodstats_for_area(
         path = IHSPath(path)
 
     if not isinstance(hole_dir, HoleDirection):
-        hole_dir = HoleDirection(hole_dir)
+        hole_dir = HoleDirection(str(hole_dir).upper())
 
     ids = loop.run_until_complete(IHSClient.get_ids_by_area(path=path, area=area))
     ids = ["14207C0202511H", "14207C0205231H"]
@@ -113,7 +113,7 @@ def calc_prodstats_for_hole_direction(hole_dir: Union[str, HoleDirection]):
         return params
 
     if not isinstance(hole_dir, HoleDirection):
-        hole_dir = HoleDirection(hole_dir)
+        hole_dir = HoleDirection(str(hole_dir).upper())
 
     params = loop.run_until_complete(get_areas(hole_dir))
     calc_prodstats_for_area.chunks(params, 3).apply_async()

@@ -16,8 +16,8 @@ class ProdStatRange(str, Enum):
 
 
 class HoleDirection(str, Enum):
-    h = "h"
-    v = "v"
+    H = "H"
+    V = "V"
 
 
 class EntityType(str, Enum):

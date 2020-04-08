@@ -12,7 +12,7 @@ from collector import IHSClient, IHSPath
 from const import ProdStatRange
 from schemas import ProductionWellSet
 from util import hf_number
-from util.pd import column_as_set, validate_required_columns
+from util.pd import validate_required_columns
 from util.types import PandasObject
 
 logger = logging.getLogger(__name__)
@@ -281,7 +281,7 @@ class ProdStats:
         )
         aggregated["comments"] = None
 
-        api10s = aggregated.prodstats.column_as_set("api10")
+        api10s = aggregated.util.column_as_set("api10")
         logger.debug(
             f"{api10s} calculated prodstats: {list(alias_map.values())}",
             extra={"api10": api10s, **alias_map},
@@ -602,9 +602,6 @@ class ProdStats:
         peak30["peak30_gas"] = df.groupby(level=0).gas.max()
 
         return peak30[["peak30_date", "peak30_oil", "peak30_gas", "peak30_month"]]
-
-    def column_as_set(self, column_name: str) -> set:
-        return column_as_set(self._obj, column_name)
 
 
 if __name__ == "__main__":

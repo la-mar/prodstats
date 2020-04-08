@@ -27,6 +27,8 @@ class WellHeader(WellBase):
     operator = db.Column(db.String(), index=True)
     hist_operator = db.Column(db.String(), index=True)
     perfll = db.Column(db.Integer())
+    tvd = db.Column(db.Integer())
+    md = db.Column(db.Integer())
     lateral_length = db.Column(db.Integer())
     comp_date = db.Column(db.Date())
     spud_date = db.Column(db.Date())
@@ -84,6 +86,8 @@ class WellDepth(WellBase):
 
     name = db.Column(db.String(50), index=True, primary_key=True)
     value = db.Column(db.Integer())
+    property_name = db.Column(db.String(50))
+    aggregate_type = db.Column(db.String(25))
     grid_id = db.Column(db.Integer())
     formation = db.Column(db.String(50))
     into_formation_feet = db.Column(db.Integer())
