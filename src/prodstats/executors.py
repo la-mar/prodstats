@@ -463,8 +463,21 @@ if __name__ == "__main__":
         "42461412090000",
         "42461411750000",
         "42461411740000",
+        "42461411730000",
+        "42461411720000",
+        "42461411600000",
+        "42461411280000",
+        "42461411270000",
+        "42461411260000",
+        "42383406650000",
+        "42383406640000",
+        "42383406400000",
+        "42383406390000",
+        "42383406380000",
+        "42461412110000",
+        "42383402790000",
     ]
-
+    api10s = [x[:10] for x in api14s]
     ids = ["14207C0155111H", "14207C0155258418H"]
     ids = ["14207C0202511H", "14207C0205231H"]
     entity12s = {x[:12] for x in ids}
@@ -476,15 +489,16 @@ if __name__ == "__main__":
         async def test_prod():
             pexec = ProdExecutor()
             prodset = ProdSet()
-            df = await pexec.download(entity12s=entity12s)
+            # df = await pexec.download(entity12s=entity12s)
+            df = await pexec.download(api10s=api10s, params={"related": True})
             prodset = await pexec.process(df)
             await pexec.persist(prodset)
 
-            results, errors = pexec.run_sync(
-                entity12s=entity12s, batch_size=20, return_data=True
-            )
+            # results, errors = pexec.run_sync(
+            #     entity12s=entity12s, batch_size=20, return_data=True
+            # )
 
-            affected, prodset = results[0]
+            # affected, prodset = results[0]
 
         async def test_geoms():
             gexec = WellGeomExecutor()

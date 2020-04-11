@@ -368,6 +368,25 @@ class Shapes:
         tvd_agg = points.loc[points.is_in_lateral].util.column_stats(tvd_column)
         return tvd_agg.append(md_agg).dropna()
 
+    def lateral_length(self):
+        points = self._obj
+
+        if "is_in_lateral" not in points.columns:
+            points = points.shapes.mark_lateral_points()
+
+        validate_required_columns(["is_in_lateral"], points.columns)
+        validate_required_columns(["md"], points.index.names)
+
+        return (
+            points.loc[points.is_in_lateral]
+            .reset_index(level=1)
+            .loc[:, "md"]
+            .groupby(level=0)
+            .agg(["min", "max"])
+            .apply(lambda row: row["max"] - row["min"], axis=1)
+            .rename("lateral_length")
+        )
+
 
 if __name__ == "__main__":
 
@@ -422,10 +441,13 @@ if __name__ == "__main__":
         bent_sticks = points.shapes.as_bent_stick()
         surveys = surveys.join(laterals).join(sticks).join(bent_sticks)
 
-        points.shapes.depth_stats()
+        depth_stats = points.shapes.depth_stats()
+        depth_stats
 
-        # geomset = WellGeometrySet(locations=locations, surveys=surveys, points=points)
+        points.shapes.lateral_length()
 
+        geomset = WellGeometrySet(locations=locations, surveys=surveys, points=points)
+        geomset
         # geomset.to_geojson(output_dir="data", subset=["xxxxxx"])
 
         # from db import db

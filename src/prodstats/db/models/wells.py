@@ -40,6 +40,7 @@ class WellHeader(WellBase):
     basin = db.Column(db.String(50), index=True)  # basin
     state = db.Column(db.String(50))  # state_name
     county = db.Column(db.String(50), index=True)  # county_name
+    provider_status = db.Column(db.String(50))
     provider = db.Column(db.String())
     provider_last_update_at = db.Column(db.DateTime(timezone=True))
     basin_holedir_isprod_idx = db.Index(
@@ -97,6 +98,7 @@ class WellDepth(WellBase):
     overlap_feet = db.Column(db.Integer())
     overlap_percent = db.Column(db.Float())
     in_target = db.Column(db.Boolean())
+    assignment_method = db.Column(db.String())  # TODO: enum
     # tvd = db.Column(db.Integer())
     # td = db.Column(db.Integer())
     # tvd_min = db.Column(db.Integer())

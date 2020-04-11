@@ -7,7 +7,7 @@ class ProdHeader(Base):
     __tablename__ = "production_header"
 
     api10 = db.Column(db.String(10), primary_key=True)
-    primary_api14 = db.Column(db.String(14))
+    primary_api14 = db.Column(db.String(14), index=True)
     entity12 = db.Column(db.String(12), nullable=False)
     status = db.Column(db.String())
     first_prod_date = db.Column(db.Date())

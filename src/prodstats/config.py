@@ -28,7 +28,7 @@ from util.iterables import filter_by_prefix
 from util.toml import project, version
 from util.types import StringArray
 
-""" Optional Pandas display settings"""
+""" Optional Pandas display settings """
 pd.options.display.max_rows = 1000
 pd.set_option("display.float_format", lambda x: "%.2f" % x)
 pd.set_option("large_repr", "truncate")

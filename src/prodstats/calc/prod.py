@@ -613,6 +613,7 @@ if __name__ == "__main__":
     path = IHSPath.prod_h
     kwargs: Dict = {}
     kwargs
+    logger.setLevel(20)
 
     async def wrapper():
 
@@ -637,25 +638,25 @@ if __name__ == "__main__":
         prod = await pd.DataFrame.prodstats.from_ihs(
             entity12s=entity12s, path=IHSPath.prod_h
         )
-        prod.iloc[0]
+        # prod.iloc[0]
 
         # force remove tzinfo then localize to UTC
         # prod.provider_last_update_at.dt.tz_localize(None).dt.tz_localize("utc")
-        ts = prod.provider_last_update_at[0]
-        ts.tz_localize(None).tz_localize("utc")
+        # ts = prod.provider_last_update_at[0]
+        # ts.tz_localize(None).tz_localize("utc")
         prod.prodstats.calc()
         # prod.entity12.unique()
         # prod.groupby(level=0).first().count().entity12
-        related_wells = (
-            prod.groupby(level=0)
-            .first()
-            .groupby("entity12")
-            .agg({"api14": "unique", "entity": "count"})
-        ).rename(columns={"api14": "related_wells", "entity": "related_well_count"})
+        # related_wells = (
+        #     prod.groupby(level=0)
+        #     .first()
+        #     .groupby("entity12")
+        #     .agg({"api14": "unique", "entity": "count"})
+        # ).rename(columns={"api14": "related_wells", "entity": "related_well_count"})
 
-        # from util.jsontools import to_json
+        # # from util.jsontools import to_json
 
-        # to_json(prod, "data/test.json")
+        # # to_json(prod, "data/test.json")
 
-        prod = prod.merge(related_wells, on="entity12")
-        prod.related_wells.apply(lambda x: x.tolist())
+        # prod = prod.merge(related_wells, on="entity12")
+        # prod.related_wells.apply(lambda x: x.tolist())

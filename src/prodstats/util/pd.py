@@ -2,9 +2,12 @@ import logging
 from typing import List, Union
 
 import pandas as pd
+from pandas.tseries.offsets import MonthBegin, MonthEnd
 
 import util
 from util.types import PandasObject
+
+logger = logging.getLogger(__name__)
 
 
 def validate_required_columns(required: List[str], columns: List[str]):
@@ -17,7 +20,33 @@ def validate_required_columns(required: List[str], columns: List[str]):
         raise KeyError(f"Missing columns: {missing}")
 
 
-logger = logging.getLogger(__name__)
+def x_months_ago(
+    x: int, relative_to: pd.Timestamp = None, month_begin: bool = True
+) -> pd.Timestamp:
+    """Get a timestamp X number of months in the past at either the first or last
+        day of that month.
+
+    Arguments:
+        x {int} -- number of months to use to calculate the delta
+
+    Keyword Arguments:
+        relative_to {pd.Timestamp} -- is specified, the returned timestamp is calculated
+                                      relative to this timestamp (default: {None})
+        month_begin {bool} -- if True, return timestamp at first day of the month;
+                              if False, return timestamp at last day of the month  (default: {True})
+
+    Returns:
+        pd.Timestamp
+    """
+    if month_begin:
+        offset = MonthBegin
+    else:
+        offset = MonthEnd
+
+    if not relative_to:
+        relative_to = pd.Timestamp.now()
+
+    return (relative_to.to_period("M") - x).to_timestamp() + offset(0)
 
 
 @pd.api.extensions.register_dataframe_accessor("util")
