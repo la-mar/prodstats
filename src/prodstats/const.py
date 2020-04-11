@@ -28,8 +28,12 @@ class EntityType(str, Enum):
 class IHSPath(str, Enum):
     prod_h = "prod/h"
     prod_v = "prod/v"
+    prod_h_sample = "prod/h/sample"
+    prod_v_sample = "prod/v/sample"
     well_h = "well/h"
     well_v = "well/v"
+    well_h_sample = "well/h/sample"
+    well_v_sample = "well/v/sample"
 
     prod_h_ids = "prod/h/ids"
     prod_v_ids = "prod/v/ids"
