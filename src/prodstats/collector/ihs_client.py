@@ -72,6 +72,7 @@ class IHSClient(AsyncClient):
         path: IHSPath,
         params: Dict = None,
         entities: Union[str, List[str]] = None,
+        api14s: Union[str, List[str]] = None,
         api10s: Union[str, List[str]] = None,
         entity12s: Union[str, List[str]] = None,
         timeout: Optional[int] = None,
@@ -92,20 +93,28 @@ class IHSClient(AsyncClient):
             list -- list of monthly production records for the given ids
         """
         optcount = sum(
-            [entities is not None, api10s is not None, entity12s is not None]
+            [
+                entities is not None,
+                api14s is not None,
+                api10s is not None,
+                entity12s is not None,
+            ]
         )
         if optcount < 1:
             raise ValueError(
-                "One of ['entities', 'api10s', 'entitiy12s'] must be specified"
+                "One of ['entities', 'api14s', 'api10s', 'entitiy12s'] must be specified"
             )
         if optcount > 1:
             raise ValueError(
-                "Only one of ['entities', 'api10s', 'entitiy12s'] can be specified"
+                "Only one of ['entities', 'api14s', 'api10s', 'entitiy12s'] can be specified"
             )
 
         if entities is not None:
             ids = entities
             param_name = "id"
+        elif api14s is not None:
+            ids = api14s
+            param_name = "api14"
         elif api10s is not None:
             ids = api10s
             param_name = "api10"
@@ -159,6 +168,51 @@ class IHSClient(AsyncClient):
         )
 
     @classmethod
+    async def get_sample(
+        cls,
+        path: IHSPath,
+        n: int = None,
+        frac: float = None,
+        area: str = None,
+        timeout: Optional[int] = None,
+        **kwargs,
+    ) -> List[Dict[str, Any]]:
+
+        if path not in [
+            IHSPath.well_h_sample,
+            IHSPath.well_v_sample,
+            IHSPath.prod_h_sample,
+            IHSPath.prod_v_sample,
+        ]:
+            raise ValueError(f"'path' must be path to a sampling endpoint")
+
+        params: Dict = {}
+
+        if n is not None:
+            params["n"] = n
+        elif frac is not None:
+            if frac > 0 and frac <= 1:
+                params["frac"] = frac
+            raise ValueError(
+                f"invaid fraction supplied ({frac}): must be 0 < frac <= 1"
+            )
+        else:
+            raise ValueError(f"One of 'n' or 'frac' must be specified")
+
+        if area:
+            params["area"] = area
+
+        async with cls(**kwargs) as client:
+            response = await client.get(path.value, params=params, timeout=timeout)
+
+            json: Dict = response.json()  # type: ignore
+            data: List[Dict[str, Any]] = []
+            if "data" in json.keys():
+                data += json["data"]
+
+            return data
+
+    @classmethod
     async def get_ids_by_area(cls, path: IHSPath, area: str, **kwargs) -> List[str]:
         async with cls(**kwargs) as client:
             response = await client.get(f"{path.value}/{area}")
@@ -201,6 +255,7 @@ if __name__ == "__main__":
 
     async def async_wrapper():
         entity12s = ["14207C017575", "14207C020251"]
+        entity12s
         entities = [
             "14207C0155111H",
             "14207C0155258418H",
@@ -231,9 +286,12 @@ if __name__ == "__main__":
         #             "42383402790000",
         #         ]
 
-        await IHSClient.get_production(
-            entity12s=entity12s, path=IHSPath.prod_h, params={"related": False}
-        )
+        # await IHSClient.get_production(
+        #     entity12s=entity12s, path=IHSPath.prod_h, params={"related": False}
+        # )
+
+        await IHSClient.get_sample(IHSPath.well_h_sample, n=5)
+        await IHSClient.get_sample(IHSPath.prod_h_sample, n=5)
 
 
 #         # await IHSClient.get_areas(path=IHSPath.well_h_ids)

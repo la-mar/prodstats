@@ -16,20 +16,26 @@
   </table>
 </div>
 
-# prodstat methodology
+# TODO:
 
-# calcs
+1. Formation grid sourcing (cli upload, s3, dropbox)
+2. Formation Assignment
+3. Implement wellstats
+   - wellbore_crow_length
+   - wellbore_direction
+   - wellbore_bearing
+   - wellbore_dls_roc
+   - lateral_dls_roc
+   - wellbore_dls_mc
+   - lateral_dls_mc
+   - nearest_prospect
+   - dist_to_prospect_mi
+   - nearest_api10
+   - dist_to_company_well_mi
+4. Capture comments on production calculations and prodstats
 
-- boe = oil + gas / 6
+   - material changes in allocation well count
 
-## header inputs
-
-- api10
-- perf_upper_min
-- perf_lower_max
-  <!-- - frac_lb -->
-  <!-- - frac_bbl -->
-
-# Add comments to prodstat records
-
-- indicate if a sizable change occured in well_count
+5. Generate well links to relevant RRC filings
+6. Production links needed?
+7. Well Spacing

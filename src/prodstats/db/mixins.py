@@ -131,10 +131,10 @@ class DataFrameMixin(BulkIOMixin):
     @staticmethod
     def _prepare(df: pd.DataFrame, reset_index: bool) -> List[Dict]:
 
-        df = df.replace({np.nan: None})  # nan to None
-
         if reset_index:
             df = df.reset_index()
+
+        df = df.replace({np.nan: None})  # nan to None
 
         return df.to_dict(orient="records")
 

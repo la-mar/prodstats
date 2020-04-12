@@ -23,12 +23,16 @@ class WellHeader(WellBase):
     api10 = db.Column(db.String(10), index=True)
     hole_direction = db.Column(db.String(1))
     status = db.Column(db.String(50))
-    is_producing = db.Column(db.Boolean())
+    is_producing = db.Column(db.Boolean(), index=True)
     operator = db.Column(db.String(), index=True)
+    operator_alias = db.Column(db.String(), index=True)
     hist_operator = db.Column(db.String(), index=True)
+    hist_operator_alias = db.Column(db.String(), index=True)
     perfll = db.Column(db.Integer())
     tvd = db.Column(db.Integer())
     md = db.Column(db.Integer())
+    ground_elev = db.Column(db.Integer())
+    kb_elev = db.Column(db.Integer())
     lateral_length = db.Column(db.Integer())
     comp_date = db.Column(db.Date())
     spud_date = db.Column(db.Date())
@@ -38,8 +42,11 @@ class WellHeader(WellBase):
     rig_release_date = db.Column(db.Date())  # rr_date
     last_activity_date = db.Column(db.Date())
     basin = db.Column(db.String(50), index=True)  # basin
+    sub_basin = db.Column(db.String(50), index=True)  # basin
     state = db.Column(db.String(50))  # state_name
+    state_code = db.Column(db.String(10))  # state_name
     county = db.Column(db.String(50), index=True)  # county_name
+    county_code = db.Column(db.String(10))  # county_name
     provider_status = db.Column(db.String(50))
     provider = db.Column(db.String())
     provider_last_update_at = db.Column(db.DateTime(timezone=True))
@@ -56,6 +63,8 @@ class FracParameters(WellBase):
     proppant_lb = db.Column(db.Integer())
     fluid_bbl_ft = db.Column(db.Integer())
     proppant_lb_ft = db.Column(db.Integer())
+    lateral_length = db.Column(db.Integer())
+    lateral_length_type = db.Column(db.String(25))
     gen_int = db.Column(db.Integer())
     gen_str = db.Column(db.String(10))
     provider = db.Column(db.String())
@@ -65,21 +74,24 @@ class FracParameters(WellBase):
 class WellStat(WellBase):
     __tablename__ = "wellstats"
 
-    # name = db.Column(db.String(50), primary_key=True)
-    # type = db.Column(db.String(50), primary_key=True)
-    # value = db.Column(db.Numeric(19, 2))
+    name = db.Column(db.String(50), primary_key=True)
+    type = db.Column(db.String(25), nullable=False)  # numeric, string, date
+    numeric_value = db.Column(db.Numeric(19, 2))
+    string_value = db.Column(db.Numeric(19, 2))
+    date_value = db.Column(db.Numeric(19, 2))
+    comments = db.Column(db.JSONB(), nullable=False, server_default="{}")
 
-    wellbore_crow_length = db.Column(db.Integer())  # wellbore_linear_distance
-    wellbore_direction = db.Column(db.String(1))  # wellbore_direction
-    wellbore_bearing = db.Column(db.Float())  # wellbore_direction_degrees
-    wellbore_dls_roc = db.Column(db.Float())
-    lateral_dls_roc = db.Column(db.Float())
-    wellbore_dls_mc = db.Column(db.Float())
-    lateral_dls_mc = db.Column(db.Float())
-    nearest_deo_prospect = db.Column(db.String(50))
-    dist_to_deo_prospect_mi = db.Column(db.Float())
-    nearest_deo_api10 = db.Column(db.String(50))
-    dist_to_deo_well_mi = db.Column(db.Float())
+    # wellbore_crow_length = db.Column(db.Integer())  # wellbore_linear_distance
+    # wellbore_direction = db.Column(db.String(1))  # wellbore_direction
+    # wellbore_bearing = db.Column(db.Float())  # wellbore_direction_degrees
+    # wellbore_dls_roc = db.Column(db.Float())
+    # lateral_dls_roc = db.Column(db.Float())
+    # wellbore_dls_mc = db.Column(db.Float())
+    # lateral_dls_mc = db.Column(db.Float())
+    # nearest_prospect = db.Column(db.String(50))
+    # dist_to_prospect_mi = db.Column(db.Float())
+    # nearest_api10 = db.Column(db.String(50))
+    # dist_to_deo_well_mi = db.Column(db.Float())
 
 
 class WellDepth(WellBase):
@@ -87,10 +99,10 @@ class WellDepth(WellBase):
 
     name = db.Column(db.String(50), index=True, primary_key=True)
     value = db.Column(db.Integer())
-    property_name = db.Column(db.String(50))
+    property_name = db.Column(db.String(50), index=True)
     aggregate_type = db.Column(db.String(25))
-    grid_id = db.Column(db.Integer())
-    formation = db.Column(db.String(50))
+    grid_id = db.Column(db.Integer(), index=True)
+    formation = db.Column(db.String(50), index=True)
     into_formation_feet = db.Column(db.Integer())
     into_formation_percent = db.Column(db.Float())
     above_next_formation_feet = db.Column(db.Integer())

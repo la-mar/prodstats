@@ -1,12 +1,13 @@
 import asyncio
 import logging
-from typing import Coroutine, Dict, List, Union
+from typing import Any, Coroutine, Dict, List, Union
 
+import numpy as np
 import pandas as pd
 
 import schemas as sch
 from calc.sets import WellSet
-from collector import FracFocusClient, IHSClient, IHSPath
+from collector import FracFocusClient, FracFocusPath, IHSClient, IHSPath
 from const import HoleDirection
 from db import db
 from db.models import ProdHeader
@@ -15,11 +16,42 @@ from util.types import PandasObject
 
 logger = logging.getLogger(__name__)
 
+STATUS_INDICATOR_MAP = {
+    "is_other": "OTHER",
+    "is_inactive_pa": "INACTIVE-PA",
+    "is_ta": "TA",
+    "is_producing": "PRODUCING",
+    "is_completed": "COMPLETED",
+    "is_duc": "DUC",
+    "is_drilling": "DRILLING",
+    "is_permit": "PERMIT",
+    "is_stale_permit": "STALE-PERMIT",
+}
+
+PRODUCING_STATES = [
+    "PRODUCING",
+    "COMPLETED",
+    "PERMIT",
+    "STALE-PERMIT",
+    "TA",
+    "DRILLING",
+    "DUC",
+]
+
 
 @pd.api.extensions.register_dataframe_accessor("wells")
 class Well:
     def __init__(self, obj: PandasObject):
         self._obj: PandasObject = obj
+
+    @staticmethod
+    def _to_wellset(data: List[Dict[str, Any]], create_index: bool) -> WellSet:
+        wells = sch.WellRecordSet(wells=data).df(create_index=create_index)
+        depths = sch.WellDepthSet(wells=data).df(create_index=create_index)
+        fracs = sch.FracParameterSet(wells=data).df(create_index=create_index)
+        ips = sch.IPTestSet(wells=data).df(create_index=create_index)
+
+        return WellSet(wells=wells, depths=depths, fracs=fracs, ips=ips)
 
     @classmethod
     async def from_ihs(
@@ -31,15 +63,16 @@ class Well:
         **kwargs,
     ) -> WellSet:
 
-        data = await IHSClient.get_wells(
+        data: List[Dict[str, Any]] = await IHSClient.get_wells(
             api14s=api14s, api10s=api10s, path=path, **kwargs
         )
-        wells = sch.WellRecordSet(wells=data).df(create_index=create_index)
-        depths = sch.WellDepthSet(wells=data).df(create_index=create_index)
-        fracs = sch.FracParameterSet(wells=data).df(create_index=create_index)
-        ips = sch.IPTestSet(wells=data).df(create_index=create_index)
+        return cls._to_wellset(data, create_index)
+        # wells = sch.WellRecordSet(wells=data).df(create_index=create_index)
+        # depths = sch.WellDepthSet(wells=data).df(create_index=create_index)
+        # fracs = sch.FracParameterSet(wells=data).df(create_index=create_index)
+        # ips = sch.IPTestSet(wells=data).df(create_index=create_index)
 
-        return WellSet(wells=wells, depths=depths, fracs=fracs, stats=None, ips=ips)
+        # return WellSet(wells=wells, depths=depths, fracs=fracs, ips=ips)
 
     @classmethod
     async def from_fracfocus(
@@ -124,6 +157,35 @@ class Well:
             wellset.fracs = fracs
 
         return wellset
+
+    @classmethod
+    async def from_sample(  # TODO: merge this with from_multiple to leverage the same logic
+        cls,
+        path: IHSPath,
+        n: int = None,
+        frac: float = None,
+        area: str = None,
+        create_index: bool = True,
+    ) -> WellSet:
+        optcount = sum([n is not None, frac is not None])
+        if optcount < 1:
+            raise ValueError("One of ['n', 'frac'] must be specified")
+        if optcount > 1:
+            raise ValueError("Only one of ['n', 'frac'] can be specified")
+
+        if isinstance(path, IHSPath):
+            return cls._to_wellset(
+                await IHSClient.get_sample(path, n=n, frac=frac, area=area),
+                create_index,
+            )
+        elif isinstance(path, FracFocusPath):
+            raise NotImplementedError(
+                f"FracFocus sampling not implented. Use IHSPath instead."
+            )
+        else:
+            raise ValueError(
+                f"'path' must be one of [IHSPath, FracFocusPath], not {type(path)}"
+            )
 
     async def enrich_frac_parameters(self, dropna: bool = True):
         fracs = self._obj
@@ -285,31 +347,29 @@ class Well:
 
         return df.loc[:, return_columns]
 
-    def assign_status(
+    def _calculate_status(
         self,
-        mapping: Dict[str, str],
         target_column: str = "new_status",
         how: str = "waterfall",
         original_status_column: str = "status",
         detail: bool = False,
+        status_indicator_map: Dict[str, str] = None,
     ) -> pd.DataFrame:
         """ Assign well status using indicators existing in the passed DataFrame or
             using pd.DataFrame.wells.status_indicators() to generate them if they arent
             present.
 
-        Arguments:
-            mapping {Dict[str, str]} -- mapping of indicator column names and their
-                corresponding status value to be used in waterfall assignment. The
-                precidence of assignment is inferred from the order or items in the
-                mapping.
-
         Keyword Arguments:
-            target_column {str} -- column name for status assignments (default: {"new_status"})
+            target_column {str} -- column name for status assignments (default: "new_status")
             how {str} -- assignment methodology to use, currently the only available option
-                is the default. (default: {"waterfall"})
+                is the default. (default: "waterfall")
             original_status_column {str} -- name of column containing the original stati from
-                the data provider (default: {"status"})
+                the data provider (default: "status")
             detail {bool} -- return the intermediate calculations used in assignments
+            status_indicator_map {Dict[str, str]} -- status_indicator_map of indicator column names
+                and their corresponding status value to be used in waterfall assignment.
+                The precidence of assignment is inferred from the order or items in the
+                status_indicator_map (default: const.STATUS_INDICATOR_MAP).
 
         Raises:
             ValueError
@@ -320,6 +380,10 @@ class Well:
 
         df = self._obj
 
+        status_indicator_map = (
+            status_indicator_map if status_indicator_map else STATUS_INDICATOR_MAP
+        )
+
         if "is_keeper_status" not in df.columns:
             df = df.wells.status_indicators(indicators_only=True)
 
@@ -329,7 +393,7 @@ class Well:
         ]
 
         if how == "waterfall":
-            for column_name, label in mapping.items():
+            for column_name, label in status_indicator_map.items():
                 selected = df.loc[
                     df[target_column].isna() & df[column_name], column_name
                 ]
@@ -346,29 +410,152 @@ class Well:
 
         return df
 
-    async def production_headers(self, fields: List[str]) -> pd.DataFrame:
-        """ Fetch the related production headers for the wells in the current DataFrame. """
+    async def last_prod_date(self, prefer_local: bool = False):
+        """ Fetch the last production dates from IHS service (default) or from
+            the application's local database """
 
+        prod_headers = None
         api14s_in = self._obj.index.values.tolist()
-        prod_header_columns = ["primary_api14"] + fields
-        prod_headers = (
-            await ProdHeader.select(*prod_header_columns)
-            .where(ProdHeader.primary_api14.in_(api14s_in))
-            .gino.all()
-        )
-        prod_headers = (
-            pd.DataFrame(prod_headers, columns=prod_header_columns)
-            .rename(columns={"primary_api14": "api14"})
-            .set_index("api14")
-        )
 
-        api14s_out = prod_headers.index.values.tolist()
+        if prefer_local:
+            logger.debug("fetching production headers from app database")
+            prod_header_columns = ["primary_api14", "last_prod_date"]
+            prod_headers = (
+                await ProdHeader.select(*prod_header_columns)
+                .where(ProdHeader.primary_api14.in_(api14s_in))
+                .gino.all()
+            )
+            prod_headers = (
+                pd.DataFrame(prod_headers, columns=prod_header_columns)
+                .rename(columns={"primary_api14": "api14"})
+                .set_index("api14")
+            )
+            if prod_headers.empty:
+                prod_headers = None
 
-        logger.debug(
-            f"Found production headers for {len(api14s_out)} of {len(api14s_in)} wells"
-        )
+        if prod_headers is None:
+            logger.debug("fetching production headers from ihs service")
+            prod = await IHSClient.get_production(
+                IHSPath.prod_h_headers, api14s=api14s_in
+            )
+            prod_headers = (
+                pd.DataFrame(prod)
+                .set_index("api14")
+                .dates.apply(pd.Series)
+                .loc[:, "last_prod"]
+                .rename("last_prod_date")
+                .to_frame()
+            )
 
+            prod_headers = prod_headers.dropna()
+
+            # TODO: log how many failed conversions occurred (count NaTs?)
+            prod_headers = pd.to_datetime(
+                prod_headers.last_prod_date, errors="coerce"
+            ).to_frame()
+
+            # an api14 can sometimes be tied to more than one producing entity. To handle this,
+            # take the max last_prod_date for each api14.
+            prod_headers = prod_headers.groupby(level=0).max()
+
+            api14s_out = prod_headers.index.values.tolist()
+            logger.debug(
+                f"Found production headers for {len(api14s_out)} of {len(api14s_in)} wells"
+            )
         return prod_headers
+
+    def assign_status(
+        self, status_indicator_map: Dict[str, str] = None
+    ) -> pd.DataFrame:
+        wells = self._obj
+
+        well_columns = [
+            "status",
+            "spud_date",
+            "comp_date",
+            "permit_date",
+            "last_prod_date",
+        ]
+        validate_required_columns(
+            well_columns, wells.columns,
+        )
+
+        status: pd.DataFrame = wells.loc[:, well_columns]
+        status = status.wells.status_indicators()
+        new_status: pd.Series = status.wells._calculate_status(
+            status_indicator_map=status_indicator_map
+        )
+        return new_status.rename(columns={"new_status": "status"})
+
+    def is_producing(
+        self, status_column: str = "status", producing_states: List[str] = None
+    ) -> pd.Series:
+
+        validate_required_columns([status_column], self._obj.columns)
+        producing_states = producing_states or PRODUCING_STATES
+        return self._obj.status.isin(producing_states)
+
+    def merge_lateral_lengths(self) -> pd.DataFrame:
+        """ Merge perfll and lateral_length into a single column, preferring perfll """
+
+        wells = self._obj
+        required_columns = ["perfll", "lateral_length"]
+        validate_required_columns(required_columns, wells.columns)
+
+        # ? get lateral_length, preferring perll over lateral_length
+        latlens = wells.loc[:, required_columns]
+        latlens.loc[latlens.perfll.notnull(), "lateral_length"] = np.nan
+        latlens = (
+            latlens.reset_index()
+            .melt(
+                id_vars="api14",
+                var_name="lateral_length_type",
+                value_name="lateral_length",
+            )
+            .set_index("api14")
+            .dropna(how="any")
+        )
+        return latlens
+
+    def process_fracs(self):
+
+        fracs = self._obj
+        validate_required_columns(
+            ["fluid", "proppant", "lateral_length", "lateral_length_type"],
+            fracs.columns,
+        )
+
+        fracs = fracs.dropna(how="all", subset=["fluid", "proppant"])
+
+        # TODO: validate fluid/proppant UOM and convert to BBL/LB where necessary
+
+        # convert lb & bbl to lb/ft & bbl/ft
+        per_ft = (
+            fracs.loc[:, ["fluid", "proppant"]]
+            .div(fracs["lateral_length"], axis=0)
+            .rename(columns={"fluid": "fluid_bbl_ft", "proppant": "proppant_lb_ft"})
+        )
+
+        fracs = fracs.join(per_ft)
+
+        # rename fluid & proppant and drop uoms
+        fracs = fracs.rename(
+            columns={"fluid": "fluid_bbl", "proppant": "proppant_lb"}
+        ).drop(columns=["fluid_uom", "proppant_uom"])
+
+        fracs = fracs.dropna(
+            how="all",
+            subset=[
+                "fluid_bbl",
+                "proppant_lb",
+                "lateral_length_type",
+                "lateral_length",
+                "fluid_bbl_ft",
+                "proppant_lb_ft",
+            ],
+        )
+
+        return fracs
 
 
 if __name__ == "__main__":
@@ -377,6 +564,14 @@ if __name__ == "__main__":
     import calc.geom  # noqa
     import calc.prod  # noqa
     import util.pd  # noqa
+    from db.models import (  # noqa
+        WellHeader,
+        FracParameters,
+        WellStat,
+        WellDepth,
+        WellLink,
+        IPTest,
+    )
 
     # import random
 
@@ -419,13 +614,23 @@ if __name__ == "__main__":
         if not db.is_bound():
             await db.startup()
 
-        wells, depths, fracs, _, ips = await pd.DataFrame.wells.from_multiple(
-            hole_dir="H", api14s=api14s
+        # wells, depths, fracs, ips, _ = await pd.DataFrame.wells.from_ihs(
+        #     path=IHSPath.well_h, api14s=api14s
+        # )
+        # wells, depths, fracs, ips, _ = await pd.DataFrame.wells.from_multiple(
+        #     hole_dir="H", api14s=api14s
+        # )
+        # geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
+
+        wells, depths, fracs, ips, *other = await pd.DataFrame.wells.from_sample(
+            IHSPath.well_h_sample, n=25, area="tx-midland"
         )
+
+        api14s = wells.util.column_as_set("api14")
 
         geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
 
-        # merge depth stats from wells and geoms
+        # ! depths
         depth_stats = geoms.points.shapes.depth_stats()
         depths_melted = (
             depths.dropna(how="all")
@@ -439,52 +644,41 @@ if __name__ == "__main__":
         )
 
         depth_stats = depth_stats.append(depths_melted)
-        depth_stats = depth_stats.dropna(subset=["value"])
-        # load depth_stats to WellDepths
+        depths = depth_stats.dropna(subset=["value"])
 
-        # enrich well_headers
+        # ! wells
+        md_tvd: pd.DataFrame = depths[depths.name.isin(["md", "tvd"])].reset_index(
+            level=[1, 2], drop=True
+        ).pivot(columns="name")
+        md_tvd.columns = md_tvd.columns.droplevel(0)
+
+        wells = wells.join(md_tvd)
         wells["lateral_length"] = geoms.points.shapes.lateral_length()
         wells["provider_status"] = wells.status.str.upper()
 
-        # calculate WELL STATUS
-        status = wells.loc[:, ["status", "spud_date", "comp_date", "permit_date"]]
-        status = status.join(
-            await wells.wells.production_headers(fields=["last_prod_date"])
-        )
+        # ! well status
 
-        status = status.wells.status_indicators()
-        new_status = status.wells.assign_status(
-            mapping={
-                "is_other": "OTHER",
-                "is_inactive_pa": "INACTIVE-PA",
-                "is_ta": "TA",
-                "is_producing": "PRODUCING",
-                "is_completed": "COMPLETED",
-                "is_duc": "DUC",
-                "is_drilling": "DRILLING",
-                "is_permit": "PERMIT",
-                "is_stale_permit": "STALE-PERMIT",
-            }
-        )
+        prod_headers: pd.DataFrame = None
+        prefer_local = False  # if True, get from app db; if False, fetch from IHS
 
-        new_status.new_status.fillna(0).groupby(
-            new_status.new_status
-        ).count().sort_values(ascending=False)
+        if prod_headers is None:
+            prod_headers = await wells.wells.last_prod_date(prefer_local=prefer_local)
 
-        wells["status"] = new_status
+        wells["status"] = wells.join(prod_headers).wells.assign_status()
+        wells["is_producing"] = wells.wells.is_producing()
 
-        producing_states = [
-            "PRODUCING",
-            "COMPLETED",
-            "PERMIT",
-            "STALE-PERMIT",
-            "TA",
-            "DRILLING",
-            "DUC",
-        ]
+        lateral_lengths = wells.wells.merge_lateral_lengths()
+        fracs = fracs.join(lateral_lengths)
+        fracs = fracs.wells.process_fracs()
 
-        wells["is_producing"] = wells.status.isin(producing_states)
-        wells[["status", "is_producing"]]
+        # ! fracs
+
+        await WellHeader.bulk_upsert(wells)
+        await WellDepth.bulk_upsert(depths)
+        await FracParameters.bulk_upsert(fracs)
+        await IPTest.bulk_upsert(ips)
+
+        # TODO: Check missing lateral lengths. ex: 42329418160000
 
         """
         status.fillna(0).groupby("status").count().spud_date.sort_values(ascending=False)

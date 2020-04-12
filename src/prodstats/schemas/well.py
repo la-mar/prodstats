@@ -124,7 +124,7 @@ class IPTest(WellBase):
     depth_top_uom: Optional[str] = None
     depth_base: Optional[int] = None
     depth_base_uom: Optional[str] = None
-    sulfer: Optional[bool] = None
+    sulfur: Optional[bool] = None
     oil_gravity: Optional[int] = None
     oil_gravity_uom: Optional[str] = None
     gor: Optional[int] = None
@@ -151,13 +151,13 @@ class IPTests(WellBase):
         ips = values.get("ip")
         culled = []
         if ips:
-            for ip in ips:
+            for idx, ip in enumerate(ips):
                 try:
                     if ip:
                         IPTest(**ip)
                         culled.append(ip)
-                except Exception:
-                    logger.debug(f"{api14}: filtered row from ip tests")
+                except Exception as e:
+                    logger.debug(f"{api14}: filtered ip test #{idx} -- {e}")
         return {"api14": api14, "ip": culled}
 
 
@@ -184,9 +184,9 @@ class WellRecord(WellBase):
     hole_direction: str
     status: str
     county: Optional[str]
-    county_code: Optional[int]
+    county_code: Optional[str]
     state: Optional[str]
-    state_code: Optional[int]
+    state_code: Optional[str]
     basin: Optional[str]
     sub_basin: Optional[str]
     is_producing: Optional[bool] = None

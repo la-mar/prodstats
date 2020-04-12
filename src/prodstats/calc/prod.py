@@ -47,6 +47,7 @@ class ProdStats:
         cls,
         path: IHSPath,
         entities: Union[str, List[str]] = None,
+        api14s: Union[str, List[str]] = None,
         api10s: Union[str, List[str]] = None,
         entity12s: Union[str, List[str]] = None,
         create_index: bool = True,
@@ -59,6 +60,7 @@ class ProdStats:
 
         Keyword Arguments:
             entities {Union[str, List[str]]} -- can be a single or list of producing entities
+            api14s {Union[str, List[str]]} -- can be a single or list of API14 numbers
             api10s {Union[str, List[str]]} -- can be a single or list of API10 numbers
             entity12s {Union[str, List[str]]} -- can be a single or list of 12-digit
                 producing entity numbers
@@ -70,7 +72,12 @@ class ProdStats:
         """
 
         data = await IHSClient.get_production(
-            entities=entities, api10s=api10s, entity12s=entity12s, path=path, **kwargs
+            entities=entities,
+            api14s=api14s,
+            api10s=api10s,
+            entity12s=entity12s,
+            path=path,
+            **kwargs,
         )
         wellset = ProductionWellSet(wells=data)
         return wellset.df(create_index=create_index)
@@ -515,6 +522,7 @@ class ProdStats:
         prodstat_columns: List[str] = ["oil", "gas", "water", "boe", "gor"],
         norm_option_sets: List[Tuple[Optional[int], Optional[str]]] = None,
         prodstat_option_sets: List[Dict[str, Any]] = None,
+        skip_stats: bool = False,
     ) -> ProdSet:
         header, monthly, _ = self.preprocess()
 
@@ -561,9 +569,13 @@ class ProdStats:
             norm_sets=norm_option_sets, columns=monthly_prod_columns
         )
 
-        stats = monthly.prodstats.stats(
-            columns=prodstat_columns, option_sets=prodstat_option_sets
-        )
+        if skip_stats:
+            stats = None
+            logger.debug(f"skipping prodstat calculations")
+        else:
+            stats = monthly.prodstats.stats(
+                columns=prodstat_columns, option_sets=prodstat_option_sets
+            )
 
         monthly = monthly.drop(columns=["perfll"])
 

@@ -90,15 +90,16 @@ class ProdSet(DataSet):
 
 
 class WellSet(DataSet):
-    __data_slots__: Tuple = ("wells", "depths", "fracs", "stats", "ips")
+    __data_slots__: Tuple = ("wells", "depths", "fracs", "ips", "stats", "links")
 
     def __init__(
         self,
         wells: pd.DataFrame = None,
         depths: pd.DataFrame = None,
         fracs: pd.DataFrame = None,
-        stats: pd.DataFrame = None,
         ips: pd.DataFrame = None,
+        stats: pd.DataFrame = None,
+        links: pd.DataFrame = None,
     ):
 
         super().__init__(
@@ -106,15 +107,17 @@ class WellSet(DataSet):
                 "wells": db.models.WellHeader,
                 "depths": db.models.WellDepth,
                 "fracs": db.models.FracParameters,
-                "stats": db.models.WellStat,
                 "ips": db.models.IPTest,
+                "stats": db.models.WellStat,
+                "links": db.models.WellLink,
             }
         )
         self.wells = wells
         self.depths = depths
         self.fracs = fracs
-        self.stats = stats
         self.ips = ips
+        self.stats = stats
+        self.links = links
 
 
 class WellGeometrySet(DataSet):
