@@ -671,6 +671,10 @@ if __name__ == "__main__":
         fracs = fracs.join(lateral_lengths)
         fracs = fracs.wells.process_fracs()
 
+        wellset = WellSet(
+            wells=wells, depths=depths, fracs=fracs, ips=ips, stats=None, links=None
+        )
+        wellset
         # ! fracs
 
         await WellHeader.bulk_upsert(wells)
@@ -679,81 +683,3 @@ if __name__ == "__main__":
         await IPTest.bulk_upsert(ips)
 
         # TODO: Check missing lateral lengths. ex: 42329418160000
-
-        """
-        status.fillna(0).groupby("status").count().spud_date.sort_values(ascending=False)
-
-        status
-        OIL PRODUCER          1120
-        ABANDON LOCATION       280
-        AT TOTAL DEPTH         125
-        WELL PERMIT            125
-        OIL-WO                  92
-        WELL START              81
-        TREATD                  80
-        GAS PRODUCER            69
-        DRY & ABANDONED         44
-        CANCEL                  40
-        GAS-WO                  37
-        JUNKED & ABANDONED       9
-        ABD-OW                   8
-        D&AW                     8
-        ABD-GW                   3
-        J&AW                     3
-        SUSPENDED WELL           2
-        WI-EOR                   1
-        SWDOP                    1
-        TA                       1
-        TAW                      1
-        J&AWOG                   1
-        """
-
-        # waterfall status assignment
-
-        # status.loc[status.is_keeper_status, "new_status"] = status.loc[
-        #     status.is_keeper_status, "status"
-        # ]
-
-        # status.loc[status.new_status.isna(), "new_status"] = status.loc[
-        #     status.new_status.isna() & status.is_other, "is_other"
-        # ].replace({True: "OTHER"})
-
-        # status.loc[status.new_status.isna(), "new_status"] = status.loc[
-        #     status.new_status.isna() & status.is_inactive_pa, "is_inactive_pa"
-        # ].replace({True: "INACTIVE-PA"})
-
-        # status.loc[status.new_status.isna(), "new_status"] = status.loc[
-        #     status.new_status.isna() & status.is_inactive_pa, "is_inactive_pa"
-        # ].replace({True: "INACTIVE-PA"})
-
-        # self = status.wells
-
-        """
-            Is_Producing
-                if Uppercase([Status]) in ('PRODUCING',
-                'COMPLETED',
-                'PERMIT',
-                'STALE-PERMIT',
-                'TA',
-                'DRILLING',
-                'DUC') then "PRODUCING" else "NON_PRODUCING" endif
-        """
-        #
-
-        # from db.models import WellHeader
-
-        # dir(WellHeader)
-        # model_cols = {*WellHeader.c.names}
-        # df_cols = {*wells.columns.tolist()}
-
-        # [c for c in model_cols if c not in df_cols]
-        # [c for c in df_cols if c not in model_cols]
-
-        """
-            change status to provider_status
-            determine real status
-            set is_producing flag
-            set status
-
-
-        """

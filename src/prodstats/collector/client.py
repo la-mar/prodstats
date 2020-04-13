@@ -211,7 +211,7 @@ class AsyncClient(httpx.AsyncClient):
             self._credentials = credentials
 
     async def get(self, *args, **kwargs) -> httpx.Response:
-        logger.info(f"AsyncClient.get -- {args} {kwargs}")
+        logger.debug(f"GET {self.base_url}: {args=} {kwargs=}")
         response = await super().get(*args, **kwargs)
 
         # patch json loader to use orjson and return empty dict when content is empty

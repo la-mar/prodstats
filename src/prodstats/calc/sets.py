@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -112,12 +112,20 @@ class WellSet(DataSet):
                 "links": db.models.WellLink,
             }
         )
-        self.wells = wells
-        self.depths = depths
-        self.fracs = fracs
-        self.ips = ips
-        self.stats = stats
-        self.links = links
+        self.wells: pd.DataFrame = wells
+        self.depths: pd.DataFrame = depths
+        self.fracs: pd.DataFrame = fracs
+        self.ips: pd.DataFrame = ips
+        self.stats: pd.DataFrame = stats
+        self.links: pd.DataFrame = links
+        self.geoms: Optional[WellGeometrySet] = None
+
+    @property
+    def has_geoms(self):
+        return self.geoms is None
+
+    def add_geoms(self, geomset: WellGeometrySet):
+        self.geoms = geomset
 
 
 class WellGeometrySet(DataSet):

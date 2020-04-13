@@ -21,6 +21,7 @@ logging.getLogger("boto3").setLevel(logging.WARNING)
 logging.getLogger("gino").setLevel(logging.WARNING)
 logging.getLogger("fiona").setLevel(logging.WARNING)
 logging.getLogger("botocore").setLevel(logging.CRITICAL)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def mlevel(level: Union[int, str]) -> int:
@@ -144,7 +145,9 @@ def get_formatter(name: Union[str, None]) -> logging.Formatter:
         "simple": logging.Formatter(
             fmt="%(name)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
         ),
-        "layman": logging.Formatter(fmt="%(message)s", datefmt="%Y-%m-%d %H:%M:%S"),
+        "layman": logging.Formatter(
+            fmt="%(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+        ),
         "json": DatadogJSONFormatter(),
     }
     return formatters[name or "funcname"]  # type: ignore

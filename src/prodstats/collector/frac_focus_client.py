@@ -61,7 +61,7 @@ class FracFocusClient(AsyncClient):
         async with cls(**kwargs) as client:
             coros: List[Coroutine] = []
             for id in ids:
-                coro = client.get(f"{path.value}/{id}", timeout=timeout,)
+                coro = client.get(f"{path.value}/{id}", timeout=timeout)
                 coros.append(coro)
 
             for idx, chunk in enumerate(util.chunks(coros, concurrency)):
@@ -109,5 +109,5 @@ if __name__ == "__main__":
 
     async def async_wrapper():
 
-        data = await FracFocusClient.get_jobs(ids=api14s, path=FracFocusPath.well)
+        data = await FracFocusClient.get_jobs(api14s=api14s)
         data

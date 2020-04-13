@@ -5,7 +5,6 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
-import config as conf
 import const
 from calc.sets import ProdSet
 from collector import IHSClient, IHSPath
@@ -17,8 +16,7 @@ from util.types import PandasObject
 
 logger = logging.getLogger(__name__)
 
-
-CALC_MONTHS: List[Optional[int]] = [1, 3, 6, 12, 18, 24]
+CALC_MONTHS: List[Optional[int]] = [1, 3, 6, 12, 18, 24, 30, 36, 42, 48]
 CALC_NORM_VALUES = [  # change to List[int] now that the label can be derived
     (None, None),
     (1000, "1k"),
@@ -35,7 +33,7 @@ CALC_PROD_COLUMNS: List[str] = ["oil", "gas", "water", "boe"]
 
 @pd.api.extensions.register_dataframe_accessor("prodstats")
 class ProdStats:
-    peak_norm_limit: int = conf.PEAK_NORM_LIMIT
+    peak_norm_limit: int = const.PEAK_NORM_LIMIT
     ranges = ProdStatRange
 
     def __init__(self, obj: PandasObject):
@@ -90,6 +88,7 @@ class ProdStats:
         range_name: ProdStatRange,
         months: Union[int, str] = None,
         norm_by_label: str = None,
+        **kwargs,
     ) -> Dict[str, str]:
         """ Compose field names for the aggregate outputs of a list of columns
 
@@ -178,13 +177,14 @@ class ProdStats:
         if not monthly.index.is_monotonic_increasing:
             # force sorting prior to function call for performance reasons
             raise ValueError(
-                f"DataFrame index is not monotonic. Is the DataFrame's index sorted in ascending order?"  # noqa
+                f"Index is not monotonic. Is the DataFrame's index sorted in ascending order?"  # noqa
             )
 
         df = monthly
         df.loc[:, list(agg_map.keys())] = df.loc[:, list(agg_map.keys())].astype(float)
 
         if include_zeroes:
+
             # aggregate all target columns
             df = df.prodstats.monthly_by_range(
                 range_name=range_name, months=months
@@ -193,7 +193,7 @@ class ProdStats:
             aggregated = df.groupby(level=0).agg(agg_map).rename(columns=alias_map)
             aggregated = aggregated.join(df.prodstats.prod_bounds_by_well())
 
-            # melt to EAV=type schema
+            # melt to EAV type schema
             aggregated = aggregated.prodstats.melt(prodstat_names=alias_map.values())
             result = aggregated
 
@@ -288,11 +288,11 @@ class ProdStats:
         )
         aggregated["comments"] = None
 
-        api10s = aggregated.util.column_as_set("api10")
-        logger.debug(
-            f"{api10s} calculated prodstats: {list(alias_map.values())}",
-            extra={"api10": api10s, **alias_map},
-        )
+        # api10s = aggregated.util.column_as_set("api10")
+        # logger.debug(
+        #     f"{api10s} calculated prodstats: {list(alias_map.values())}",
+        #     extra={"api10": api10s, **alias_map},
+        # )
 
         return aggregated
 
@@ -323,7 +323,6 @@ class ProdStats:
                 }
             )
 
-        logger.debug(f"generated {len(option_sets)} option sets")
         return option_sets
 
     @classmethod
@@ -344,6 +343,8 @@ class ProdStats:
             agg_types=agg_types,
             include_zeroes=include_zeroes,
         )
+        logger.debug(f"(Prodstats) generated {len(bounded)} bounded option sets")
+
         unbounded = cls._generate_option_sets(
             months=[None],
             norm_values=norm_values,
@@ -351,6 +352,7 @@ class ProdStats:
             agg_types=agg_types,
             include_zeroes=include_zeroes,
         )
+        logger.debug(f"(Prodstats) generated {len(unbounded)} unbounded option sets")
 
         return bounded + unbounded
 
@@ -361,10 +363,18 @@ class ProdStats:
 
         monthly = self._obj
         option_sets = option_sets or self.generate_option_sets()
-
+        # total_option_sets = len(option_sets)
         stats = pd.DataFrame()
-        for opts in option_sets:
-            # logger.warning(opts)
+
+        opts = pd.DataFrame.prodstats.generate_option_sets()
+
+        for idx, opts in enumerate(option_sets):
+            # alias_map: Dict[str, str] = pd.DataFrame.prodstats.make_aliases(
+            #     **kwargs, **opts
+            # )
+            # logger.debug(
+            #     f"(Prodstats) {idx}/{total_option_sets}: {list(alias_map.values())}"
+            # )
             stats = stats.append(monthly.prodstats.interval(**kwargs, **opts))
         return stats
 
@@ -524,16 +534,21 @@ class ProdStats:
         prodstat_option_sets: List[Dict[str, Any]] = None,
         skip_stats: bool = False,
     ) -> ProdSet:
+
+        logger.debug(f"(Production) preprocessing...")
         header, monthly, _ = self.preprocess()
 
+        logger.debug(f"(Production) calulating peak30...")
         peak30 = monthly.prodstats.peak30()
         header = header.join(peak30)
 
+        logger.debug(f"(Production) calulating PDP...")
         pdp = monthly.prodstats.pdp(
             range_name=ProdStatRange.LAST, months=3, dollars_per_bbl=30000, factor=0.75
         )
         header = header.join(pdp)
 
+        logger.debug(f"(Production) applying normalization...")
         monthly["peak_norm_month"] = monthly.prod_month - header.peak30_month + 1
         monthly["peak_norm_days"] = (
             monthly[monthly.peak_norm_month > 0]
@@ -571,13 +586,15 @@ class ProdStats:
 
         if skip_stats:
             stats = None
-            logger.debug(f"skipping prodstat calculations")
+            logger.debug(f"(Production) SKIPPED prodstats")
         else:
+            logger.debug(f"(Production) calculating prodstats...")
             stats = monthly.prodstats.stats(
                 columns=prodstat_columns, option_sets=prodstat_option_sets
             )
 
         monthly = monthly.drop(columns=["perfll"])
+        logger.debug(f"(Production) complete")
 
         return ProdSet(header=header, monthly=monthly, stats=stats)
 
@@ -618,6 +635,8 @@ class ProdStats:
 
 if __name__ == "__main__":
 
+    import loggers
+
     api10s = None
     entities = None
     ids = ["14207C017575", "14207C020251", "14207C0201501H"]
@@ -625,50 +644,14 @@ if __name__ == "__main__":
     path = IHSPath.prod_h
     kwargs: Dict = {}
     kwargs
-    logger.setLevel(20)
+
+    loggers.config(level=10)
 
     async def wrapper():
-
-        # ids = ["14207C017575"]
-        # ids = [
-        #     "14207C0155111H",
-        #     "14207C0155258418H",
-        #     "14207C0155258421H",
-        #     # "14207C01552617H",
-        #     "14207C015535211H",
-        #     # "14207C015535212H",
-        #     # "14207C0155368001H",
-        #     # "14207C0155368002H",
-        #     # "14207C01558022H",
-        #     # "14207C0155809H",
-        #     # "14207C017575",
-        #     # "14207C020251",
-        # ]
-
-        # prod = await IHSClient.get_production(entity12s=entity12s, path=IHSPath.prod_h)
 
         prod = await pd.DataFrame.prodstats.from_ihs(
             entity12s=entity12s, path=IHSPath.prod_h
         )
-        # prod.iloc[0]
 
-        # force remove tzinfo then localize to UTC
-        # prod.provider_last_update_at.dt.tz_localize(None).dt.tz_localize("utc")
-        # ts = prod.provider_last_update_at[0]
-        # ts.tz_localize(None).tz_localize("utc")
-        prod.prodstats.calc()
-        # prod.entity12.unique()
-        # prod.groupby(level=0).first().count().entity12
-        # related_wells = (
-        #     prod.groupby(level=0)
-        #     .first()
-        #     .groupby("entity12")
-        #     .agg({"api14": "unique", "entity": "count"})
-        # ).rename(columns={"api14": "related_wells", "entity": "related_well_count"})
-
-        # # from util.jsontools import to_json
-
-        # # to_json(prod, "data/test.json")
-
-        # prod = prod.merge(related_wells, on="entity12")
-        # prod.related_wells.apply(lambda x: x.tolist())
+        prodset = prod.prodstats.calc()
+        prodset

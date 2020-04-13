@@ -2,8 +2,8 @@
 from util.enums import Enum
 
 MCF_TO_BBL_FACTOR: int = 6
-
 LATERAL_DIP_THRESHOLD: int = 85
+PEAK_NORM_LIMIT: int = 6
 
 # ---Enums-------------------------------------------------------------------- #
 
@@ -21,8 +21,8 @@ class HoleDirection(str, Enum):
 
 
 class EntityType(str, Enum):
-    well = "well"
-    prod = "prod"
+    WELL = "well"
+    PROD = "prod"
 
 
 class Provider(str, Enum):

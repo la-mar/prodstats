@@ -39,3 +39,8 @@
 5. Generate well links to relevant RRC filings
 6. Production links needed?
 7. Well Spacing
+8. RequestRouter for provider requests:
+   - input: const.DataType, const.Provider, const.HoleDirection
+   - output: PathComponent
+9. Standardize log messages
+10. Refactor executors.py functionality into base class

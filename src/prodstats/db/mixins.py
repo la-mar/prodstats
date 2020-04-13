@@ -66,7 +66,7 @@ class BulkIOMixin(object):
             # update these columns when a conflict is encountered
             if ignore_on_conflict:
                 stmt = stmt.on_conflict_do_nothing(constraint=cls.__table__.primary_key)
-                op_name = op_name + " (ignore_on_conflict)"
+                # op_name = f"{op_name}[ignore_on_conflict]"
             elif update_on_conflict:
                 on_conflict_update_cols = [
                     c.name
@@ -79,7 +79,7 @@ class BulkIOMixin(object):
                         k: getattr(stmt.excluded, k) for k in on_conflict_update_cols
                     },
                 )
-                op_name = op_name + " (update_on_conflict)"
+                # op_name = f"{op_name}[update_on_conflict]"
 
             coros.append(cls.execute_statement(stmt, records=chunk, op_name=op_name))
 
@@ -122,8 +122,7 @@ class BulkIOMixin(object):
                 measurements[f"{method}s_per_second"] = n / exc_time or 1
 
         logger.info(
-            f"{cls.__table__.name}.{method}: {method} {n} records ({exc_time}s)",
-            extra=measurements,
+            f"({cls.__name__}) {method} {n} records ({exc_time}s)", extra=measurements,
         )
 
 

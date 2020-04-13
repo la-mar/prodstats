@@ -130,7 +130,6 @@ DATADOG_DEFAULT_TAGS: Dict[str, str] = {
 IHS_BASE_URL = conf("PRODSTATS_IHS_URL", cast=HTTPUrl)
 FRACFOCUS_BASE_URL = conf("PRODSTATS_FRACFOCUS_URL", cast=HTTPUrl)
 
-PEAK_NORM_LIMIT: int = 6
 CALC_MAX_IDS_PER_TASK: int = 25
 
 # ---Accessors---------------------------------------------------------------- #
