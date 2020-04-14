@@ -101,6 +101,7 @@ def post_event(title: str, text: str, tags: Union[Dict, List, str] = None):
 
 def post_heartbeat():
     """ Send service heartbeat to Datadog """
+    logger.debug("heartbeat")
     return post("heartbeat", 1, metric_type="gauge")
 
 

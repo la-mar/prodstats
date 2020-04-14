@@ -44,3 +44,7 @@
    - output: PathComponent
 9. Standardize log messages
 10. Refactor executors.py functionality into base class
+11. Populate lat/lon on well_location
+12. Add geom_webmercator to well_location, survey_points, surveys
+13. Change prodstat aggregate_type stored in database from 'mean' to 'avg' for consistency
+14. Set httpx timeouts

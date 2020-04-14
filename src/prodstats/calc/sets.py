@@ -25,10 +25,10 @@ class SetItem:
             yield getattr(self, x)
 
 
-class DataSet:
+class BaseSet:
     models: Dict[str, db.models.Model] = None  # type: ignore
 
-    __data_slots__: Tuple = ("frame1", "frame2")
+    __data_slots__: Tuple = ()
 
     def __init__(self, models: Dict[str, db.models.Model]):
         self.models: Dict[str, db.models.Model] = models
@@ -66,7 +66,18 @@ class DataSet:
             )
 
 
-class ProdSet(DataSet):
+class DataSet(BaseSet):
+
+    __data_slots__: Tuple = ("data",)
+
+    def __init__(
+        self, data: pd.DataFrame = None, models: Dict[str, db.models.Model] = None
+    ):
+        super().__init__(models={"data": None})
+        self.data = data
+
+
+class ProdSet(BaseSet):
 
     __data_slots__: Tuple = ("header", "monthly", "stats")
 
@@ -89,7 +100,8 @@ class ProdSet(DataSet):
         self.stats = stats
 
 
-class WellSet(DataSet):
+class WellSet(BaseSet):
+
     __data_slots__: Tuple = ("wells", "depths", "fracs", "ips", "stats", "links")
 
     def __init__(
@@ -128,7 +140,7 @@ class WellSet(DataSet):
         self.geoms = geomset
 
 
-class WellGeometrySet(DataSet):
+class WellGeometrySet(BaseSet):
     __data_slots__: Tuple = ("locations", "surveys", "points")
 
     def __init__(

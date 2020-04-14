@@ -36,41 +36,42 @@ def _setup_heartbeat(sender, **kwargs):
     #     30, tasks.post_heartbeat, name="heartbeat",
     # )
     sender.add_periodic_task(
-        30, tasks.log, name="heartbeat",
+        15, tasks.log_qsize.s(), name="heartbeat",
     )
 
 
-def _calc_prodstats_for_area(sender, **kwargs):
-    sender.add_periodic_task(
-        900,
-        tasks.calc_prodstats_for_area.s(IHSPath.prod_h_ids, "tx-upton"),
-        name="calc_prodstats_for_upton",
-    )
-    sender.add_periodic_task(
-        900,
-        tasks.calc_prodstats_for_area.s(IHSPath.prod_h_ids, "tx-reagan"),
-        name="calc_prodstats_for_reagan",
-    )
-
-
-def _calc_prodstats_for_hole_direction(sender, **kwargs):
-    sender.add_periodic_task(
-        60,
-        tasks.calc_prodstats_for_hole_direction.s(HoleDirection.h),
-        name="calc_prodstats_for_horizontals",
-    )
-
-
-# def _sync_area_manifest(sender, **kwargs):
+# def _calc_prodstats_for_area(sender, **kwargs):
 #     sender.add_periodic_task(
-#         15, tasks.sync_area_manifest, name="sync_area_manifest",
+#         900,
+#         tasks.calc_prodstats_for_area.s(IHSPath.prod_h_ids, "tx-upton"),
+#         name="calc_prodstats_for_upton",
 #     )
+#     sender.add_periodic_task(
+#         900,
+#         tasks.calc_prodstats_for_area.s(IHSPath.prod_h_ids, "tx-reagan"),
+#         name="calc_prodstats_for_reagan",
+#     )
+
+
+# def _calc_prodstats_for_hole_direction(sender, **kwargs):
+#     sender.add_periodic_task(
+#         60,
+#         tasks.calc_prodstats_for_hole_direction.s(HoleDirection.h),
+#         name="calc_prodstats_for_horizontals",
+#     )
+
+
+def _sync_area_manifest(sender, **kwargs):
+    logger.debug("Registering periodic task: %s", "sync_area_manifest")
+    sender.add_periodic_task(
+        30, tasks.sync_area_manifest.s(), name="sync_area_manifest",
+    )
 
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
     # _setup_collection_tasks(sender, **kwargs)
-    # _setup_heartbeat(sender, **kwargs)
-    _calc_prodstats_for_hole_direction(sender, **kwargs)
-    # _sync_area_manifest(sender, **kwargs)
+    _setup_heartbeat(sender, **kwargs)
+    # _calc_prodstats_for_hole_direction(sender, **kwargs)
+    _sync_area_manifest(sender, **kwargs)
     # _calc_prodstats_for_area(sender, **kwargs)

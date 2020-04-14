@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import List
 
 import typer
+from prodstats.main import app
 
 import config as conf
 import loggers
-from prodstats.main import app
 
 loggers.config()
 
@@ -97,6 +97,7 @@ def cron(loglevel: str = CELERY_LOG_LEVEL_NAME):
         "-A",
         "cq:celery_app",
         "beat",
+        "--pidfile=",
         "--loglevel",
         loggers.mlevelname(loglevel),
     ]

@@ -77,20 +77,13 @@ class IHSClient(AsyncClient):
         api10s: Union[str, List[str]] = None,
         timeout: Optional[int] = None,
         concurrency: int = None,
+        related: bool = True,
         **kwargs,
     ) -> List[Dict[str, Any]]:
         """Fetch production records from the internal IHS service.
 
-        Arguments:
-            id {Union[str, List[str]]} -- can be a single or list of producing entities or api10s
-
-        Keyword Arguments:
-            params {Dict} -- additional params to pass to client.get() (default: None)
-            path {str} -- url resource bath (default: "prod/h")
-            timeout {int} -- optional timeout period for production requests
-
         Returns:
-            list -- list of monthly production records for the given ids
+            list -- list of monthly production records
         """
         optcount = sum(
             [
@@ -127,7 +120,7 @@ class IHSClient(AsyncClient):
             ids=ids,
             path=path,
             param_name=param_name,
-            params=params,
+            params={"related": related, **(params or {})},
             timeout=timeout,
             concurrency=concurrency,
             **kwargs,

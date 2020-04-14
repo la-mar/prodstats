@@ -60,7 +60,7 @@ DATABASE_PASSWORD: Secret = conf("DATABASE_PASSWORD", cast=Secret, default=None)
 DATABASE_HOST: str = conf("DATABASE_HOST", cast=str, default="localhost")
 DATABASE_PORT: int = conf("DATABASE_PORT", cast=int, default=5432)
 DATABASE_NAME: str = conf("DATABASE_NAME", cast=str, default=project)
-DATABASE_POOL_SIZE_MIN: int = conf("DATABASE_POOL_SIZE_MIN", cast=int, default=10)
+DATABASE_POOL_SIZE_MIN: int = conf("DATABASE_POOL_SIZE_MIN", cast=int, default=1)
 DATABASE_POOL_SIZE_MAX: int = conf(
     "DATABASE_POOL_SIZE_MIN", cast=int, default=DATABASE_POOL_SIZE_MIN
 )
@@ -160,7 +160,7 @@ CELERY_LOG_FORMAT: str = conf("LOG_FORMAT", cast=str, default=LOG_FORMAT)
 class CeleryConfig:
 
     # custom
-    db_pool_min_size: int = conf("CELERY_DB_MIN_POOL_SIZE", cast=int, default=2)
+    db_pool_min_size: int = conf("CELERY_DB_MIN_POOL_SIZE", cast=int, default=1)
     db_pool_max_size: int = conf(
         "CELERY_DB_MAX_POOL_SIZE", cast=int, default=db_pool_min_size
     )

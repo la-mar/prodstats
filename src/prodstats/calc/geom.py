@@ -7,11 +7,11 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import LineString, Point
 
-import const
 import schemas as sch
 import util.geo as geo
 from calc.sets import WellGeometrySet
 from collector import IHSClient, IHSPath
+from const import LATERAL_DIP_THRESHOLD
 from util.pd import validate_required_columns
 from util.types import PandasObject
 
@@ -48,7 +48,7 @@ class Shapes:
         return WellGeometrySet(locations=locations, surveys=surveys, points=points)
 
     def mark_lateral_points(self, dip_threshold: int = None) -> pd.DataFrame:
-        dip_threshold = dip_threshold or const.LATERAL_DIP_THRESHOLD
+        dip_threshold = dip_threshold or LATERAL_DIP_THRESHOLD
 
         points = self._obj
         validate_required_columns(["dip"], points.columns)
@@ -349,19 +349,30 @@ class Shapes:
         df = self._obj.copy(deep=True)
         for field in geometry_columns:
             df[field] = df[field].apply(lambda x: geo.shape_to_wkb(x, srid=srid))
+
+        logger.debug(
+            f"converted {len(geometry_columns)} geometry columns to wkb: {geometry_columns}"
+        )
         return df
 
     def wkb_to_shapes(self, geometry_columns: List[str]) -> pd.DataFrame:
         df = self._obj.copy(deep=True)
         for field in geometry_columns:
             df[field] = df[field].apply(geo.wkb_to_shape)
+
+        logger.debug(
+            f"converted {len(geometry_columns)} geometry columns to shape objects: {geometry_columns}"  # noqa
+        )
         return df
 
-    def depth_stats(self, md_column: str = "md", tvd_column: str = "tvd"):
+    def depth_stats(
+        self, md_column: str = "md", tvd_column: str = "tvd"
+    ) -> pd.DataFrame:
         """ calculate min, max, avg, and percentiles for MD and TVD.
             TVD calculations only consider points in the lateral portion
             of the wellbore. """
         points = self._obj
+
         if "is_in_lateral" not in points.columns:
             points = points.shapes.mark_lateral_points()
         md_agg = points.reset_index(level=1).util.column_stats(md_column)
@@ -426,10 +437,11 @@ if __name__ == "__main__":
 
     async def async_wrapper():
 
-        locations, surveys, points = await pd.DataFrame.shapes.from_ihs(
-            path, api14s=api14s
-        )
+        geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
 
+        locations, surveys, points = geoms
+
+        locations.iloc[0]
         # points
         points = points.shapes.index_survey_points()
         kops = points.shapes.find_kop()

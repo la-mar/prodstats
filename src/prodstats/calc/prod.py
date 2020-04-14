@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 import const
-from calc.sets import ProdSet
+from calc.sets import DataSet, ProdSet
 from collector import IHSClient, IHSPath
 from const import ProdStatRange
 from schemas import ProductionWellSet
@@ -50,7 +50,7 @@ class ProdStats:
         entity12s: Union[str, List[str]] = None,
         create_index: bool = True,
         **kwargs,
-    ) -> pd.DataFrame:
+    ) -> DataSet:
         """Fetch production records from the internal IHS service.
 
         Arguments:
@@ -66,7 +66,7 @@ class ProdStats:
                 index applied [api10, prod_date] (default: True)
 
         Returns:
-            pd.DataFrame -- DataFrame of monthly production for the given ids
+            DataSet
         """
 
         data = await IHSClient.get_production(
@@ -77,8 +77,8 @@ class ProdStats:
             path=path,
             **kwargs,
         )
-        wellset = ProductionWellSet(wells=data)
-        return wellset.df(create_index=create_index)
+        prod = ProductionWellSet(wells=data).df(create_index=create_index)
+        return DataSet(data=prod)
 
     @staticmethod
     def make_aliases(
@@ -363,10 +363,7 @@ class ProdStats:
 
         monthly = self._obj
         option_sets = option_sets or self.generate_option_sets()
-        # total_option_sets = len(option_sets)
         stats = pd.DataFrame()
-
-        opts = pd.DataFrame.prodstats.generate_option_sets()
 
         for idx, opts in enumerate(option_sets):
             # alias_map: Dict[str, str] = pd.DataFrame.prodstats.make_aliases(
@@ -649,9 +646,9 @@ if __name__ == "__main__":
 
     async def wrapper():
 
-        prod = await pd.DataFrame.prodstats.from_ihs(
+        prod: DataSet = await pd.DataFrame.prodstats.from_ihs(
             entity12s=entity12s, path=IHSPath.prod_h
         )
 
-        prodset = prod.prodstats.calc()
+        prodset = prod.data.prodstats.calc()
         prodset
