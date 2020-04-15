@@ -906,7 +906,8 @@ if __name__ == "__main__":
             if not db.is_bound():
                 await db.startup()
             wexec = WellExecutor(HoleDirection.H)
-            wellset = await wexec.download(api14s=["1"])
+            wellset = await wexec.download(api14s=api14s)
+            # wellset = await wexec.download(api14s=["1"])
             wellset_processed = await wexec.process(wellset)
             await wexec.persist(wellset_processed)
 

@@ -182,7 +182,7 @@ class WellRecord(WellBase):
     provider_last_update_at: datetime = Field(..., alias="last_update_at")
 
     dates: Optional[WellDates] = WellDates()
-    elev: WellElevations = Field({}, alias="elevations")
+    elev: WellElevations = Field(WellElevations(), alias="elevations")
 
     def record(self, flatten_keys: list = ["dates", "elev"]) -> Dict[str, Any]:
         data = self.dict()
@@ -194,9 +194,33 @@ class WellRecord(WellBase):
     def localize(cls, v: Any) -> Any:
         return super().localize(v)
 
+    # @classproperty
+    # def __sub_models__(cls) -> Dict[str, CustomBaseModel]:
+    #     return {
+    #         field_name: field.type_
+    #         for field_name, field in cls.__fields__.items()
+    #         if issubclass(field.type_, BaseModel)
+    #     }
+
+    # @classproperty
+    # def __dataframe_columns__(cls) -> List[str]:
+    #     removals: List[str] = []
+    #     replacements: List[str] = []
+    #     for field_name, field in cls.__sub_models__.items():
+    #         removals.append(field_name)
+    #         replacements += field.__dataframe_columns__
+
+    #     return [
+    #         x for x in list(cls.__fields__.keys()) if x not in removals
+    #     ] + replacements
+
 
 class WellRecordSet(WellSetBase):
     wells: Optional[List[WellRecord]] = None
+
+    # @classproperty
+    # def __dataframe_columns__(cls) -> List[str]:
+    #     return cls.__first_field__.type_.__dataframe_columns__
 
     def records(self) -> List[Dict[str, Any]]:
         """ Return the well records as a single list """
@@ -306,7 +330,6 @@ class WellSurveyPointSet(WellGeometrySetBase):
 
     @classproperty
     def __dataframe_columns__(cls) -> List[str]:
-        # FIXME: Nested set models should recurse down to the first non-set model
         return list(cls.__first_field__.type_.__first_field__.type_.__fields__.keys())
 
     def records(self) -> List[Dict[str, Any]]:
@@ -404,7 +427,4 @@ if __name__ == "__main__":
     points.dict()
     points.df()
 
-    WellSurveyPointSet.__first_field__
-    cls = WellSurveyPointSet
-
-    list(cls.__first_field__.type_.__fields__.keys())
+    WellSurveyPointSet.__dataframe_columns__

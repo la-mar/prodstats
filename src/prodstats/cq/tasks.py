@@ -13,6 +13,7 @@ import util
 from collector import IHSClient
 from const import HoleDirection, IHSPath
 from cq.worker import celery_app
+from executors import GeomExecutor, ProdExecutor, WellExecutor  # noqa
 
 logger = get_task_logger(__name__)
 
