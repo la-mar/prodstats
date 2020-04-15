@@ -87,13 +87,22 @@ class BaseExecutor:
         self, name: str, model: models.Model, df: pd.DataFrame, **kwargs
     ) -> int:
 
-        ts = timer()
-        count = await model.bulk_upsert(df, **kwargs)
-        exc_time = round(timer() - ts, 2)
-        logger.info(f"({self}) persisted {df.shape[0]} {name} records ({exc_time}s)")
-        self.add_metric(
-            operation="persist", name=name, seconds=exc_time, count=df.shape[0],
-        )
+        count = 0
+        if df is not None and not df.empty:
+            logger.debug(
+                f"({self}) scheduling persistance of {df.shape[0]} {name} records)"
+            )
+            ts = timer()
+            count = await model.bulk_upsert(df, **kwargs)
+            exc_time = round(timer() - ts, 2)
+            logger.info(
+                f"({self}) persisted {df.shape[0]} {name} records ({exc_time}s)"
+            )
+            self.add_metric(
+                operation="persist", name=name, seconds=exc_time, count=df.shape[0],
+            )
+        else:
+            logger.info(f"({self}) nothing to persist")
         return count
 
     async def persist(self, dataset: DataSet, **kwargs) -> int:
@@ -216,19 +225,29 @@ class ProdExecutor(BaseExecutor):
 
     async def process(self, dataset: DataSet, **kwargs) -> ProdSet:
         kwargs = {**self.process_kwargs, **kwargs}
+        ps = ProdSet()
+        ts = timer()
+        df: pd.DataFrame = dataset.data
+
         try:
-            ts = timer()
-            df: pd.DataFrame = dataset.data
-            ps: ProdSet = df.prodstats.calc(**kwargs)
-            exc_time = round(timer() - ts, 2)
+            if df is not None and not df.empty:
+                ps = df.prodstats.calc(**kwargs)
+                exc_time = round(timer() - ts, 2)
 
-            total_count = sum([x.shape[0] for x in list(ps) if x is not None])
-            for name, model, df in ps.items():
-                seconds = round(df.shape[0] * (exc_time / (total_count or 1)), 2)
-                self.add_metric(
-                    operation="process", name=name, seconds=seconds, count=df.shape[0],
-                )
-
+                total_count = sum([x.shape[0] for x in list(ps) if x is not None])
+                for name, model, df in ps.items():
+                    if df is not None and not df.empty:
+                        seconds = round(
+                            df.shape[0] * (exc_time / (total_count or 1)), 2
+                        )
+                        self.add_metric(
+                            operation="process",
+                            name=name,
+                            seconds=seconds,
+                            count=df.shape[0],
+                        )
+            else:
+                logger.info(f"({self}) nothing to process",)
             return ps
 
         except Exception as e:
@@ -394,17 +413,24 @@ class GeomExecutor(BaseExecutor):
             locations, surveys, points = dataset
 
             if self.hole_dir == HoleDirection.H:  # TODO: Move to router
-                points = points.shapes.index_survey_points()
-                kops = points.shapes.find_kop()
-                points = points.join(kops)
+                if surveys is not None and points is not None:
+                    points = points.shapes.index_survey_points()
+                    kops = points.shapes.find_kop()
+                    points = points.join(kops)
 
-                # surveys
-                laterals = points[points.is_in_lateral].shapes.as_line(
-                    label="lateral_only"
-                )
-                sticks = points.shapes.as_stick()
-                bent_sticks = points.shapes.as_bent_stick()
-                surveys = surveys.join(laterals).join(sticks).join(bent_sticks)
+                    # surveys
+                    laterals = points[points.is_in_lateral].shapes.as_line(
+                        label="lateral_only"
+                    )
+                    sticks = points.shapes.as_stick()
+                    bent_sticks = points.shapes.as_bent_stick()
+                    surveys = surveys.join(laterals).join(sticks).join(bent_sticks)
+                else:
+                    api14s = locations.util.column_as_set("api14")
+                    logger.warning(
+                        f"({self}) skipped processing of {len(api14s)} surveys)",
+                        extra={"api14s": api14s},
+                    )
 
             geomset = WellGeometrySet(
                 locations=locations, surveys=surveys, points=points
@@ -413,10 +439,14 @@ class GeomExecutor(BaseExecutor):
             total_count = sum([x.shape[0] for x in list(geomset) if x is not None])
 
             for name, model, df in geomset.items():
-                seconds = round(df.shape[0] * (exc_time / (total_count or 1)), 2)
-                self.add_metric(
-                    operation="process", name=name, seconds=seconds, count=df.shape[0],
-                )
+                if df is not None and not df.empty:
+                    seconds = round(df.shape[0] * (exc_time / (total_count or 1)), 2)
+                    self.add_metric(
+                        operation="process",
+                        name=name,
+                        seconds=seconds,
+                        count=df.shape[0],
+                    )
 
             return geomset
 
@@ -645,8 +675,6 @@ class WellExecutor(BaseExecutor):
                         seconds=seconds,
                         count=df.shape[0],
                     )
-                else:
-                    logger.debug(f"({self}) {name}: no records to process")
 
             return wellset
 
@@ -827,6 +855,185 @@ if __name__ == "__main__":
     h_sample: List[str] = random.choices(api14h, k=sample_size)
     v_sample: List[str] = random.choices(api14v, k=sample_size)
 
+    api14s = [
+        "42461409160000",
+        "42383406370000",
+        "42461412100000",
+        "42461412090000",
+        "42461411750000",
+        "42461411740000",
+        "42461411730000",
+        "42461411720000",
+        "42461411600000",
+        "42461411280000",
+        "42461411270000",
+        "42461411260000",
+        "42383406650000",
+        "42383406640000",
+        "42383406400000",
+        "42383406390000",
+        "42383406380000",
+        "42461412110000",
+        "42383402790000",
+    ]
+    api10s = [x[:10] for x in api14s]
+    ids = ["14207C0155111H", "14207C0155258418H"]
+    ids = ["14207C0202511H", "14207C0205231H"]
+    entity12s = {x[:12] for x in ids}
+    hole_direction = HoleDirection.H
+    deo_api14s = api14s[-3:]
+
+    async def async_wrapper():
+        if not db.is_bound():
+            await db.startup()
+
+        async def test_tiny_batch():
+            if not db.is_bound():
+                await db.startup()
+            wexec = WellExecutor(HoleDirection.H)
+
+            wellsets = []
+            for api14 in api14s:
+                api14 = "42461412110000"
+                try:
+                    wellset = await wexec.download(api14s=[api14])
+                    wellset_processed = await wexec.process(wellset)
+                    await wexec.persist(wellset_processed)
+                except Exception:
+                    wellsets.append(wellset_processed)
+
+        async def test_driftwood_horizontals():
+            if not db.is_bound():
+                await db.startup()
+            wexec = WellExecutor(HoleDirection.H)
+            wellset = await wexec.download(api14s=["1"])
+            wellset_processed = await wexec.process(wellset)
+            await wexec.persist(wellset_processed)
+
+        async def test_driftwood_production():
+            if not db.is_bound():
+                await db.startup()
+            pexec = ProdExecutor(HoleDirection.H)
+            ds: DataSet = await pexec.download(api14s=deo_api14s)
+            ps: ProdSet = await pexec.process(ds)
+            await pexec.persist(ps)
+
+        async def test_driftwood_geoms():
+            if not db.is_bound():
+                await db.startup()
+            pexec = GeomExecutor(HoleDirection.H)
+            # ds: WellGeometrySet = await pexec.download(api14s=["42461412110000"])
+            ds: WellGeometrySet = await pexec.download(api14s=api14s)
+            ps: WellGeometrySet = await pexec.process(ds)
+            await pexec.persist(ps)
+
+        async def test_well_vertical():
+            if not db.is_bound():
+                await db.startup()
+            wexec = WellExecutor(HoleDirection.V)
+            # results, errors = wexec.run_sync(api14s=api14s)
+            api14s = await IHSClient.get_ids_by_area(
+                path=IHSPath.well_v_ids, area="tx-upton"
+            )
+            api14s = api14s[:100]
+            wellset = await wexec.download(api14s=api14s)
+            wellset_processed = await wexec.process(wellset=wellset)
+            await wexec.persist(wellset=wellset_processed)
+
+        async def test_production_vertical():
+            if not db.is_bound():
+                await db.startup()
+
+            hole_dir = HoleDirection.V
+            id_path = IHSPath.prod_v_ids
+
+            pexec = ProdExecutor(hole_dir)
+            entities = await IHSClient.get_ids_by_area(path=id_path, area="tx-upton")
+            entities = entities[:10]
+            ds: DataSet = await pexec.download(entities=entities)
+            ps: ProdSet = await pexec.process(ds)
+            await pexec.persist(ps)
+
+        async def test_well_horizontals():
+            if not db.is_bound():
+                await db.startup()
+            wexec = WellExecutor(HoleDirection.H)
+            # results, errors = wexec.run_sync(api14s=api14s)
+            api14s = await IHSClient.get_ids_by_area(
+                path=IHSPath.well_h_ids, area="tx-upton"
+            )
+            api14s = api14s[:100]
+            wellset = await wexec.download(api14s=api14s)
+            wellset_processed = await wexec.process(wellset=wellset)
+            await wexec.persist(wellset=wellset_processed)
+
+        async def test_production_horizontal():
+            if not db.is_bound():
+                await db.startup()
+
+            hole_dir = HoleDirection.H
+            id_path = IHSPath.prod_h_ids
+
+            pexec = ProdExecutor(hole_dir)
+            entities = await IHSClient.get_ids_by_area(path=id_path, area="tx-upton")
+            entities = entities[:10]
+            # entity12s = [x[:12] for x in entities]
+            ds: DataSet = await pexec.download(entities=entities)
+            ps: ProdSet = await pexec.process(ds)
+            await pexec.persist(ps)
+
+        # async def test_wells_supplemental():
+        #     wexec = WellExecutor(hole_direction)
+        #     wellset = await wexec.download(api14s=api14s)
+        #     geoms = await GeomExecutor(hole_direction).download(api14s=api14s)
+        #     prod = await ProdExecutor(hole_direction).download(api14s=api14s)
+        #     prod_headers = (
+        #         prod.reset_index()
+        #         .groupby("api14")
+        #         .prod_date.max()
+        #         .rename("last_prod_date")
+        #         .to_frame()
+        #     )
+        #     wellset_processed = await wexec.process(
+        #         wellset=wellset, geoms=geoms, prod_headers=prod_headers
+        #     )
+        #     await wexec.persist(wellset=wellset_processed)
+
+        async def sync_all():
+            if not db.is_bound():
+                await db.startup()
+
+            loggers.config(level=20)
+
+            for hole_direction in [HoleDirection.V]:
+                if hole_direction == HoleDirection.H:
+                    ids_path = IHSPath.well_h_ids
+                else:
+                    ids_path = IHSPath.well_v_ids
+
+                areas = await IHSClient.get_areas(path=ids_path)
+                areas = ["tx-upton", "tx-reagan", "tx-midland"]
+
+                counts = []
+                datasets = []
+
+                batch_size = 100
+                for area in areas:
+                    logger.warning(f"running area: {area}")
+                    api14s = await IHSClient.get_ids_by_area(path=ids_path, area=area)
+
+                    for chunk in util.chunks(api14s, n=batch_size):
+                        for executor in [WellExecutor, GeomExecutor, ProdExecutor]:
+                            try:
+                                count, dataset = executor(hole_direction).run(
+                                    api14s=chunk
+                                )
+                                counts.append(count)
+                                datasets.append(dataset)
+                            except Exception as e:
+                                print(e)
+
+    # * multiprocessing, lol
     # hole_directions: List[HoleDirection] = HoleDirection.members()
     # # hole_directions: List[HoleDirection] = [HoleDirection.H]
     # executors = [WellExecutor, GeomExecutor, ProdExecutor]
@@ -841,160 +1048,3 @@ if __name__ == "__main__":
     # results = pool.starmap(test_executor_arun, starargs)
     # pool.close()
     # print(f"\n\n{results}\n\n")
-
-    # api14s = [
-    #     "42461409160000",
-    #     "42383406370000",
-    #     "42461412100000",
-    #     "42461412090000",
-    #     "42461411750000",
-    #     "42461411740000",
-    #     "42461411730000",
-    #     "42461411720000",
-    #     "42461411600000",
-    #     "42461411280000",
-    #     "42461411270000",
-    #     "42461411260000",
-    #     "42383406650000",
-    #     "42383406640000",
-    #     "42383406400000",
-    #     "42383406390000",
-    #     "42383406380000",
-    #     "42461412110000",
-    #     "42383402790000",
-    # ]
-    # api10s = [x[:10] for x in api14s]
-    # ids = ["14207C0155111H", "14207C0155258418H"]
-    # ids = ["14207C0202511H", "14207C0205231H"]
-    # entity12s = {x[:12] for x in ids}
-    # hole_direction = HoleDirection.H
-    # deo_api14s = api14s
-
-    # async def async_wrapper():
-    #     if not db.is_bound():
-    #         await db.startup()
-
-    #     async def test_driftwood_horizontals():
-    #         if not db.is_bound():
-    #             await db.startup()
-    #         wexec = WellExecutor(HoleDirection.H)
-    #         wellset = await wexec.download(api14s=deo_api14s)
-    #         wellset_processed = await wexec.process(wellset)
-    #         await wexec.persist(wellset_processed)
-
-    #     async def test_driftwood_production():
-    #         if not db.is_bound():
-    #             await db.startup()
-    #         pexec = ProdExecutor(HoleDirection.H)
-    #         ds: DataSet = await pexec.download(api14s=deo_api14s)
-    #         ps: ProdSet = await pexec.process(ds)
-    #         await pexec.persist(ps)
-
-    #     async def test_well_vertical():
-    #         if not db.is_bound():
-    #             await db.startup()
-    #         wexec = WellExecutor(HoleDirection.V)
-    #         # results, errors = wexec.run_sync(api14s=api14s)
-    #         api14s = await IHSClient.get_ids_by_area(
-    #             path=IHSPath.well_v_ids, area="tx-upton"
-    #         )
-    #         api14s = api14s[:100]
-    #         wellset = await wexec.download(api14s=api14s)
-    #         wellset_processed = await wexec.process(wellset=wellset)
-    #         await wexec.persist(wellset=wellset_processed)
-
-    #     async def test_production_vertical():
-    #         if not db.is_bound():
-    #             await db.startup()
-
-    #         hole_dir = HoleDirection.V
-    #         id_path = IHSPath.prod_v_ids
-
-    #         pexec = ProdExecutor(hole_dir)
-    #         entities = await IHSClient.get_ids_by_area(path=id_path, area="tx-upton")
-    #         entities = entities[:10]
-    #         ds: DataSet = await pexec.download(entities=entities)
-    #         ps: ProdSet = await pexec.process(ds)
-    #         await pexec.persist(ps)
-
-    #     async def test_well_horizontals():
-    #         if not db.is_bound():
-    #             await db.startup()
-    #         wexec = WellExecutor(HoleDirection.H)
-    #         # results, errors = wexec.run_sync(api14s=api14s)
-    #         api14s = await IHSClient.get_ids_by_area(
-    #             path=IHSPath.well_h_ids, area="tx-upton"
-    #         )
-    #         api14s = api14s[:100]
-    #         wellset = await wexec.download(api14s=api14s)
-    #         wellset_processed = await wexec.process(wellset=wellset)
-    #         await wexec.persist(wellset=wellset_processed)
-
-    #     async def test_production_horizontal():
-    #         if not db.is_bound():
-    #             await db.startup()
-
-    #         hole_dir = HoleDirection.H
-    #         id_path = IHSPath.prod_h_ids
-
-    #         pexec = ProdExecutor(hole_dir)
-    #         entities = await IHSClient.get_ids_by_area(path=id_path, area="tx-upton")
-    #         entities = entities[:10]
-    #         # entity12s = [x[:12] for x in entities]
-    #         ds: DataSet = await pexec.download(entities=entities)
-    #         ps: ProdSet = await pexec.process(ds)
-    #         await pexec.persist(ps)
-
-    #     async def test_wells_supplemental():
-    #         wexec = WellExecutor(hole_direction)
-    #         wellset = await wexec.download(api14s=api14s)
-    #         geoms = await GeomExecutor(hole_direction).download(api14s=api14s)
-    #         prod = await ProdExecutor(hole_direction).download(api14s=api14s)
-    #         prod_headers = (
-    #             prod.reset_index()
-    #             .groupby("api14")
-    #             .prod_date.max()
-    #             .rename("last_prod_date")
-    #             .to_frame()
-    #         )
-    #         wellset_processed = await wexec.process(
-    #             wellset=wellset, geoms=geoms, prod_headers=prod_headers
-    #         )
-    #         await wexec.persist(wellset=wellset_processed)
-
-    #     async def sync_all():
-    #         if not db.is_bound():
-    #             await db.startup()
-
-    #         loggers.config(level=20)
-
-    #         for hole_direction in [HoleDirection.V]:
-    #             if hole_direction == HoleDirection.H:
-    #                 ids_path = IHSPath.well_h_ids
-    #             else:
-    #                 ids_path = IHSPath.well_v_ids
-
-    #             areas = await IHSClient.get_areas(path=ids_path)
-    #             areas = ["tx-upton", "tx-reagan", "tx-midland"]
-
-    #             counts = []
-    #             datasets = []
-
-    #             batch_size = 100
-    #             for area in areas:
-    #                 logger.warning(f"running area: {area}")
-    #                 api14s = await IHSClient.get_ids_by_area(path=ids_path, area=area)
-
-    #                 for chunk in util.chunks(api14s, n=batch_size):
-    #                     for executor in [WellExecutor, GeomExecutor, ProdExecutor]:
-    #                         try:
-    #                             count, dataset = await executor(hole_direction).run(
-    #                                 api14s=chunk, batch_size=batch_size
-    #                             )
-    #                             counts.append(count)
-    #                             datasets.append(dataset)
-    #                         except Exception as e:
-    #                             print(e)
-
-    #     # ! tenacity?
-    #     # ! asynchronously fracture failed batches

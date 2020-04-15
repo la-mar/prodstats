@@ -1,12 +1,13 @@
 import logging
 from datetime import date, datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 from pydantic import Field, root_validator, validator
 from shapely.geometry import LineString, Point, asShape
 
-from schemas.bases import CustomBaseModel
+from schemas.bases import CustomBaseModel, CustomBaseSetModel
+from util.deco import classproperty
 
 __all__ = [
     "WellDates",
@@ -34,6 +35,13 @@ logger = logging.getLogger(__name__)
 class WellBase(CustomBaseModel):
     class Config:
         allow_population_by_field_name = True
+
+
+class WellSetBase(WellBase, CustomBaseSetModel):
+    def df(
+        self, create_index: bool = True, index_columns: Union[str, List[str]] = "api14"
+    ) -> pd.DataFrame:
+        return super().df(create_index=create_index, index_columns=index_columns)
 
 
 class WellDates(WellBase):
@@ -67,17 +75,8 @@ class FracParameters(WellBase):
         return super().localize(v)
 
 
-class FracParameterSet(WellBase):
+class FracParameterSet(WellSetBase):
     wells: List[FracParameters]
-
-    def records(self) -> List[Dict[str, Any]]:
-        return [wd.dict() for wd in self.wells]
-
-    def df(self, create_index: bool = True) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index and "api14" in df.columns:
-            df = df.set_index("api14")
-        return df
 
 
 class WellElevations(WellBase):
@@ -94,17 +93,8 @@ class WellDepths(WellBase):
     plugback_depth: Optional[int] = None
 
 
-class WellDepthSet(WellBase):
+class WellDepthSet(WellSetBase):
     wells: List[WellDepths]
-
-    def records(self) -> List[Dict[str, Any]]:
-        return [wd.dict() for wd in self.wells]
-
-    def df(self, create_index: bool = True) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index and "api14" in df.columns:
-            df = df.set_index("api14")
-        return df
 
 
 class IPTest(WellBase):
@@ -161,21 +151,12 @@ class IPTests(WellBase):
         return {"api14": api14, "ip": culled}
 
 
-class IPTestSet(WellBase):
+class IPTestSet(WellSetBase):
     wells: List[IPTests]
 
     def records(self) -> List[Dict[str, Any]]:
         """ Return the well records as a single list """
-        records: List[Dict[str, Any]] = []
-        for well in self.wells:
-            records += well.records()
-        return records
-
-    def df(self, create_index: bool = True) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index and "api14" in df.columns:
-            df = df.set_index("api14")
-        return df
+        return super().records(using="records")
 
 
 class WellRecord(WellBase):
@@ -214,7 +195,7 @@ class WellRecord(WellBase):
         return super().localize(v)
 
 
-class WellRecordSet(WellBase):
+class WellRecordSet(WellSetBase):
     wells: Optional[List[WellRecord]] = None
 
     def records(self) -> List[Dict[str, Any]]:
@@ -224,17 +205,14 @@ class WellRecordSet(WellBase):
             records = [well.record() for well in self.wells]
         return records
 
-    def df(self, create_index: bool = True) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index and "api14" in df.columns:
-            df = df.set_index("api14")
-
-        return df
-
 
 class WellGeometryBase(WellBase):
     class Config:
         arbitrary_types_allowed = True
+
+
+class WellGeometrySetBase(WellGeometryBase, WellSetBase):
+    pass
 
 
 class WellSurvey(WellGeometryBase):
@@ -258,21 +236,8 @@ class WellSurvey(WellGeometryBase):
         return {"api14": api14, **survey}
 
 
-class WellSurveySet(WellGeometryBase):
+class WellSurveySet(WellGeometrySetBase):
     wells: Optional[List[WellSurvey]] = None
-
-    def records(self) -> List[Dict[str, Any]]:
-        records: List[Dict] = []
-        if self.wells:
-            for x in self.wells:
-                records.append(x.dict())
-        return records
-
-    def df(self, create_index: bool = True) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index and "api14" in df.columns:
-            df = df.set_index("api14")
-        return df
 
     @root_validator(pre=True)
     def filter_failing_records(cls, values) -> Dict[str, Any]:
@@ -308,7 +273,7 @@ class WellSurveyPoint(WellGeometryBase):
         return values
 
 
-class WellSurveyPoints(WellGeometryBase):
+class WellSurveyPoints(WellGeometrySetBase):
 
     points: Optional[List[WellSurveyPoint]] = None
 
@@ -335,30 +300,24 @@ class WellSurveyPoints(WellGeometryBase):
             records = [x.dict() for x in self.points]
         return records
 
-    def df(self, create_index: bool = True) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index and "api14" in df.columns:
-            df = df.set_index("api14")
-        return df
 
-
-class WellSurveyPointSet(WellGeometryBase):
+class WellSurveyPointSet(WellGeometrySetBase):
     wells: Optional[List[WellSurveyPoints]] = None
 
+    @classproperty
+    def __dataframe_columns__(cls) -> List[str]:
+        # FIXME: Nested set models should recurse down to the first non-set model
+        return list(cls.__first_field__.type_.__first_field__.type_.__fields__.keys())
+
     def records(self) -> List[Dict[str, Any]]:
-        records: List[Dict] = []
-        if self.wells:
-            for x in self.wells:
-                records += x.records()
-        return records
+        return super().records(using="records")
 
     def df(
-        self, create_index: bool = True, sort_by: str = "md", ascending: bool = True,
+        self,
+        create_index: bool = True,
+        index_columns: Union[str, List[str]] = ["api14", "md"],
     ) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index and "api14" in df.columns:
-            df = df.set_index(["api14", "md"])
-        return df
+        return super().df(create_index=create_index, index_columns=index_columns)
 
 
 class WellLocation(WellGeometryBase):
@@ -376,7 +335,7 @@ class WellLocation(WellGeometryBase):
         return asShape(v)
 
 
-class WellLocationSet(WellGeometryBase):
+class WellLocationSet(WellGeometrySetBase):
     wells: Optional[List[WellLocation]] = None
 
     @validator("wells", pre=True)
@@ -394,30 +353,32 @@ class WellLocationSet(WellGeometryBase):
 
         return locations
 
-    def records(self) -> List[Dict[str, Any]]:
-        records: List[Dict] = []
-        if self.wells:
-            for x in self.wells:
-                records.append(x.dict())
-        return records
-
-    def df(self, create_index: bool = True) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index and "api14" in df.columns:
-            df = df.set_index(["api14", "name"])
-        return df
-
 
 if __name__ == "__main__":
     from util.jsontools import load_json
 
     ihs_wells = load_json(f"tests/fixtures/ihs_wells.json")
+    ihs_geoms = load_json(f"tests/fixtures/ihs_well_shapes.json")
 
     obj = WellRecord(**ihs_wells[0])
     obj.record()
 
     objset = WellRecordSet(wells=ihs_wells)
-    objset.df().T
+    # objset = WellRecordSet(wells=[])
+    objset.df()
+
+    # WellRecordSet.__dataframe_columns__
+    # field = fields["wells"]
+
+    # self = objset
+
+    # list(list(self.__fields__.values())[0].type_.__fields__.keys())
+    # .__fields_set__
+
+    # pd.DataFrame(
+    #     columns=list(WellRecord.__fields__.keys()),
+    #     data=WellRecordSet(wells=ihs_wells).records(),
+    # )
 
     depths = WellDepths(**ihs_wells[0])
     depths.dict()
@@ -435,4 +396,15 @@ if __name__ == "__main__":
     frac.dict()
 
     fracs = FracParameterSet(wells=ihs_wells)
+    # fracs = FracParameterSet(wells=[])
     fracs.records()
+    fracs.df()
+
+    points = WellSurveyPointSet(wells=ihs_geoms)
+    points.dict()
+    points.df()
+
+    WellSurveyPointSet.__first_field__
+    cls = WellSurveyPointSet
+
+    list(cls.__first_field__.type_.__fields__.keys())

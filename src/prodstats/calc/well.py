@@ -9,7 +9,6 @@ import schemas as sch
 from calc.sets import WellSet
 from collector import FracFocusClient, IHSClient, IHSPath
 from const import HoleDirection
-from db import db
 from db.models import ProdHeader
 from util.pd import validate_required_columns, x_months_ago
 from util.types import PandasObject
@@ -81,20 +80,31 @@ class Well:
         api10s: Union[str, List[str]] = None,
         create_index: bool = True,
         **kwargs,
-    ) -> pd.DataFrame:
+    ) -> WellSet:
         """ Get frac job data for the given api14s/api10s from the Frac Focus service """
 
-        fracs = pd.DataFrame()
+        fracs = None
 
         try:
             data = await FracFocusClient.get_jobs(
                 api14s=api14s, api10s=api10s, **kwargs
             )
-            fracs = sch.FracParameterSet(wells=data).df(create_index=create_index)
+
+            df = sch.FracParameterSet(wells=data).df(create_index=create_index)
+            if not df.empty:
+                fracs = df
         except Exception as e:
             logger.error(f"Failed to fetch FracFocus data -- {e}")
 
-        return fracs
+        # if fracs.empty:
+        #     fields = [
+        #         x
+        #         for x in list(sch.FracParameters.__fields__.keys())
+        #         if x not in ["api14"]
+        #     ]
+        #     fracs = pd.DataFrame(columns=fields, index=pd.Index([], name="api14"))
+
+        return WellSet(fracs=fracs)
 
     @classmethod
     async def from_multiple(
@@ -147,14 +157,14 @@ class Well:
 
         if use_fracfocus:
             fracfocus = results.pop(0)
-            fracs = wellset.fracs
 
-            if fracs is None:
-                fracs = pd.DataFrame()
-
-            fracs = fracs.combine_first(fracfocus)
-            fracs = fracs[(~fracs.fluid.isna()) & (~fracs.proppant.isna())]
-            wellset.fracs = fracs
+            if wellset.fracs is None:
+                wellset.fracs = fracfocus.fracs
+            else:
+                if fracfocus.fracs is not None:
+                    wellset.fracs = fracfocus.fracs.wells.combine_frac_parameters(
+                        fracfocus.fracs
+                    )
 
         return wellset
 
@@ -178,32 +188,29 @@ class Well:
             await IHSClient.get_sample(path, n=n, frac=frac, area=area), create_index,
         )
         fracs = wellset.fracs
-        fracfocus = await cls.from_fracfocus(api14s=api14s, api10s=api10s)
-        fracs = fracs.combine_first(fracfocus)
+        fracfocus: WellSet = await cls.from_fracfocus(api14s=api14s, api10s=api10s)
+        fracs = fracs.combine_first(fracfocus.fracs)
         fracs = fracs[(~fracs.fluid.isna()) & (~fracs.proppant.isna())]
         wellset.fracs = fracs
         return wellset
-        # elif isinstance(path, FracFocusPath):
-        #     raise NotImplementedError(
-        #         f"FracFocus sampling not implented. Use IHSPath instead."
-        #     )
-        # else:
-        #     raise ValueError(
-        #         f"'path' must be one of [IHSPath, FracFocusPath], not {type(path)}"
-        #     )
 
-    async def enrich_frac_parameters(self, dropna: bool = True):
+    def combine_frac_parameters(
+        self, other: pd.DataFrame, dropna: bool = True
+    ) -> pd.DataFrame:
         fracs = self._obj
         validate_required_columns(["fluid", "proppant"], fracs.columns)
+        validate_required_columns(["fluid", "proppant"], other.columns)
+        validate_required_columns(["api14"], fracs.index.names)
+        validate_required_columns(["api14"], other.index.names)
 
-        api14s = fracs.reset_index().util.column_as_set("api14")
-        fracfocus = await pd.DataFrame.wells.from_fracfocus(api14s=api14s)
-        fracs = fracs.combine_first(fracfocus)
+        fracs = fracs.combine_first(other)
         if dropna:
             fracs = fracs[(~fracs.fluid.isna()) & (~fracs.proppant.isna())]
         return fracs
 
-    def status_indicators(self, indicators_only: bool = False, as_labels: bool = False):
+    def status_indicators(
+        self, indicators_only: bool = False, as_labels: bool = False
+    ) -> pd.DataFrame:
         df = self._obj
 
         required_columns = [
@@ -636,88 +643,37 @@ if __name__ == "__main__":
     kwargs: dict = {}
     create_index = True
 
-    async def async_wrapper():
+    # async def async_wrapper():
+    #     # from util.jsontools import load_json
 
-        # from util.jsontools import load_json
+    #     # upton_api14s = load_json("./data/upton_api14s.json")
+    #     # upton_prod_ids = load_json("./data/upton_prod_ids.json")
+    #     # upton_entity12s = [x[:12] for x in upton_prod_ids]
 
-        # upton_api14s = load_json("./data/upton_api14s.json")
-        # upton_prod_ids = load_json("./data/upton_prod_ids.json")
-        # upton_entity12s = [x[:12] for x in upton_prod_ids]
+    #     if not db.is_bound():
+    #         await db.startup()
 
-        if not db.is_bound():
-            await db.startup()
+    #     # wells, depths, fracs, ips, *other = await pd.DataFrame.wells.from_ihs(
+    #     #     path=IHSPath.well_h, api14s=api14s
+    #     # )
+    #     wells, depths, fracs, ips, *other = await pd.DataFrame.wells.from_multiple(
+    #         hole_dir="H", api14s=api14s
+    #     )
 
-        # wells, depths, fracs, ips, _ = await pd.DataFrame.wells.from_ihs(
-        #     path=IHSPath.well_h, api14s=api14s
-        # )
-        # wells, depths, fracs, ips, _ = await pd.DataFrame.wells.from_multiple(
-        #     hole_dir="H", api14s=api14s
-        # )
-        # geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
+    #     # geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
 
-        wellset = await pd.DataFrame.wells.from_sample(
-            IHSPath.well_h_sample, n=100, area="tx-upton"
-        )
-        wells, depths, fracs, ips, *other = wellset
+    #     # fracfocus = await pd.DataFrame.wells.from_fracfocus(api14s=api14s)
 
-        depths.wells.melt_depths()
+    #     wellset = await pd.DataFrame.wells.from_sample(
+    #         IHSPath.well_h_sample, n=100, area="tx-upton"
+    #     )
 
-        api14s = wells.util.column_as_set("api14")
+    #     wells, depths, fracs, ips, *other = wellset
 
-        geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_v_geoms, api14s=api14s)
-        geoms
-        geoms.surveys
+    #     depths.wells.melt_depths()
 
-        # # ! depths
-        # depth_stats = geoms.points.shapes.depth_stats()
-        # depths_melted = (
-        #     depths.dropna(how="all")
-        #     .reset_index()
-        #     .melt(id_vars=["api14"], var_name="property_name")
-        # )
-        # depths_melted["aggregate_type"] = None
-        # depths_melted["name"] = depths_melted.property_name
-        # depths_melted = depths_melted.set_index(
-        #     ["api14", "property_name", "aggregate_type"]
-        # )
+    #     api14s = wells.util.column_as_set("api14")
 
-        # depth_stats = depth_stats.append(depths_melted)
-        # depths = depth_stats.dropna(subset=["value"])
-
-        # # ! wells
-        # md_tvd: pd.DataFrame = depths[depths.name.isin(["md", "tvd"])].reset_index(
-        #     level=[1, 2], drop=True
-        # ).pivot(columns="name")
-        # md_tvd.columns = md_tvd.columns.droplevel(0)
-
-        # wells = wells.join(md_tvd)
-        # wells["lateral_length"] = geoms.points.shapes.lateral_length()
-        # wells["provider_status"] = wells.status.str.upper()
-
-        # # ! well status
-
-        # # ! fracs
-        # prod_headers: pd.DataFrame = None
-        # prefer_local = False  # if True, get from app db; if False, fetch from IHS
-
-        # if prod_headers is None:
-        #     prod_headers = await wells.wells.last_prod_date(prefer_local=prefer_local)
-
-        # wells["status"] = wells.join(prod_headers).wells.assign_status()
-        # wells["is_producing"] = wells.wells.is_producing()
-
-        # lateral_lengths = wells.wells.merge_lateral_lengths()
-        # fracs = fracs.join(lateral_lengths)
-        # fracs = fracs.wells.process_fracs()
-
-        # wellset = WellSet(
-        #     wells=wells, depths=depths, fracs=fracs, ips=ips, stats=None, links=None
-        # )
-        # wellset
-
-        # await WellHeader.bulk_upsert(wells)
-        # await WellDepth.bulk_upsert(depths)
-        # await FracParameters.bulk_upsert(fracs)
-        # await IPTest.bulk_upsert(ips)
-
-        # TODO: Check missing lateral lengths. ex: 42329418160000
+    #     geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_v_geoms, api14s=api14s)
+    #     geoms
+    #     geoms.surveys

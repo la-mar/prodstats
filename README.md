@@ -48,3 +48,4 @@
 12. Add geom_webmercator to well_location, survey_points, surveys
 13. Change prodstat aggregate_type stored in database from 'mean' to 'avg' for consistency
 14. Set httpx timeouts
+15. refactor jsontools and ext.orjson to jsonlib module with api

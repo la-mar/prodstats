@@ -1,10 +1,10 @@
 from datetime import date, datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 from pydantic import Field, validator
 
-from schemas.bases import CustomBaseModel
+from schemas.bases import CustomBaseModel, CustomBaseSetModel
 
 __all__ = ["ProductionRecord", "ProductionWell", "ProductionWellSet"]
 
@@ -12,6 +12,15 @@ __all__ = ["ProductionRecord", "ProductionWell", "ProductionWellSet"]
 class ProdBase(CustomBaseModel):
     class Config:
         allow_population_by_field_name = True
+
+
+class ProdSetBase(ProdBase, CustomBaseSetModel):
+    def df(
+        self,
+        create_index: bool = True,
+        index_columns: Union[str, List[str]] = ["api10", "prod_date"],
+    ) -> pd.DataFrame:
+        return super().df(create_index=create_index, index_columns=index_columns)
 
 
 class ProductionRecord(ProdBase):
@@ -56,32 +65,33 @@ class ProductionWell(ProdBase):
         prod = d.pop("production")
         return [{**d, **row} for row in prod]
 
-    def df(self, create_index: bool = True) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index:
-            df = df.set_index(["api10", "prod_date"])
+    # def df(self, create_index: bool = True) -> pd.DataFrame:
+    #     df = pd.DataFrame(self.records())
+    #     if create_index:
+    #         df = df.set_index(["api10", "prod_date"])
 
-        return df
+    #     return df
 
 
-class ProductionWellSet(ProdBase):
+class ProductionWellSet(ProdSetBase):
     wells: List[ProductionWell]
 
     def records(self) -> List[Dict[str, Any]]:
         """ Return the production records for each well as a single list """
         # TODO: add params to toggle which features are included/excluded
 
-        records: List[Dict[str, Any]] = []
-        for well in self.wells:
-            records += well.records()
-        return records
+        return super().records(using="records")
+        # records: List[Dict[str, Any]] = []
+        # for well in self.wells:
+        #     records += well.records()
+        # return records
 
-    def df(self, create_index: bool = True) -> pd.DataFrame:
-        df = pd.DataFrame(self.records())
-        if create_index:
-            df = df.set_index(["api10", "prod_date"])
+    # def df(self, create_index: bool = True) -> pd.DataFrame:
+    #     df = pd.DataFrame(self.records())
+    #     if create_index:
+    #         df = df.set_index(["api10", "prod_date"])
 
-        return df
+    #     return df
 
 
 if __name__ == "__main__":

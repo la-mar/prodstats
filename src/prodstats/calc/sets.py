@@ -7,18 +7,21 @@ import pandas as pd
 
 import db.models
 
+__all__ = ["SetItem", "BaseSet", "DataSet", "ProdSet", "WellSet", "WellGeometrySet"]
+
 
 class SetItem:
 
     __slots__ = ("name", "model", "df")
 
-    def __init__(self, name: str, model: db.models.Model, df: pd.DataFrame):
+    def __init__(self, name: str, model: db.models.Model, df: Optional[pd.DataFrame]):
         self.name: str = name
         self.model: db.models.Model = model
-        self.df: pd.DataFrame = df
+        self.df: Optional[pd.DataFrame] = df
 
     def __repr__(self):
-        return f"SetItem: name={self.name} model={self.model} df={self.df.shape[0]}"
+        count = self.df.shape[0] if self.df is not None else None
+        return f"SetItem: name={self.name} model={self.model} df={count}"
 
     def __iter__(self):
         for x in self.__slots__:
@@ -49,7 +52,8 @@ class BaseSet:
         result: Dict[str, Any] = {}
         for x in self.__data_slots__:
 
-            value = getattr(self, x, pd.DataFrame())
+            # value = getattr(self, x, pd.DataFrame())
+            value = getattr(self, x, None)
             if value is not None:
                 result[x] = value.shape[0]
             else:
@@ -62,7 +66,8 @@ class BaseSet:
             yield SetItem(
                 name=x,
                 model=self.models.get(x, None),
-                df=getattr(self, x, pd.DataFrame()),
+                # df=getattr(self, x, pd.DataFrame()),
+                df=getattr(self, x, None),
             )
 
 

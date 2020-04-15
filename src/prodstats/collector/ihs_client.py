@@ -242,8 +242,6 @@ if __name__ == "__main__":
 
     import loggers
 
-    # import random
-
     loggers.config()
 
     async def async_wrapper():

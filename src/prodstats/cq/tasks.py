@@ -2,21 +2,27 @@ import asyncio
 import itertools
 from typing import Coroutine, Dict, List
 
+import pandas as pd
 from celery.utils.log import get_task_logger
 
 import calc.prod  # noqa
 import cq.signals  # noqa
 import db.models as models
 import ext.metrics as metrics
+import util
 from collector import IHSClient
-from const import EntityType, HoleDirection, IHSPath
+from const import HoleDirection, IHSPath
 from cq.worker import celery_app
-from executors import ProdExecutor
 
 logger = get_task_logger(__name__)
 
 
 RETRY_BASE_DELAY = 15
+
+
+# TODO: tenacity?
+# TODO: asynchronously fracture failed batches
+# TODO: circuit breakers?
 
 
 @celery_app.task
@@ -46,14 +52,63 @@ def post_heartbeat():
 
 
 @celery_app.task
-def run_executors(entity12s: List[str]):
+def run_driftwood():
+    api14s = [
+        "42461409160000",
+        "42383406370000",
+        "42461412100000",
+        "42461412090000",
+        "42461411750000",
+        "42461411740000",
+        "42461411730000",
+        "42461411720000",
+        "42461411600000",
+        "42461411280000",
+        "42461411270000",
+        "42461411260000",
+        "42383406650000",
+        "42383406640000",
+        "42383406400000",
+        "42383406390000",
+        "42383406380000",
+        "42461412110000",
+        "42383402790000",
+    ]
 
-    logger.info(f"task id count: {len(entity12s)}")
-    pexec = ProdExecutor()
-    results, errors = pexec.run_sync(entity12s=entity12s)
-    if len(errors) > 0:
-        logger.info(f"task returned {len(errors)} errors: {errors}")
-    return len(entity12s)
+    hole_dir = HoleDirection.H
+    batch_size = 3
+    for chunk in util.chunks(api14s, n=batch_size):
+        kwargs = dict(hole_dir=hole_dir, executor_name="WellExecutor", api14s=chunk)
+        run_executor.apply_async(args=[], kwargs=kwargs)
+        # for executor in [WellExecutor, GeomExecutor, ProdExecutor]:
+        # count, dataset = executor(hole_dir).run(api14s=chunk)
+
+    # import json
+    # from util.jsontools import UniversalEncoder
+    # json.loads(json.dumps(HoleDirection.H, cls=UniversalEncoder))
+
+
+@celery_app.task
+def run_executor(hole_dir: HoleDirection, executor_name: str, **kwargs):
+    executor = globals()[executor_name]
+    count, dataset = executor(hole_dir).run(**kwargs)
+    logger.warning(count)
+
+
+@celery_app.task
+def run_executors(hole_dir: HoleDirection, id_var: str, ids: List[str]):
+    pass
+    # logger.info(f"task id count: {len(entity12s)}")
+    # pexec = ProdExecutor()
+    # results, errors = pexec.run_sync(entity12s=entity12s)
+    # if len(errors) > 0:
+    #     logger.info(f"task returned {len(errors)} errors: {errors}")
+    # return len(entity12s)
+
+
+@celery_app.task
+def run_next_available():
+    """ Run next available area """
 
 
 # @celery_app.task
@@ -137,38 +192,37 @@ def run_executors(entity12s: List[str]):
 
 
 @celery_app.task
-def sync_area_manifest():  # TODO: change to use Counties endpoint (and add Counties endpoint to IHS service :/) # noqa
+def sync_area_manifest():  # FIXME: change to use Counties endpoint (and add Counties endpoint to IHS service :/) # noqa
     """ Ensure the local list of areas is up to date """
 
     loop = asyncio.get_event_loop()
 
-    async def wrapper(path: IHSPath) -> List[Dict]:
+    async def wrapper(path: IHSPath, hole_dir: HoleDirection) -> List[Dict]:
+
         records: List[Dict] = []
-        if path.name.endswith("ids"):
-            areas = await IHSClient.get_areas(path=path)
-            etype, hole_dir = path.name.replace("_ids", "").split("_")
-            records = [
-                {
-                    "path": path,
-                    "area": a,
-                    "type": EntityType(etype),
-                    "hole_direction": HoleDirection(hole_dir.upper()),
-                }
-                for a in areas
-            ]
+        areas = await IHSClient.get_areas(path=path, name_only=False)
+        records = [{"area": area["name"], "hole_direction": hole_dir} for area in areas]
         return records
 
     coros: List[Coroutine] = []
-    for path in IHSPath.members():
-        if path.name.endswith("ids"):
-            coros.append(wrapper(path))
+    for args in [
+        (IHSPath.well_h_ids, HoleDirection.H),
+        (IHSPath.well_v_ids, HoleDirection.V),
+        (IHSPath.prod_h_ids, HoleDirection.H),
+        (IHSPath.prod_v_ids, HoleDirection.V),
+    ]:
+        coros.append(wrapper(*args))
 
     results = loop.run_until_complete(asyncio.gather(*coros))
 
-    area_records = list(itertools.chain(*results))
+    area_records = pd.DataFrame(itertools.chain(*results)).drop_duplicates()
 
-    coro = models.Area.bulk_upsert(area_records, ignore_on_conflict=True)
+    coro = models.Area.bulk_upsert(
+        area_records, update_on_conflict=True, reset_index=False
+    )
     affected = loop.run_until_complete(coro)
+
+    # TODO: delete records from Area if not in new area_records
 
     logger.info(f"synchronized manifest: refreshed {affected} areas")
 
