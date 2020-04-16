@@ -69,6 +69,9 @@ class CustomBaseModel(BaseModel):
             The column names of child models are recursively expanded into the returned
             list of column names.
 
+            This mechanism is useful for ensuring DataFrames yielded from a model will have
+            a consistent shape whether the DataFrame is empty or not.
+
             Examples
             --------
 

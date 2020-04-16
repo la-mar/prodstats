@@ -66,30 +66,39 @@ class PDUtil:
         " "
         df = self._obj
         columns = util.ensure_list(columns)
-        df_grouped = df.loc[:, columns].groupby(level=0)
-        df_agg = (
-            df_grouped.agg(["min", "max", "mean"])
-            .unstack()
-            .rename({"mean": "avg"})
-            .reset_index()
-            .rename(
-                columns={
-                    "level_0": "property_name",
-                    "level_1": "aggregate_type",
-                    0: "value",
-                }
+        if df.shape[0] > 0:
+            df_grouped = df.loc[:, columns].groupby(level=0)
+            df_agg = (
+                df_grouped.agg(["min", "max", "mean"])
+                .unstack()  # unstack breaks when dataframe has no rows
+                .rename({"mean": "avg"})
+                .reset_index()
+                .rename(
+                    columns={
+                        "level_0": "property_name",
+                        "level_1": "aggregate_type",
+                        0: "value",
+                    }
+                )
             )
-        )
 
-        df_agg = df_agg.append(
-            df_grouped.quantile([0.25, 0.5, 0.75])
-            .rename({0.25: "p25", 0.50: "p50", 0.75: "p75"})
-            .reset_index()
-            .rename(columns={"level_1": "aggregate_type"})
-            .melt(id_vars=["api14", "aggregate_type"], var_name="property_name")
-        )
+            df_agg = df_agg.append(
+                df_grouped.quantile([0.25, 0.5, 0.75])
+                .rename({0.25: "p25", 0.50: "p50", 0.75: "p75"})
+                .reset_index()
+                .rename(columns={"level_1": "aggregate_type"})
+                .melt(id_vars=["api14", "aggregate_type"], var_name="property_name")
+            )
 
-        df_agg["name"] = df_agg.property_name + "_" + df_agg.aggregate_type
-        return df_agg.set_index(
-            ["api14", "property_name", "aggregate_type"]
-        ).sort_index()
+            df_agg["name"] = df_agg.property_name + "_" + df_agg.aggregate_type
+            return df_agg.set_index(
+                ["api14", "property_name", "aggregate_type"]
+            ).sort_index()
+        else:
+            # return empty frame with correct shape
+            return pd.DataFrame(
+                index=pd.MultiIndex.from_arrays(
+                    [[], [], []], names=["api14", "property_name", "aggregate_name"]
+                ),
+                columns=["value", "name"],
+            )

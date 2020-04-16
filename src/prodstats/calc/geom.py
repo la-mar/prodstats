@@ -347,7 +347,8 @@ class Shapes:
         self, geometry_columns: List[str], srid: int = 4326
     ) -> pd.DataFrame:
         df = self._obj.copy(deep=True)
-        for field in geometry_columns:
+
+        for field in [x for x in geometry_columns if x in df.columns]:
             df[field] = df[field].apply(lambda x: geo.shape_to_wkb(x, srid=srid))
 
         logger.debug(
@@ -357,7 +358,7 @@ class Shapes:
 
     def wkb_to_shapes(self, geometry_columns: List[str]) -> pd.DataFrame:
         df = self._obj.copy(deep=True)
-        for field in geometry_columns:
+        for field in [x for x in geometry_columns if x in df.columns]:
             df[field] = df[field].apply(geo.wkb_to_shape)
 
         logger.debug(
@@ -438,8 +439,9 @@ if __name__ == "__main__":
     async def async_wrapper():
 
         geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
-
         locations, surveys, points = geoms
+
+        points.reset_index(level=1).util.column_stats("md")
 
         locations.iloc[0]
         # points

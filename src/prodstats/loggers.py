@@ -22,6 +22,11 @@ logging.getLogger("gino").setLevel(logging.WARNING)
 logging.getLogger("fiona").setLevel(logging.WARNING)
 logging.getLogger("botocore").setLevel(logging.CRITICAL)
 logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("datadog").setLevel(logging.WARNING)
+logging.getLogger("datadog.api").setLevel(logging.WARNING)
+logging.getLogger("celery.app.trace").setLevel(logging.WARNING)
+logging.getLogger("celery.worker.strategy").setLevel(logging.WARNING)
+logging.getLogger("redbeat.schedulers").setLevel(logging.WARNING)
 
 
 def mlevel(level: Union[int, str]) -> int:
@@ -90,11 +95,23 @@ class DatadogJSONFormatter(json_log_formatter.JSONFormatter):
     """JSON log formatter that includes Datadog standard attributes.
        Adapted from https://github.com/dailymuse/muselog"""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # if celery is detected, add a hook to the currently running task
+        try:
+            from celery._state import get_current_task
+
+            self.get_current_task = get_current_task
+        except ImportError:
+            self.get_current_task = lambda: None
+
     def format(self, record: LogRecord) -> str:
         """Return the record in the format usable by Datadog."""
         json_record: Dict = self.json_record(record.getMessage(), record)
         mutated_record: Dict = self.mutate_json_record(json_record)
         mutated_record = mutated_record if mutated_record is not None else json_record
+
         return self.to_json(mutated_record)
 
     def to_json(self, record: Mapping[str, Any]) -> str:
@@ -118,9 +135,16 @@ class DatadogJSONFormatter(json_log_formatter.JSONFormatter):
         }
 
         record_dict = {**additional, **conf.DATADOG_DEFAULT_TAGS, **record_dict}
-        exc_info = record.exc_info
 
-        # Handle exceptions, including those in our formatter
+        # if running inside of a celery task, add the current task's identifiers
+        task = self.get_current_task()
+        if task and task.request:
+            record_dict.update(
+                task_id=task.request.id, task_name=task.name, task_meta=task.metadata
+            )
+
+        # Handle exceptions, including those in the formatter itself
+        exc_info = record.exc_info
         if exc_info:
             if "error.kind" not in record_dict:
                 record_dict["error.kind"] = exc_info[0].__name__  # type: ignore

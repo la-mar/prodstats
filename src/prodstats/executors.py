@@ -58,7 +58,7 @@ class BaseExecutor:
 
     def add_metric(self, operation: str, name: str, seconds: float, count: int):
         logger.info(
-            f"{operation}ed {count}{f' {name}' if name != '*' else ''} records ({seconds}s)"
+            f"({self}) {operation}ed {count}{f' {name}' if name != '*' else ''} records ({seconds}s)"  # noqa
         )
 
         idx_max = self.metrics.index.max()
@@ -95,9 +95,9 @@ class BaseExecutor:
             ts = timer()
             count = await model.bulk_upsert(df, **kwargs)
             exc_time = round(timer() - ts, 2)
-            logger.info(
-                f"({self}) persisted {df.shape[0]} {name} records ({exc_time}s)"
-            )
+            # logger.info(
+            #     f"({self}) persisted {df.shape[0]} {name} records ({exc_time}s)"
+            # )
             self.add_metric(
                 operation="persist", name=name, seconds=exc_time, count=df.shape[0],
             )
@@ -110,23 +110,7 @@ class BaseExecutor:
 
     async def arun(self, **kwargs) -> Tuple[int, Optional[DataSet]]:
 
-        # api14s = kwargs.pop("api14s", None)
-        # api10s = kwargs.pop("api10s", None)
-        # entities = kwargs.pop("entities", None)
-        # entity12s = kwargs.pop("entity12s", None)
         return_data = kwargs.pop("return_data", None)
-
-        # download_kwargs: Dict = {}
-        # if entities:
-        #     download_kwargs["entities"] = entities
-        # elif api14s:
-        #     download_kwargs["api14s"] = api14s
-        # elif api10s:
-        #     download_kwargs["api10s"] = api10s
-        # elif entity12s:
-        #     download_kwargs["entity12s"] = entity12s
-        # else:
-        #     raise ValueError(f"Could not determine id_type for data download")
 
         exec_id = uuid.uuid4().hex
 
@@ -140,7 +124,8 @@ class BaseExecutor:
 
         except Exception as e:
             logger.error(
-                f"({self}) execution failed: {exec_id=} -- {e}", extra=kwargs,
+                f"({self}) execution failed: {exec_id=} -- {e} ||||| {kwargs=}",
+                extra=kwargs,
             )
             raise e
 
@@ -307,7 +292,12 @@ class ProdExecutor(BaseExecutor):
     ) -> Tuple[int, Optional[DataSet]]:
 
         param_count = sum(
-            [entities is not None, api10s is not None, entity12s is not None]
+            [
+                entities is not None,
+                api14s is not None,
+                api10s is not None,
+                entity12s is not None,
+            ]
         )
 
         if param_count > 1:
@@ -413,7 +403,12 @@ class GeomExecutor(BaseExecutor):
             locations, surveys, points = dataset
 
             if self.hole_dir == HoleDirection.H:  # TODO: Move to router
-                if surveys is not None and points is not None:
+                if (
+                    surveys is not None
+                    and points is not None
+                    and not surveys.empty
+                    and not points.empty
+                ):
                     points = points.shapes.index_survey_points()
                     kops = points.shapes.find_kop()
                     points = points.join(kops)
@@ -627,33 +622,46 @@ class WellExecutor(BaseExecutor):
             # ? begin process
             # depths
             if self.hole_dir == HoleDirection.H:
-                depth_stats = geoms.points.shapes.depth_stats()
-                depth_stats = depth_stats.append(depths.wells.melt_depths())
 
-                md_tvd_from_geoms: pd.DataFrame = depth_stats[
+                if depths is not None:
+                    depth_stats: pd.DataFrame = depths.wells.melt_depths()
+
+                if geoms.points is not None and not geoms.points.empty:
+                    depth_stats = depth_stats.append(geoms.points.shapes.depth_stats())
+                    wells["lateral_length"] = geoms.points.shapes.lateral_length()
+
+                # if depths is not None and geoms.points is not None:
+                #     depth_stats = geoms.points.shapes.depth_stats()
+                #     depth_stats = depth_stats.append(depths.wells.melt_depths())
+
+                md_tvd: pd.DataFrame = depth_stats[
                     depth_stats.name.isin(["md", "tvd"])
                 ].reset_index(level=[1, 2], drop=True).pivot(columns="name")
-                md_tvd_from_geoms.columns = md_tvd_from_geoms.columns.droplevel(0)
+                md_tvd.columns = md_tvd.columns.droplevel(0)
 
                 # combine md and tvd columns from geoms and header, preferring header
-                md_tvd = depths.loc[:, ["md", "tvd"]].combine_first(md_tvd_from_geoms)
+                md_tvd = depths.loc[:, ["md", "tvd"]].combine_first(md_tvd)
 
                 # calc and merge lateral lengths
-                wells["lateral_length"] = geoms.points.shapes.lateral_length()
+                # wells["lateral_length"] = geoms.points.shapes.lateral_length()
+                wells = wells.join(md_tvd)
+                depths = depth_stats.dropna(subset=["value"])
 
             elif self.hole_dir == HoleDirection.V:
                 # copy md to tvd where tvd is missing
-                depths.tvd = depths.tvd.combine_first(depths.md)
-                md_tvd = depths.loc[:, ["md", "tvd"]]
-                depth_stats = depths.wells.melt_depths()
-
-            wells = wells.join(md_tvd)
-            depths = depth_stats.dropna(subset=["value"])
+                if depths is not None and not depths.empty:
+                    depths.tvd = depths.tvd.combine_first(depths.md)
+                    md_tvd = depths.loc[:, ["md", "tvd"]]
+                    depth_stats = depths.wells.melt_depths()
+                    wells = wells.join(md_tvd)
+                    depths = depth_stats.dropna(subset=["value"])
 
             # well status
-            wells["provider_status"] = wells.status.str.upper()
-            wells["status"] = wells.join(prod_headers).wells.assign_status()
-            wells["is_producing"] = wells.wells.is_producing()
+
+            # wells["provider_status"] = wells.status.str.upper()
+            if wells is not None and not wells.empty:
+                wells["status"] = wells.join(prod_headers).wells.assign_status()
+                wells["is_producing"] = wells.wells.is_producing()
 
             lateral_lengths = wells.wells.merge_lateral_lengths()
             fracs = fracs.join(lateral_lengths)
@@ -741,30 +749,6 @@ class WellExecutor(BaseExecutor):
 
         return result
 
-    async def _run(
-        self,
-        api14s: Union[str, List[str]] = None,
-        api10s: Union[str, List[str]] = None,
-        return_data: bool = False,
-    ) -> Tuple[int, Optional[WellSet]]:
-
-        exec_id = uuid.uuid4().hex
-        logger.warning(f"({self}) starting execution {exec_id=}")
-
-        try:
-            df = await self.download(api14s=api14s, api10s=api10s)
-            ps = await self.process(df)
-            ct = await self.persist(ps)
-            logger.warning(f"({self}) completed execution {exec_id=}")
-            return ct, ps if return_data else None
-
-        except Exception as e:
-            logger.error(
-                f"({self}) run failed: {exec_id=} -- {e}",
-                extra={"api14s": api14s, "api10s": api10s},
-            )
-            raise e
-
     async def arun(
         self,
         api14s: Union[str, List[str]] = None,
@@ -796,40 +780,6 @@ class WellExecutor(BaseExecutor):
         return super().run(api14s=api14s, api10s=api10s, return_data=return_data,)
 
 
-# async def test_executor_async(executor: BaseExecutor, api14s: List[str]):
-#     # logger.warning(f"Testing {executor} {api14s=}")
-#     import loggers
-#     import multiprocessing as mp
-
-#     loggers.config(level=20, formatter="layman")
-#     logger.warning(f"start process: {mp.current_process()}")
-
-#     from db import db  # noqa
-
-#     if not db.is_bound():
-#         await db.startup()
-#     result = await executor.arun(api14s=api14s)
-#     logger.warning(f"end process: {mp.current_process()}")
-#     return result
-
-
-# # async def test_executor_async(executor: BaseExecutor, **kwargs):
-# #     logger.warning(f"Testing {executor} {list(kwargs.keys())}")
-# #     ds = await executor.download(**kwargs)
-# #     ds_proc = await executor.process(ds)
-# #     await executor.persist(ds_proc)
-
-
-# def test_executor_run(executor: BaseExecutor, api14s: List[str]):
-#     return executor.run(api14s=api14s)
-
-
-# def test_executor_arun(executor: BaseExecutor, api14s: List[str]):
-#     loop = asyncio.get_event_loop()
-#     coro = test_executor_async(executor, api14s=api14s)
-#     return loop.run_until_complete(coro)
-
-
 if __name__ == "__main__":
     import loggers
     import calc.prod  # noqa
@@ -855,7 +805,7 @@ if __name__ == "__main__":
     h_sample: List[str] = random.choices(api14h, k=sample_size)
     v_sample: List[str] = random.choices(api14v, k=sample_size)
 
-    api14s = [
+    deo_api14h = [
         "42461409160000",
         "42383406370000",
         "42461412100000",
@@ -876,38 +826,78 @@ if __name__ == "__main__":
         "42461412110000",
         "42383402790000",
     ]
-    api10s = [x[:10] for x in api14s]
+
+    deo_api14v = [
+        "42461326620001",
+        "42461326620000",
+        "42461328130000",
+        "42461343960001",
+        "42461352410000",
+        "42383362120000",
+        "42383362080000",
+        "42383362090000",
+        "42383374140000",
+        "42383374130000",
+        "42383362060000",
+    ]
+
     ids = ["14207C0155111H", "14207C0155258418H"]
     ids = ["14207C0202511H", "14207C0205231H"]
     entity12s = {x[:12] for x in ids}
     hole_direction = HoleDirection.H
-    deo_api14s = api14s[-3:]
 
     async def async_wrapper():
         if not db.is_bound():
             await db.startup()
 
-        async def test_tiny_batch():
+        async def test_well_horizontal_tiny_batch():
             if not db.is_bound():
                 await db.startup()
             wexec = WellExecutor(HoleDirection.H)
 
             wellsets = []
-            for api14 in api14s:
-                api14 = "42461412110000"
+            for api14 in deo_api14h:
                 try:
+                    # api14 = "42461411280000"
                     wellset = await wexec.download(api14s=[api14])
                     wellset_processed = await wexec.process(wellset)
                     await wexec.persist(wellset_processed)
                 except Exception:
                     wellsets.append(wellset_processed)
 
+        async def test_well_vertical_tiny_batch():
+            if not db.is_bound():
+                await db.startup()
+            wexec = WellExecutor(HoleDirection.V)
+
+            wellsets = []
+            for api14 in deo_api14v:
+                try:
+                    # api14 = "42461411280000"
+                    wellset = await wexec.download(api14s=[api14])
+                    wellset_processed = await wexec.process(wellset)
+                    await wexec.persist(wellset_processed)
+                except Exception:
+                    wellsets.append(wellset_processed)
+
+        async def test_geom_tiny_batch():
+            if not db.is_bound():
+                await db.startup()
+            pexec = GeomExecutor(HoleDirection.H)
+
+            for api14 in deo_api14h:
+                try:
+                    ds: WellGeometrySet = await pexec.download(api14s=[api14])
+                    ps: WellGeometrySet = await pexec.process(ds)
+                    await pexec.persist(ps)
+                except Exception:
+                    pass
+
         async def test_driftwood_horizontals():
             if not db.is_bound():
                 await db.startup()
             wexec = WellExecutor(HoleDirection.H)
-            wellset = await wexec.download(api14s=api14s)
-            # wellset = await wexec.download(api14s=["1"])
+            wellset = await wexec.download(api14s=deo_api14h)
             wellset_processed = await wexec.process(wellset)
             await wexec.persist(wellset_processed)
 
@@ -915,7 +905,7 @@ if __name__ == "__main__":
             if not db.is_bound():
                 await db.startup()
             pexec = ProdExecutor(HoleDirection.H)
-            ds: DataSet = await pexec.download(api14s=deo_api14s)
+            ds: DataSet = await pexec.download(api14s=deo_api14h)
             ps: ProdSet = await pexec.process(ds)
             await pexec.persist(ps)
 
@@ -923,8 +913,8 @@ if __name__ == "__main__":
             if not db.is_bound():
                 await db.startup()
             pexec = GeomExecutor(HoleDirection.H)
-            # ds: WellGeometrySet = await pexec.download(api14s=["42461412110000"])
-            ds: WellGeometrySet = await pexec.download(api14s=api14s)
+            ds: WellGeometrySet = await pexec.download(api14s=deo_api14h)
+            ds: WellGeometrySet = await pexec.download(api14s=["42461412110000"])
             ps: WellGeometrySet = await pexec.process(ds)
             await pexec.persist(ps)
 

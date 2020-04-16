@@ -15,12 +15,12 @@ async def startup(
     pool_max_size: int = DATABASE_POOL_SIZE_MAX,
 ):  # nocover (implicitly tested with test client)
     await db.set_bind(db.url, min_size=pool_min_size, max_size=pool_max_size)
-    logger.info(f"Connected to {db.url.__to_string__(hide_password=True)}")
+    logger.debug(f"Connected to {db.url.__to_string__(hide_password=True)}")
 
 
 async def shutdown():  # nocover (implicitly tested with test client)
     await db.pop_bind().close()
-    logger.info(f"Disconnected from {db.url.__to_string__(hide_password=True)}")
+    logger.debug(f"Disconnected from {db.url.__to_string__(hide_password=True)}")
 
 
 async def create_engine() -> gino.GinoEngine:

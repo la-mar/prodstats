@@ -1,7 +1,7 @@
 import json
 from datetime import date, datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -46,7 +46,7 @@ class UniversalEncoder(DateTimeEncoder, ObjectEncoder):
     pass
 
 
-def to_string(data: Dict[Any, Any], pretty: bool = True) -> str:
+def to_string(data: Union[List, Dict], pretty: bool = True) -> str:
     indent = 4 if pretty else 0
     return json.dumps(data, indent=indent, cls=UniversalEncoder)
 
@@ -61,6 +61,6 @@ def load_json(path: str):
         return json.load(f)
 
 
-def make_repr(data: Dict[Any, Any], pretty: bool = True) -> str:
+def make_repr(data: Union[List, Dict], pretty: bool = True) -> str:
     """wraps to_string to encapsulate repr specific edge cases """
     return to_string(data=data, pretty=pretty)

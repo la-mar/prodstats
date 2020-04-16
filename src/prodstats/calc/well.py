@@ -66,12 +66,6 @@ class Well:
             api14s=api14s, api10s=api10s, path=path, **kwargs
         )
         return cls._to_wellset(data, create_index)
-        # wells = sch.WellRecordSet(wells=data).df(create_index=create_index)
-        # depths = sch.WellDepthSet(wells=data).df(create_index=create_index)
-        # fracs = sch.FracParameterSet(wells=data).df(create_index=create_index)
-        # ips = sch.IPTestSet(wells=data).df(create_index=create_index)
-
-        # return WellSet(wells=wells, depths=depths, fracs=fracs, ips=ips)
 
     @classmethod
     async def from_fracfocus(
@@ -95,14 +89,6 @@ class Well:
                 fracs = df
         except Exception as e:
             logger.error(f"Failed to fetch FracFocus data -- {e}")
-
-        # if fracs.empty:
-        #     fields = [
-        #         x
-        #         for x in list(sch.FracParameters.__fields__.keys())
-        #         if x not in ["api14"]
-        #     ]
-        #     fracs = pd.DataFrame(columns=fields, index=pd.Index([], name="api14"))
 
         return WellSet(fracs=fracs)
 
@@ -208,9 +194,7 @@ class Well:
             fracs = fracs[(~fracs.fluid.isna()) & (~fracs.proppant.isna())]
         return fracs
 
-    def status_indicators(
-        self, indicators_only: bool = False, as_labels: bool = False
-    ) -> pd.DataFrame:
+    def status_indicators(self, indicators_only: bool = False,) -> pd.DataFrame:
         df = self._obj
 
         required_columns = [
@@ -275,7 +259,7 @@ class Well:
 
         last_prod_norm_date = x_months_ago(3)
 
-        provider_status_targets = [
+        to_recategorize = [
             "OIL PRODUCER",
             "OIL-WO",
             "AT TOTAL DEPTH",
@@ -288,9 +272,9 @@ class Well:
             "TA",
         ]
 
-        df.loc[~df.status.isin(provider_status_targets), "is_keeper_status"] = True
+        df.loc[~df.status.isin(to_recategorize), "is_keeper_status"] = True
 
-        other_mask = (df.last_prod_date.isna()) | (df.spud_date < x_months_ago(36))
+        other_mask = (df.last_prod_date.isna()) & (df.spud_date < x_months_ago(36))
         df.loc[other_mask, "is_other"] = True
 
         inactive_pa_mask = (~df.last_prod_date.isna()) & (
@@ -308,10 +292,10 @@ class Well:
         )
         df.loc[is_producing_mask, "is_producing"] = True
 
-        is_completed_mask = df.comp_date >= x_months_ago(9)
+        is_completed_mask = df.comp_date.notnull()
         df.loc[is_completed_mask, "is_completed"] = True
 
-        is_duc_mask = df.comp_date >= x_months_ago(3, relative_to=last_prod_norm_date)
+        is_duc_mask = df.spud_date < x_months_ago(3, relative_to=last_prod_norm_date)
         df.loc[is_duc_mask, "is_duc"] = True
 
         is_drilling_mask = df.spud_date.notnull()
@@ -335,6 +319,7 @@ class Well:
             "is_permit",
             "is_stale_permit",
         ]
+
         df.loc[:, indicators] = df.loc[:, indicators].fillna(False)
 
         if indicators_only:
@@ -342,85 +327,7 @@ class Well:
         else:
             return_columns = required_columns + indicators
 
-        if as_labels:
-            df = df.replace(
-                {
-                    "is_other": {True: "OTHER"},
-                    "is_inactive_pa": {True: "INACTIVE-PA"},
-                    "is_ta": {True: "TA"},
-                    "is_producing": {True: "PRODUCING"},
-                    "is_completed": {True: "COMPLETED"},
-                    "is_duc": {True: "DUC"},
-                    "is_drilling": {True: "DRILLING"},
-                    "is_permit": {True: "PERMIT"},
-                    "is_stale_permit": {True: "STALE-PERMIT"},
-                }
-            ).replace({False: None})
-
         return df.loc[:, return_columns]
-
-    def _calculate_status(
-        self,
-        target_column: str = "new_status",
-        how: str = "waterfall",
-        original_status_column: str = "status",
-        detail: bool = False,
-        status_indicator_map: Dict[str, str] = None,
-    ) -> pd.DataFrame:
-        """ Assign well status using indicators existing in the passed DataFrame or
-            using pd.DataFrame.wells.status_indicators() to generate them if they arent
-            present.
-
-        Keyword Arguments:
-            target_column {str} -- column name for status assignments (default: "new_status")
-            how {str} -- assignment methodology to use, currently the only available option
-                is the default. (default: "waterfall")
-            original_status_column {str} -- name of column containing the original stati from
-                the data provider (default: "status")
-            detail {bool} -- return the intermediate calculations used in assignments
-            status_indicator_map {Dict[str, str]} -- status_indicator_map of indicator column names
-                and their corresponding status value to be used in waterfall assignment.
-                The precidence of assignment is inferred from the order or items in the
-                status_indicator_map (default: const.STATUS_INDICATOR_MAP).
-
-        Raises:
-            ValueError
-
-        Returns:
-            pd.DataFrame
-        """
-
-        df = self._obj
-
-        status_indicator_map = (
-            status_indicator_map if status_indicator_map else STATUS_INDICATOR_MAP
-        )
-
-        if "is_keeper_status" not in df.columns:
-            df = df.wells.status_indicators(indicators_only=True)
-
-        # seed with keeper values from original status column
-        df.loc[df.is_keeper_status, target_column] = df.loc[
-            df.is_keeper_status, original_status_column
-        ]
-
-        if how == "waterfall":
-            for column_name, label in status_indicator_map.items():
-                selected = df.loc[
-                    df[target_column].isna() & df[column_name], column_name
-                ]
-
-                if label is not None:
-                    selected = selected.replace({True: label})
-
-                df.loc[df[target_column].isna(), target_column] = selected
-        else:
-            raise ValueError(f"Invalid how value: use 'waterfall'")
-
-        if not detail:
-            df = df.loc[:, [target_column]]
-
-        return df
 
     async def last_prod_date(
         self, path: IHSPath, prefer_local: bool = False
@@ -485,8 +392,37 @@ class Well:
         return prod_headers
 
     def assign_status(
-        self, status_indicator_map: Dict[str, str] = None
+        self,
+        # target_column: str = "new_status",
+        status_column: str = "status",
+        how: str = "waterfall",
+        status_indicator_map: Dict[str, str] = None,
+        detail: bool = False,
+        as_labels: bool = False,
+        empty_label_placeholder: str = ".",
     ) -> pd.DataFrame:
+        """ Assign well status using indicators existing in the passed DataFrame or
+            using pd.DataFrame.wells.status_indicators() to generate them if they arent
+            present.
+
+        Keyword Arguments:
+            target_column {str} -- column name for status assignments (default: "new_status")
+            how {str} -- assignment methodology to use, currently the only available option
+                is the default. (default: "waterfall")
+            status_column {str} -- name of column containing the original stati from
+                the data provider (default: "status")
+            detail {bool} -- return the intermediate calculations used in assignments
+            status_indicator_map {Dict[str, str]} -- status_indicator_map of indicator column names
+                and their corresponding status value to be used in waterfall assignment.
+                The precidence of assignment is inferred from the order or items in the
+                status_indicator_map (default: const.STATUS_INDICATOR_MAP).
+
+        Raises:
+            ValueError
+
+        Returns:
+            pd.DataFrame
+        """
         wells = self._obj
 
         well_columns = [
@@ -500,12 +436,60 @@ class Well:
             well_columns, wells.columns,
         )
 
+        target_column = "new_status"
         status: pd.DataFrame = wells.loc[:, well_columns]
         status = status.wells.status_indicators()
-        new_status: pd.Series = status.wells._calculate_status(
-            status_indicator_map=status_indicator_map
+
+        status_indicator_map = (
+            status_indicator_map if status_indicator_map else STATUS_INDICATOR_MAP
         )
-        return new_status.rename(columns={"new_status": "status"})
+
+        # seed with keeper values from original status column
+        status.loc[status.is_keeper_status, target_column] = status.loc[
+            status.is_keeper_status, status_column
+        ]
+
+        if how == "waterfall":
+            for column_name, label in status_indicator_map.items():
+                selected = status.loc[
+                    status[target_column].isna() & status[column_name], column_name
+                ]
+
+                if label is not None:
+                    selected = selected.replace({True: label})
+
+                status.loc[status[target_column].isna(), target_column] = selected
+        else:
+            raise ValueError(f"Invalid how value: use 'waterfall'")
+
+        if not detail:
+            status = status.loc[:, [target_column]]
+
+        # copy original status to provider_status
+        status["provider_status"] = wells.status.str.upper()
+
+        # overwrite original status with new status
+        if status_column in status.columns:
+            status = status.drop(columns=[status_column])
+
+        status = status.rename(columns={target_column: status_column})
+
+        if as_labels:
+            status = status.replace(
+                {
+                    "is_other": {True: "OTHER"},
+                    "is_inactive_pa": {True: "INACTIVE-PA"},
+                    "is_ta": {True: "TA"},
+                    "is_producing": {True: "PRODUCING"},
+                    "is_completed": {True: "COMPLETED"},
+                    "is_duc": {True: "DUC"},
+                    "is_drilling": {True: "DRILLING"},
+                    "is_permit": {True: "PERMIT"},
+                    "is_stale_permit": {True: "STALE-PERMIT"},
+                }
+            ).replace({False: empty_label_placeholder})
+
+        return status
 
     def is_producing(
         self, status_column: str = "status", producing_states: List[str] = None
@@ -521,7 +505,7 @@ class Well:
         wells = self._obj
 
         if "lateral_length" not in wells.columns:
-            wells.loc[:, "lateral_length"] = np.nan
+            wells["lateral_length"] = np.nan
 
         required_columns = ["perfll", "lateral_length"]
         validate_required_columns(required_columns, wells.columns)
@@ -643,37 +627,31 @@ if __name__ == "__main__":
     kwargs: dict = {}
     create_index = True
 
-    # async def async_wrapper():
-    #     # from util.jsontools import load_json
+    async def coro():
+        from db import db
 
-    #     # upton_api14s = load_json("./data/upton_api14s.json")
-    #     # upton_prod_ids = load_json("./data/upton_prod_ids.json")
-    #     # upton_entity12s = [x[:12] for x in upton_prod_ids]
+        if not db.is_bound():
+            await db.startup()
 
-    #     if not db.is_bound():
-    #         await db.startup()
+        wells, depths, fracs, ips, *other = await pd.DataFrame.wells.from_ihs(
+            path=IHSPath.well_h, api14s=api14s
+        )
 
-    #     # wells, depths, fracs, ips, *other = await pd.DataFrame.wells.from_ihs(
-    #     #     path=IHSPath.well_h, api14s=api14s
-    #     # )
-    #     wells, depths, fracs, ips, *other = await pd.DataFrame.wells.from_multiple(
-    #         hole_dir="H", api14s=api14s
-    #     )
 
-    #     # geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
+# # geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
 
-    #     # fracfocus = await pd.DataFrame.wells.from_fracfocus(api14s=api14s)
+# # fracfocus = await pd.DataFrame.wells.from_fracfocus(api14s=api14s)
 
-    #     wellset = await pd.DataFrame.wells.from_sample(
-    #         IHSPath.well_h_sample, n=100, area="tx-upton"
-    #     )
+# wellset = await pd.DataFrame.wells.from_sample(
+#     IHSPath.well_h_sample, n=100, area="tx-upton"
+# )
 
-    #     wells, depths, fracs, ips, *other = wellset
+# wells, depths, fracs, ips, *other = wellset
 
-    #     depths.wells.melt_depths()
+# depths.wells.melt_depths()
 
-    #     api14s = wells.util.column_as_set("api14")
+# api14s = wells.util.column_as_set("api14")
 
-    #     geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_v_geoms, api14s=api14s)
-    #     geoms
-    #     geoms.surveys
+# geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_v_geoms, api14s=api14s)
+# geoms
+# geoms.surveys

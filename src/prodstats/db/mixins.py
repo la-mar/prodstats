@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 import logging
 from enum import Enum
 from timeit import default_timer as timer
-from typing import Coroutine, Dict, List, Union
+from typing import Callable, Coroutine, Dict, List, Optional, Union
 
-import numpy as np
 import pandas as pd
+from asyncpg.exceptions import DataError, UniqueViolationError
 from sqlalchemy.dialects.postgresql.dml import Insert
+from sqlalchemy.exc import IntegrityError
 
+import config as conf
 import util
 
 
@@ -27,7 +30,13 @@ logger = logging.getLogger(__name__)
 
 class BulkIOMixin(object):
     @classmethod
-    async def execute_statement(cls, stmt, records: List[Dict], op_name: str) -> int:
+    async def execute_statement(
+        cls,
+        stmt,
+        records: List[Dict],
+        op_name: str,
+        retry_func: Optional[Callable] = None,
+    ) -> int:
 
         try:
             n = len(records)
@@ -37,8 +46,32 @@ class BulkIOMixin(object):
             exc_time = round(timer() - ts, 2)
             cls.log_operation(op_name, n, exc_time)
 
+        except (IntegrityError, UniqueViolationError, DataError) as ie:
+
+            if retry_func and n > 1:
+                first_half = records[: n // 2]
+                second_half = records[n // 2 :]
+                first_n = len(first_half)
+                second_n = len(second_half)
+
+                log_records: str = ""
+                if conf.DEBUG:
+                    log_records = f"\n{util.jsontools.to_string(records)}\n"
+
+                logger.warning(
+                    f"({cls.__name__}) {ie.__class__.__name__}: retrying with fractured records (first_half={first_n} second_half={second_n}) -- {ie.args[0]} {log_records}"  # noqa
+                )
+                await retry_func(first_half, batch_size=first_n // 4)
+                await retry_func(second_half, batch_size=second_n // 4)
+
         except Exception as e:
-            logger.error(f"{e.__class__}: {e} -- {e.args}")
+            log_records: str = ""
+            if conf.DEBUG:
+                log_records = f"\n{util.jsontools.to_string(records)}\n"
+
+            logger.exception(
+                f"({cls.__name__}) {e.__class__.__name__}:  {e} -- {e.args} {log_records}"  # noqa
+            )
             raise e
 
         return n
@@ -51,8 +84,8 @@ class BulkIOMixin(object):
         exclude_cols: list = None,
         update_on_conflict: bool = True,
         ignore_on_conflict: bool = False,
-        concurrency: int = 50
-        # fetch_result: bool = False,
+        concurrency: int = 50,
+        errors: str = "fractionalize",
     ) -> int:
         batch_size = batch_size or len(records)
         exclude_cols = exclude_cols or []
@@ -66,7 +99,7 @@ class BulkIOMixin(object):
             # update these columns when a conflict is encountered
             if ignore_on_conflict:
                 stmt = stmt.on_conflict_do_nothing(constraint=cls.__table__.primary_key)
-                # op_name = f"{op_name}[ignore_on_conflict]"
+
             elif update_on_conflict:
                 on_conflict_update_cols = [
                     c.name
@@ -79,9 +112,25 @@ class BulkIOMixin(object):
                         k: getattr(stmt.excluded, k) for k in on_conflict_update_cols
                     },
                 )
-                # op_name = f"{op_name}[update_on_conflict]"
 
-            coros.append(cls.execute_statement(stmt, records=chunk, op_name=op_name))
+            if errors == "fractionalize":
+                partial = functools.partial(
+                    cls.bulk_upsert,
+                    exclude_cols=exclude_cols,
+                    update_on_conflict=update_on_conflict,
+                    ignore_on_conflict=ignore_on_conflict,
+                    concurrency=concurrency,
+                )
+            elif errors == "raise":  # placeholder for later
+                partial = None
+            else:
+                partial = None
+
+            coros.append(
+                cls.execute_statement(
+                    stmt, records=chunk, op_name=op_name, retry_func=partial
+                )
+            )
 
         result: int = 0
         for idx, chunk in enumerate(util.chunks(coros, concurrency)):
@@ -121,7 +170,7 @@ class BulkIOMixin(object):
             if exc_time > 0:
                 measurements[f"{method}s_per_second"] = n / exc_time or 1
 
-        logger.info(
+        logger.debug(
             f"({cls.__name__}) {method} {n} records ({exc_time}s)", extra=measurements,
         )
 
@@ -133,7 +182,8 @@ class DataFrameMixin(BulkIOMixin):
         if reset_index:
             df = df.reset_index()
 
-        df = df.replace({np.nan: None})  # nan to None
+        # df = df.replace({np.nan: None})  # nan to None
+        df = df.where(df.notnull(), None)  # handles NaNs in pandas 1.0+
 
         return df.to_dict(orient="records")
 

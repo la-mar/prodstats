@@ -41,6 +41,7 @@ class AsyncClient(httpx.AsyncClient):
             http2=True,
             **kwargs,
         )
+
         self.credentials = credentials
         self.auth_url: Optional[httpx.URL] = httpx.URL(
             auth_url
