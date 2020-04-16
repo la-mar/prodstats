@@ -1,5 +1,6 @@
 import asyncio
 import itertools
+import math
 from typing import Coroutine, Dict, List
 
 import pandas as pd
@@ -13,17 +14,26 @@ import util
 from collector import IHSClient
 from const import HoleDirection, IHSPath
 from cq.worker import celery_app
-from executors import GeomExecutor, ProdExecutor, WellExecutor  # noqa
+from executors import BaseExecutor, GeomExecutor, ProdExecutor, WellExecutor  # noqa
 
 logger = get_task_logger(__name__)
 
 
 RETRY_BASE_DELAY = 15
 
+BATCH_SIZE: int = 25
+TASK_SPREAD_MULTIPLIER: int = 30
 
 # TODO: tenacity?
 # TODO: asynchronously fracture failed batches
 # TODO: circuit breakers?
+
+# TODO: task metadata
+
+
+def spread_countdown(n: int, multiplier: int = None) -> float:
+    multiplier = multiplier or TASK_SPREAD_MULTIPLIER
+    return math.log(n + 1) * multiplier + n
 
 
 @celery_app.task
@@ -52,9 +62,33 @@ def post_heartbeat():
     return metrics.post_heartbeat()
 
 
+def run(
+    hole_dir: HoleDirection,
+    executors: List[BaseExecutor],
+    api14s: List[str],
+    spread_multiplier: int = None,
+):
+    for idx, chunk in enumerate(util.chunks(api14s, n=BATCH_SIZE)):
+        for executor in executors:
+            kwargs = {
+                "hole_dir": hole_dir,
+                "executor_name": executor.__name__,
+                "api14s": chunk,
+            }
+            logger.warning(f"submitting option_set: {kwargs=}")
+            run_executor.apply_async(
+                args=[],
+                kwargs=kwargs,
+                countdown=spread_countdown(n=idx, multiplier=spread_multiplier),
+            )
+
+
 @celery_app.task
 def run_driftwood():
-    api14s = [
+
+    executors = [WellExecutor, GeomExecutor, ProdExecutor]
+
+    deo_api14h = [
         "42461409160000",
         "42383406370000",
         "42461412100000",
@@ -76,13 +110,23 @@ def run_driftwood():
         "42383402790000",
     ]
 
-    hole_dir = HoleDirection.H
-    batch_size = 3
-    for chunk in util.chunks(api14s, n=batch_size):
-        kwargs = dict(hole_dir=hole_dir, executor_name="WellExecutor", api14s=chunk)
-        run_executor.apply_async(args=[], kwargs=kwargs)
-        # for executor in [WellExecutor, GeomExecutor, ProdExecutor]:
-        # count, dataset = executor(hole_dir).run(api14s=chunk)
+    run(HoleDirection.H, executors, deo_api14h)
+
+    deo_api14v = [
+        "42461326620001",
+        "42461326620000",
+        "42461328130000",
+        "42461343960001",
+        "42461352410000",
+        "42383362120000",
+        "42383362080000",
+        "42383362090000",
+        "42383374140000",
+        "42383374130000",
+        "42383362060000",
+    ]
+
+    run(HoleDirection.V, executors, deo_api14v)
 
     # import json
     # from util.jsontools import UniversalEncoder
@@ -91,9 +135,9 @@ def run_driftwood():
 
 @celery_app.task
 def run_executor(hole_dir: HoleDirection, executor_name: str, **kwargs):
+
     executor = globals()[executor_name]
     count, dataset = executor(hole_dir).run(**kwargs)
-    logger.warning(count)
 
 
 @celery_app.task
