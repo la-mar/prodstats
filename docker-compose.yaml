@@ -52,6 +52,16 @@ services:
     container_name: prodstats_worker_2
     user: celeryuser
     command: prodstats run worker
+  # worker_3:
+  #   <<: *defaults
+  #   container_name: prodstats_worker_3
+  #   user: celeryuser
+  #   command: prodstats run worker
+  # worker_4:
+  #   <<: *defaults
+  #   container_name: prodstats_worker_4
+  #   user: celeryuser
+  #   command: prodstats run worker
   cron:
     <<: *defaults
     container_name: prodstats_cron
@@ -65,7 +75,7 @@ services:
       dockerfile: Dockerfile
     command: redis-server  --save "" --appendonly no --loglevel notice --bind 0.0.0.0
     ports:
-      - 6379
+      - 6379:6379
     # volumes:
     #   - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
     # command:

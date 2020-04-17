@@ -29,6 +29,15 @@ class Yammler(dict):
                 data = yaml.safe_load(f) or {}
         super().__init__(data)
 
+    def __enter__(self):
+        """ Opens a context with the Yammler's file loaded and immediately dumps back to
+            the backing yaml file when the context is exited."""
+        return self
+
+    def __exit__(self, *exc):
+        if not exc:
+            self.dump()
+
     def dump(self) -> None:
         with self.durable(self.fspath, "w") as f:
             yaml.safe_dump(dict(self), f, default_flow_style=False)
@@ -37,16 +46,16 @@ class Yammler(dict):
     def stamp():
         return datetime.utcnow()
 
-    @classmethod
-    @contextmanager
-    def context(cls, fspath: Union[str, Path]):
-        """Opens a context with the specified file loaded and immediately dumps back to a
-            yaml file when the context is exited."""
-        obj = cls(fspath)
-        try:
-            yield obj
-        finally:
-            obj.dump()
+    # @classmethod
+    # @contextmanager
+    # def context(cls, fspath: Union[str, Path]):
+    #     """Opens a context with the specified file loaded and immediately dumps back to a
+    #         yaml file when the context is exited."""
+    #     obj = cls(fspath)
+    #     try:
+    #         yield obj
+    #     finally:
+    #         obj.dump()
 
     @classmethod
     @contextmanager

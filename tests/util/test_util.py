@@ -3,7 +3,7 @@ import logging
 import pytest  # noqa
 
 import util
-from util import apply_transformation, chunks, hf_number, hf_size, urljoin
+from util import apply_transformation, chunks, hf_number, hf_size
 
 logger = logging.getLogger(__name__)
 
@@ -198,22 +198,3 @@ class TestApplyTransformation:
 
         assert result["KEY"] == "VALUE"
         assert isinstance(result["OBJ_KEY"], CustomType)
-
-
-class TestURLJoin:
-
-    base_url = "https://api.example.com/v3"
-    expected_url = f"{base_url}/path/to/endpoint"
-
-    def test_generic(self):
-        path = "/path/to/endpoint"
-        assert urljoin(self.base_url, path) == self.expected_url
-
-    def test_double_slash(self):
-        base_url = f"{self.base_url}/"
-        path = "/path/to/endpoint"
-        assert urljoin(base_url, path) == self.expected_url
-
-    def test_no_slash(self):
-        path = "path/to/endpoint"
-        assert urljoin(self.base_url, path) == self.expected_url

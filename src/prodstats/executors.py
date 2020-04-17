@@ -108,6 +108,7 @@ class BaseExecutor:
     async def persist(self, dataset: DataSet, **kwargs) -> int:
         raise NotImplementedError
 
+    # TODO: download_kwargs, process_kwargs, persist_kwargs
     async def arun(self, **kwargs) -> Tuple[int, Optional[DataSet]]:
 
         return_data = kwargs.pop("return_data", None)
@@ -427,6 +428,10 @@ class GeomExecutor(BaseExecutor):
                         extra={"api14s": api14s},
                     )
 
+            if locations is not None and not locations.empty:
+                locations["lon"] = locations.geom.apply(lambda pt: pt.x if pt else None)
+                locations["lat"] = locations.geom.apply(lambda pt: pt.y if pt else None)
+
             geomset = WellGeometrySet(
                 locations=locations, surveys=surveys, points=points
             )
@@ -658,7 +663,7 @@ class WellExecutor(BaseExecutor):
 
             # well status
 
-            # wells["provider_status"] = wells.status.str.upper()
+            wells["provider_status"] = wells.status.str.upper()
             if wells is not None and not wells.empty:
                 wells["status"] = wells.join(prod_headers).wells.assign_status()
                 wells["is_producing"] = wells.wells.is_producing()
@@ -845,6 +850,10 @@ if __name__ == "__main__":
     ids = ["14207C0202511H", "14207C0205231H"]
     entity12s = {x[:12] for x in ids}
     hole_direction = HoleDirection.H
+    # from db import db
+    # import util
+
+    util.aio.async_to_sync(db.startup())
 
     async def async_wrapper():
         if not db.is_bound():
@@ -914,7 +923,7 @@ if __name__ == "__main__":
                 await db.startup()
             pexec = GeomExecutor(HoleDirection.H)
             ds: WellGeometrySet = await pexec.download(api14s=deo_api14h)
-            ds: WellGeometrySet = await pexec.download(api14s=["42461412110000"])
+            # ds: WellGeometrySet = await pexec.download(api14s=["42461412110000"])
             ps: WellGeometrySet = await pexec.process(ds)
             await pexec.persist(ps)
 
@@ -928,8 +937,8 @@ if __name__ == "__main__":
             )
             api14s = api14s[:100]
             wellset = await wexec.download(api14s=api14s)
-            wellset_processed = await wexec.process(wellset=wellset)
-            await wexec.persist(wellset=wellset_processed)
+            wellset_processed = await wexec.process(wellset)
+            await wexec.persist(wellset_processed)
 
         async def test_production_vertical():
             if not db.is_bound():
@@ -954,9 +963,10 @@ if __name__ == "__main__":
                 path=IHSPath.well_h_ids, area="tx-upton"
             )
             api14s = api14s[:100]
-            wellset = await wexec.download(api14s=api14s)
-            wellset_processed = await wexec.process(wellset=wellset)
-            await wexec.persist(wellset=wellset_processed)
+            ws = await wexec.download(api14s=api14s)
+            # ws = await wexec.download(api10s=api10s)
+            wsproc = await wexec.process(ws)
+            await wexec.persist(wsproc)
 
         async def test_production_horizontal():
             if not db.is_bound():

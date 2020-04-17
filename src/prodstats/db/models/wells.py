@@ -65,8 +65,8 @@ class FracParameters(WellBase):
     proppant_lb_ft = db.Column(db.Integer())
     lateral_length = db.Column(db.Integer())
     lateral_length_type = db.Column(db.String(25))
-    gen_int = db.Column(db.Integer())
-    gen_str = db.Column(db.String(10))
+    gen = db.Column(db.Integer())
+    gen_name = db.Column(db.String(10))
     provider = db.Column(db.String())
     provider_last_update_at = db.Column(db.DateTime(timezone=True))
 

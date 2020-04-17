@@ -6,11 +6,11 @@ import numpy as np
 import pandas as pd
 
 import const
+import util
 from calc.sets import DataSet, ProdSet
 from collector import IHSClient, IHSPath
 from const import ProdStatRange
 from schemas import ProductionWellSet
-from util import hf_number
 from util.pd import validate_required_columns
 from util.types import PandasObject
 
@@ -20,13 +20,24 @@ CALC_MONTHS: List[Optional[int]] = [1, 3, 6, 12, 18, 24, 30, 36, 42, 48]
 CALC_NORM_VALUES = [  # change to List[int] now that the label can be derived
     (None, None),
     (1000, "1k"),
+    # (3000, "3k"),
+    # (5000, "5k"),
+    # (7500, "7500"),
+    # (10000, "10k"),
+]
+MONTHLY_NORM_VALUES = [
+    (None, None),
+    (1000, "1k"),
     (3000, "3k"),
     (5000, "5k"),
     (7500, "7500"),
     (10000, "10k"),
 ]
+
+
 CALC_RANGES = ProdStatRange.members()
-CALC_AGG_TYPES = ["sum", "mean"]
+# CALC_AGG_TYPES = ["sum", "mean"]
+CALC_AGG_TYPES = ["sum"]
 CALC_INCLUDE_ZEROES = [True, False]
 CALC_PROD_COLUMNS: List[str] = ["oil", "gas", "water", "boe"]
 
@@ -464,7 +475,7 @@ class ProdStats:
         self, norm_sets: List[Tuple[Optional[int], Optional[str]]] = None, **kwargs
     ) -> pd.DataFrame:
         monthly = self._obj
-        for value, suffix in norm_sets or CALC_NORM_VALUES:
+        for value, suffix in norm_sets or MONTHLY_NORM_VALUES:
             if value is not None and suffix is not None:
                 monthly = monthly.join(
                     monthly.prodstats.norm_to_ll(value=value, suffix=suffix, **kwargs)
@@ -498,7 +509,7 @@ class ProdStats:
             include_zeroes=True,
             range_name=range_name,
             months=months,
-            norm_by_label=f"{hf_number(dollars_per_bbl)}bbl",
+            norm_by_label=f"{util.humanize.short_number(dollars_per_bbl).lower()}bbl",
         )
 
         monthly_nonzero_oil = (
@@ -526,7 +537,12 @@ class ProdStats:
     def calc(
         self,
         monthly_prod_columns: List[str] = ["oil", "gas", "water", "boe"],
-        prodstat_columns: List[str] = ["oil", "gas", "water", "boe", "gor"],
+        prodstat_columns: List[str] = [
+            "oil",
+            "gas",
+            "water",
+            "boe",
+        ],  # TODO: Add special case for gor
         norm_option_sets: List[Tuple[Optional[int], Optional[str]]] = None,
         prodstat_option_sets: List[Dict[str, Any]] = None,
         skip_stats: bool = False,
@@ -650,5 +666,4 @@ if __name__ == "__main__":
             entity12s=entity12s, path=IHSPath.prod_h
         )
 
-        prodset = prod.data.prodstats.calc()
-        prodset
+        prod.data.prodstats.calc()

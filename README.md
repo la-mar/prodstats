@@ -18,9 +18,10 @@
 
 # TODO:
 
+1. Chord GeomExecutor -> ProdExecutor -> WellExecutor(use local geoms and prod_headers)
 1. Formation grid sourcing (cli upload, s3, dropbox)
-2. Formation Assignment
-3. Implement wellstats
+1. Formation Assignment
+1. Implement wellstats
    - wellbore_crow_length
    - wellbore_direction
    - wellbore_bearing
@@ -32,20 +33,22 @@
    - dist_to_prospect_mi
    - nearest_api10
    - dist_to_company_well_mi
-4. Capture comments on production calculations and prodstats
+1. Capture comments on production calculations and prodstats
 
    - material changes in allocation well count
 
-5. Generate well links to relevant RRC filings
-6. Production links needed?
-7. Well Spacing
-8. RequestRouter for provider requests:
+1. Generate well links to relevant RRC filings
+1. Production links needed?
+1. Well Spacing
+1. RequestRouter for provider requests:
    - input: const.DataType, const.Provider, const.HoleDirection
    - output: PathComponent
-9. Standardize log messages
-10. Refactor executors.py functionality into base class
-11. Populate lat/lon on well_location
-12. Add geom_webmercator to well_location, survey_points, surveys
-13. Change prodstat aggregate_type stored in database from 'mean' to 'avg' for consistency
-14. Set httpx timeouts
-15. refactor jsontools and ext.orjson to jsonlib module with api
+1. Standardize log messages
+1. Refactor executors.py functionality into base class
+1. Populate lat/lon on well_location
+1. Add geom_webmercator to well_location, survey_points, surveys
+1. Change prodstat aggregate_type stored in database from 'mean' to 'avg' for consistency
+1. Set httpx timeouts
+1. refactor jsontools and ext.orjson to jsonlib module with api
+1. Normalize Area/Provider related tables when incorporating drillinginfo. Change Area to ProviderArea and add providers.IDMaster.
+1. Schema provider fields to Enum

@@ -210,20 +210,7 @@ class IHSClient(AsyncClient):
         async with cls(**kwargs) as client:
             response = await client.get(f"{path.value}/{area}")
             response.raise_for_status()
-            return response.json()["data"][0]["ids"]
-
-    # @classmethod
-    # async def get_all_ids(
-    #     cls, path: IHSPath, areas: List[str] = None, **kwargs
-    # ) -> List[str]:
-    #     areas = areas or await cls.get_areas(path, **kwargs)
-
-    #     coros: List[Coroutine] = []
-    #     for area in areas:
-    #         coros.append(cls.get_ids_by_area(path=path, area=area))
-
-    #     ids = await asyncio.gather(*coros)
-    #     return list(itertools.chain(*ids))
+            return response.json()["data"][0].get("ids", [])
 
     @classmethod
     async def get_areas(
@@ -283,12 +270,14 @@ if __name__ == "__main__":
 
         await IHSClient.get_sample(IHSPath.well_h_sample, n=5)
         await IHSClient.get_sample(IHSPath.prod_h_sample, n=5)
+        #         # await IHSClient.get_areas(path=IHSPath.well_h_ids)
+        #         # await IHSClient.get_ids_by_area(path=IHSPath.well_h_ids, area="tx-upton")
 
+        wells = await IHSClient.get_wells(
+            path=IHSPath.well_h, api14s=["42329389060000"]
+        )
+        wells
 
-#         # await IHSClient.get_areas(path=IHSPath.well_h_ids)
-#         # await IHSClient.get_ids_by_area(path=IHSPath.well_h_ids, area="tx-upton")
-
-#         wells = await IHSClient.get_wells(api14s=well_ids, path=IHSPath.well_h)
 
 #         geoms = await IHSClient.get_wells(api14s=well_ids, path=IHSPath.well_h_geoms)
 

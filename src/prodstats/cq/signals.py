@@ -28,14 +28,19 @@ def init_worker(**kwargs):
     """ Configures each Celery worker process on process startup"""
     loop = asyncio.get_event_loop()
 
-    async def run():
-        bind = await db.startup(  # creates connection pool per worker process
+    # async def run():
+    #     bind = await db.startup(  # creates connection pool per worker process
+    #         pool_min_size=conf.CeleryConfig.db_pool_min_size,
+    #         pool_max_size=conf.CeleryConfig.db_pool_max_size,
+    #     )
+    #     return bind
+
+    loop.run_until_complete(
+        db.startup(  # creates connection pool per worker process
             pool_min_size=conf.CeleryConfig.db_pool_min_size,
             pool_max_size=conf.CeleryConfig.db_pool_max_size,
         )
-        return bind
-
-    loop.run_until_complete(run())
+    )
 
 
 @worker_process_shutdown.connect
@@ -44,24 +49,13 @@ def shutdown_worker(**kwargs):
 
     loop = asyncio.get_event_loop()
 
-    async def run():
-        bind = await db.shutdown()
-        return bind
+    # async def run():
+    #     bind = await db.shutdown()
+    #     return bind
 
-    loop.run_until_complete(run())
+    loop.run_until_complete(db.shutdown())
 
 
 @beat_init.connect
 def init_beat(**kwargs):
     """ Celery Beat process configuration """
-    # loop = asyncio.get_event_loop()
-
-    # # TODO: I dont think this is needed
-    # async def run():
-    #     bind = await db.startup(
-    #         pool_min_size=conf.CeleryConfig.db_pool_min_size,
-    #         pool_max_size=conf.CeleryConfig.db_pool_max_size,
-    #     )
-    #     return bind
-
-    # loop.run_until_complete(run())

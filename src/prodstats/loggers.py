@@ -140,7 +140,7 @@ class DatadogJSONFormatter(json_log_formatter.JSONFormatter):
         task = self.get_current_task()
         if task and task.request:
             record_dict.update(
-                task_id=task.request.id, task_name=task.name, task_meta=task.metadata
+                task_id=task.request.id, task_name=task.name, task_meta=task.meta
             )
 
         # Handle exceptions, including those in the formatter itself

@@ -3,6 +3,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
+# TODO: support shapely geometries
+
 
 class DateTimeEncoder(json.JSONEncoder):
     def default(self, obj):

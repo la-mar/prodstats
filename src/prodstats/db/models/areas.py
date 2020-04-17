@@ -24,14 +24,17 @@ ONE_WEEK = 168
 class Area(Base):
     __tablename__ = "areas"
 
-    area = db.Column(db.String(25), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+    area = db.Column(db.String(25), unique=True, nullable=False)
+    h_last_run_at = db.Column(db.DateTime(timezone=True))
+    v_last_run_at = db.Column(db.DateTime(timezone=True))
+    providers = db.Column(db.JSONB(), nullable=False, server_default="[]")
     # entity_type = db.Column(
     #     db.ChoiceType(EntityType, impl=db.String()), primary_key=True
     # )
-    hole_direction = db.Column(
-        db.ChoiceType(HoleDirection, impl=db.String()), primary_key=True
-    )
-    last_run_at = db.Column(db.DateTime(timezone=True))
+    # hole_direction = db.Column(
+    #     db.ChoiceType(HoleDirection, impl=db.String()), primary_key=True
+    # )
 
     @classmethod
     def _is_ready(cls, last_run_at: Optional[datetime], cooldown_hours: int):
@@ -43,7 +46,9 @@ class Area(Base):
             return True
 
     @classmethod
-    async def next_available(cls, hole_dir: HoleDirection) -> Tuple[Area, bool]:
+    async def next_available(
+        cls, hole_dir: HoleDirection
+    ) -> Tuple[Area, str, bool, int]:
         """ Get the properties describing the next available execution time of
          the given hole direction and entity type """
 
@@ -54,26 +59,24 @@ class Area(Base):
         else:
             cooldown = ONE_WEEK
 
-        area_obj = (  # get stalest area
-            await cls.query.where(
-                (cls.hole_direction == hole_dir)  # & (cls.entity_type == entity_type)
-            )
-            .order_by(cls.last_run_at.desc())
-            .gino.first()
-        )
+        attr = f"{hole_dir.value.lower()}_last_run_at"
 
-        is_ready = cls._is_ready(area_obj.last_run_at, cooldown)
-        logger.debug(
-            f"({cls.__name__}) next available: {area_obj.area}[{area_obj.hole_direction.name}] {is_ready=}"  # noqa
+        area_obj = await cls.query.order_by(  # get stalest area for given hole_dir
+            getattr(cls, attr).asc().nullsfirst()
+        ).gino.first()
+
+        is_ready = cls._is_ready(getattr(area_obj, attr), cooldown)
+        logger.info(
+            f"({cls.__name__}[{hole_dir}]) next available: {area_obj.area} {is_ready=}"  # noqa
         )
-        return area_obj, is_ready
+        return area_obj, attr, is_ready, cooldown
 
     @classmethod
     async def df(cls) -> pd.DataFrame:
         records = await cls.query.gino.all()
-        return pd.DataFrame([x.to_dict() for x in records]).set_index(
-            ["area", "hole_direction"]
-        )
+        return pd.DataFrame(
+            [x.to_dict() for x in records], columns=cls.c.names
+        ).set_index("area")
 
 
 if __name__ == "__main__":
@@ -82,9 +85,10 @@ if __name__ == "__main__":
         from db import db
         from db.models import Area
 
+        cls = Area
+
         await db.startup()
 
-        cls = Area
         hole_dir = HoleDirection.H
 
         await cls.next_available(hole_dir)

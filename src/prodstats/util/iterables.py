@@ -2,11 +2,34 @@ import functools
 import hashlib
 import itertools
 from collections import OrderedDict
-from typing import Dict, Generator, Iterable, List, Union
+from typing import Any, Callable, Dict, Generator, Iterable, List, Union
+
+
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
 
 
 def make_hash(data: Union[List, OrderedDict]) -> str:
     return hashlib.md5(str(data).encode()).hexdigest()
+
+
+def ensure_list(value: Any) -> List[Any]:
+    """ Ensure the passed value is a list-like object. """
+
+    if isinstance(value, set):
+        value = list(value)
+    if not issubclass(type(value), list):
+        return [value]
+    return value
+
+
+def reduce(values: List) -> Union[List[Any], Any]:
+    """ Reduce a list to a scalar if length == 1 """
+    while isinstance(values, list) and len(values) == 1:
+        values = values[0]
+    return values
 
 
 def chunks(iterable: Iterable, n: int = 1000, cls=list) -> Generator:
@@ -97,3 +120,28 @@ def distinct_by_key(data: List[Dict], key: str) -> List:
         if k:
             result[k] = x
     return list(result.values())
+
+
+def apply_transformation(
+    data: dict, convert: Callable, keys: bool = False, values: bool = True
+) -> Dict:
+    """ Recursively apply an arbitrary function to a dictionary's keys, values, or both """
+    if isinstance(data, (str, int, float)):
+        if values:
+            return convert(data)
+        else:
+            return data
+    if isinstance(data, dict):
+        new = data.__class__()
+        for k, v in data.items():
+            if keys:
+                new[convert(k)] = apply_transformation(v, convert, keys, values)
+            else:
+                new[k] = apply_transformation(v, convert, keys, values)
+    elif isinstance(data, (list, set, tuple)):
+        new = data.__class__(
+            apply_transformation(v, convert, keys, values) for v in data
+        )
+    else:
+        return data
+    return new

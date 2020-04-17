@@ -28,16 +28,18 @@ from util.iterables import filter_by_prefix
 from util.toml import project, version
 from util.types import StringArray
 
-""" Optional Pandas display settings """
+# --- Pandas ----------------------------------------------------------------- #
+
 pd.options.display.max_rows = 1000
 pd.set_option("display.float_format", lambda x: "%.2f" % x)
 pd.set_option("large_repr", "truncate")
 pd.set_option("precision", 2)
 
-""" Congiure asyncio to use uvloop. Not sure where else to put this
-    to guarantee it gets called at the moment. """
-# asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+# --- UVLoop ----------------------------------------------------------------- #
+
 uvloop.install()
+
+# --- General ---------------------------------------------------------------- #
 
 conf: Config = Config(".env")
 
@@ -53,7 +55,17 @@ DEBUG: bool = conf("DEBUG", cast=bool, default=False)
 EXTERNAL_CONFIG_BASE_PATH: Path = Path("./config").resolve()
 SECRET_KEY: Secret = conf("SECRET_KEY", cast=Secret)
 
-""" database """
+TASK_BATCH_SIZE: int = conf("PRODSTATS_TASK_BATCH_SIZE", cast=int, default=25)
+# TASK_SPREAD_MULTIPLIER: int = conf(
+#     "PRODSTATS_TASK_SPREAD_MULTIPLIER", cast=int, default=30
+# )
+
+COLLECTOR_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "collectors.yaml"  # TODO: remove
+PARSER_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "parsers.yaml"  # TODO: remove
+
+
+# --- Database --------------------------------------------------------------- #
+
 DATABASE_DRIVER: str = conf("DATABASE_DRIVER", cast=str, default="postgresql+asyncpg")
 DATABASE_USERNAME: str = conf("DATABASE_USERNAME", cast=str, default=None)
 DATABASE_PASSWORD: Secret = conf("DATABASE_PASSWORD", cast=Secret, default=None)
@@ -64,12 +76,6 @@ DATABASE_POOL_SIZE_MIN: int = conf("DATABASE_POOL_SIZE_MIN", cast=int, default=1
 DATABASE_POOL_SIZE_MAX: int = conf(
     "DATABASE_POOL_SIZE_MIN", cast=int, default=DATABASE_POOL_SIZE_MIN
 )
-
-
-""" alembic """
-MIGRATION_DIR: Path = Path("./src/prodstats/db/migrations").resolve()
-
-
 DATABASE_CONFIG: DatabaseURL = DatabaseURL(
     drivername=DATABASE_DRIVER,
     username=DATABASE_USERNAME,
@@ -78,6 +84,10 @@ DATABASE_CONFIG: DatabaseURL = DatabaseURL(
     port=DATABASE_PORT,
     database=DATABASE_NAME,
 )
+
+# --- Alembic ---------------------------------------------------------------- #
+
+MIGRATION_DIR: Path = Path("./src/prodstats/db/migrations").resolve()
 
 ALEMBIC_CONFIG: DatabaseURL = DatabaseURL(
     drivername="postgresql+psycopg2",  # alembic will fail if using an async driver
@@ -88,26 +98,13 @@ ALEMBIC_CONFIG: DatabaseURL = DatabaseURL(
     database=DATABASE_NAME,
 )
 
+# --- Logging ---------------------------------------------------------------- #
 
-""" Logging """
 LOG_LEVEL: str = conf("LOG_LEVEL", cast=str, default="20")
 LOG_FORMAT: str = conf("LOG_FORMAT", cast=str, default="json")
 LOG_HANDLER: str = conf("LOG_HANDLER", cast=str, default="colorized")
 
-
-# ---Collector---------------------------------------------------------------- #
-
-COLLECTOR_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "collectors.yaml"
-PARSER_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "parsers.yaml"
-
-# ---Extensions--------------------------------------------------------------- #
-
-SENTRY_ENABLED: bool = conf("SENTRY_ENABLED", cast=bool, default=False)
-SENTRY_DSN: Optional[Secret] = conf("SENTRY_DSN", cast=Secret, default=None)
-SENTRY_LEVEL: int = conf("SENTRY_LEVEL", cast=int, default=40)
-SENTRY_EVENT_LEVEL: int = conf("SENTRY_EVENT_LEVEL", cast=int, default=40)
-SENTRY_ENV_NAME: str = conf("SENTRY_ENV_NAME", cast=str, default=ENV)
-SENTRY_RELEASE: str = conf("SENTRY_RELEASE", cast=str, default=f"{project}-{version}")
+# --- Extensions ------------------------------------------------------------- #
 
 DATADOG_ENABLED: bool = conf("DATADOG_ENABLED", cast=bool, default=False)
 DATADOG_API_KEY: Optional[Secret] = conf(
@@ -130,9 +127,8 @@ DATADOG_DEFAULT_TAGS: Dict[str, str] = {
 IHS_BASE_URL = conf("PRODSTATS_IHS_URL", cast=HTTPUrl)
 FRACFOCUS_BASE_URL = conf("PRODSTATS_FRACFOCUS_URL", cast=HTTPUrl)
 
-CALC_MAX_IDS_PER_TASK: int = 25
 
-# ---Accessors---------------------------------------------------------------- #
+# --- Accessors -------------------------------------------------------------- #
 
 
 def items() -> Dict:
@@ -150,11 +146,10 @@ def with_prefix(prefix: str, tolower: bool = True, strip: bool = True) -> Dict:
     return filter_by_prefix(items(), prefix, tolower=tolower, strip=strip)
 
 
+# --- Celery ----------------------------------------------------------------- #
+
 CELERY_LOG_LEVEL: str = conf("CELERY_LOG_LEVEL", cast=str, default=LOG_LEVEL)
 CELERY_LOG_FORMAT: str = conf("LOG_FORMAT", cast=str, default=LOG_FORMAT)
-
-
-# ---Celery------------------------------------------------------------------- #
 
 
 class CeleryConfig:
@@ -194,9 +189,9 @@ class CeleryConfig:
     worker_max_tasks_per_child: int = conf(
         "CELERYD_MAX_TASKS_PER_CHILD", cast=int, default=1000
     )
-    worker_max_memory_per_child: int = conf(
-        "CELERYD_MAX_MEMORY_PER_CHILD", cast=int, default=24000
-    )  # 24mb
+    # worker_max_memory_per_child: int = conf(
+    #     "CELERYD_MAX_MEMORY_PER_CHILD", cast=int, default=24000
+    # )  # 24mb
     worker_enable_remote_control: bool = conf(
         "CELERY_ENABLE_REMOTE_CONTROL", cast=bool, default=False
     )  # must be false for sqs

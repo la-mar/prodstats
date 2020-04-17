@@ -440,6 +440,8 @@ if __name__ == "__main__":
 
         geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
         locations, surveys, points = geoms
+        locations["lon"] = locations.geom.apply(lambda x: x.x if x else None)
+        locations["lat"] = locations.geom.apply(lambda x: x.y if x else None)
 
         points.reset_index(level=1).util.column_stats("md")
 

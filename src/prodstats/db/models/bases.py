@@ -6,6 +6,7 @@ from geoalchemy2 import Geometry
 from gino.dialects.asyncpg import JSONB
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.schema import Constraint
 from sqlalchemy_utils import ChoiceType, EmailType, URLType
 
 import util.jsontools
@@ -70,6 +71,10 @@ class Base(db.Model, DataFrameMixin):
     @classproperty
     def __model_name__(cls) -> str:
         return f"{cls.__module__}.{cls.__name__}"
+
+    @classproperty
+    def constraints(cls) -> Dict[str, Constraint]:
+        return {x.name: x for x in list(cls.__table__.constraints)}
 
 
 class ColumnProxy:

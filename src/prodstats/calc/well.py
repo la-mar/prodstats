@@ -465,9 +465,6 @@ class Well:
         if not detail:
             status = status.loc[:, [target_column]]
 
-        # copy original status to provider_status
-        status["provider_status"] = wells.status.str.upper()
-
         # overwrite original status with new status
         if status_column in status.columns:
             status = status.drop(columns=[status_column])
@@ -634,7 +631,7 @@ if __name__ == "__main__":
             await db.startup()
 
         wells, depths, fracs, ips, *other = await pd.DataFrame.wells.from_ihs(
-            path=IHSPath.well_h, api14s=api14s
+            path=IHSPath.well_h, api10s=api10s[:5]
         )
 
 

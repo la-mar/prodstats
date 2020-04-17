@@ -9,10 +9,12 @@ from enum import Enum
 from timeit import default_timer as timer
 from typing import Callable, Coroutine, Dict, List, Optional, Union
 
+import numpy as np
 import pandas as pd
 from asyncpg.exceptions import DataError, UniqueViolationError
 from sqlalchemy.dialects.postgresql.dml import Insert
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.schema import Constraint
 
 import config as conf
 import util
@@ -84,11 +86,13 @@ class BulkIOMixin(object):
         exclude_cols: list = None,
         update_on_conflict: bool = True,
         ignore_on_conflict: bool = False,
+        conflict_constraint: Union[str, Constraint] = None,
         concurrency: int = 50,
         errors: str = "fractionalize",
     ) -> int:
         batch_size = batch_size or len(records)
         exclude_cols = exclude_cols or []
+        conflict_constraint = conflict_constraint or cls.__table__.primary_key
         coros: List[Coroutine] = []
 
         for idx, chunk in enumerate(util.chunks(records, batch_size)):
@@ -98,7 +102,7 @@ class BulkIOMixin(object):
 
             # update these columns when a conflict is encountered
             if ignore_on_conflict:
-                stmt = stmt.on_conflict_do_nothing(constraint=cls.__table__.primary_key)
+                stmt = stmt.on_conflict_do_nothing(constraint=conflict_constraint)
 
             elif update_on_conflict:
                 on_conflict_update_cols = [
@@ -107,7 +111,7 @@ class BulkIOMixin(object):
                     if c not in cls.pk and c.name not in exclude_cols
                 ]
                 stmt = stmt.on_conflict_do_update(
-                    constraint=cls.__table__.primary_key,
+                    constraint=conflict_constraint,
                     set_={
                         k: getattr(stmt.excluded, k) for k in on_conflict_update_cols
                     },
@@ -182,8 +186,10 @@ class DataFrameMixin(BulkIOMixin):
         if reset_index:
             df = df.reset_index()
 
-        # df = df.replace({np.nan: None})  # nan to None
-        df = df.where(df.notnull(), None)  # handles NaNs in pandas 1.0+
+        df = df.replace({np.nan: None})  # catch NaT
+
+        # handles NaNs in pandas 1.0+; does NOT catch NaT
+        df = df.where(df.notnull(), None)
 
         return df.to_dict(orient="records")
 
