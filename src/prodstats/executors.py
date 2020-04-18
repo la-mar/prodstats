@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 import logging
 import uuid
 from timeit import default_timer as timer
@@ -12,7 +13,7 @@ import calc.well  # noqa
 import db.models as models
 import util
 from calc.sets import DataSet, ProdSet, WellGeometrySet, WellSet
-from const import HoleDirection, IHSPath
+from const import HoleDirection, IHSPath, ProdStatRange
 
 logger = logging.getLogger(__name__)
 
@@ -174,7 +175,7 @@ class ProdExecutor(BaseExecutor):
             else:
                 raise ValueError("Cant determine request path")
 
-            dataset: DataSet = await pd.DataFrame.prodstats.from_ihs(
+            prodset: ProdSet = await pd.DataFrame.prodstats.from_ihs(
                 path=path,
                 api14s=api14s,
                 api10s=api10s,
@@ -188,10 +189,10 @@ class ProdExecutor(BaseExecutor):
                 operation="download",
                 name="*",
                 seconds=exc_time,
-                count=dataset.data.shape[0],
+                count=prodset.header.shape[0],
             )
 
-            return dataset
+            return prodset
 
         except Exception as e:
             self.raise_execution_error(
@@ -209,32 +210,210 @@ class ProdExecutor(BaseExecutor):
             )
             raise e
 
-    async def process(self, dataset: DataSet, **kwargs) -> ProdSet:
+    def _process_monthly(
+        self, prodset: ProdSet, prod_columns: List[str] = ["oil", "gas", "water", "boe"]
+    ) -> ProdSet:
+        """ Calculate the monthly production for the given ProdSet. A new ProdSet object
+            is returned. The input ProdSet is not mutated.
+
+        Arguments:
+            prodset {ProdSet} -- must contain at least a monthly DataFrame
+
+        Keyword Arguments:
+            prod_columns {List[str]} -- list of column names to be considered as monthly
+                production values (default: ["oil", "gas", "water", "boe"])
+
+        Returns:
+            ProdSet
+        """
+        # prodset = ProdSet(*prodset)  # copy
+        monthly: pd.DataFrame = prodset.monthly
+
+        if monthly is not None and not monthly.empty:
+            # TODO: timeit
+            logger.debug(f"(Production) calculating monthly production...")
+            monthly["boe"] = monthly.prodstats.boe()
+            monthly["oil_percent"] = monthly.prodstats.oil_percent()
+            monthly["prod_days"] = monthly.prodstats.prod_days()
+            monthly["peak_norm_month"] = monthly.prodstats.peak_norm_month()
+            monthly["peak_norm_days"] = monthly.prodstats.peak_norm_days()
+
+            # * avg daily prod by month
+            monthly = monthly.join(monthly.prodstats.daily_avg_by_month(prod_columns))
+
+            # * normalize to various lateral lengths
+            perfll = monthly.perfll
+            per1k = monthly[prod_columns].prodstats.norm_to_ll(1000, perfll)
+            per3k = monthly[prod_columns].prodstats.norm_to_ll(3000, perfll)
+            per5k = monthly[prod_columns].prodstats.norm_to_ll(5000, perfll)
+            per7k = monthly[prod_columns].prodstats.norm_to_ll(
+                7500, perfll, suffix="7500"
+            )
+            per10k = monthly[prod_columns].prodstats.norm_to_ll(10000, perfll)
+
+            monthly = pd.concat([monthly, per1k, per3k, per5k, per7k, per10k], axis=1)
+            # monthly = monthly.drop(columns=["perfll"])
+
+            prodset.monthly = monthly
+        else:
+            logger.info(f"(Production) no monthly production to calculate")
+
+        return prodset
+
+    def _process_headers(self, prodset: ProdSet) -> ProdSet:
+        # prodset = ProdSet(*prodset)  # copy
+        header: pd.DataFrame = prodset.header
+        monthly: pd.DataFrame = prodset.monthly
+
+        has_headers = header is not None and not header.empty
+        has_monthly = monthly is not None and not monthly.empty
+
+        if has_headers and has_monthly:
+            # TODO: timeit
+            logger.debug(f"(Production) enriching production headers")
+            header = header.join(monthly.prodstats.peak30())
+            header = header.join(monthly.prodstats.prod_dates_by_well())
+            pdp = monthly.prodstats.pdp_by_well(
+                range_name=ProdStatRange.LAST,
+                months=3,
+                dollars_per_bbl=30000,
+                factor=0.75,
+            )
+            header = header.join(pdp)
+
+            prodset.header = header
+        else:
+            logger.info(
+                f"(Production) no production headers to process {has_headers=} {has_monthly=}"
+            )
+
+        return prodset
+
+    def _process_prodstats(
+        self,
+        monthly: pd.DataFrame,
+        agg_type: str = "sum",
+        norm_value: int = None,
+        norm_suffix: str = None,
+        prod_columns: List[str] = ["oil", "gas", "water", "boe"],
+    ) -> pd.DataFrame:
+
+        logger.debug(f"(Production) calculating prodstats {agg_type=} {norm_value=}")
+
+        # * oil/gas/water/boe
+        prodstat_options = list(
+            itertools.chain(
+                itertools.product(
+                    [ProdStatRange.FIRST],
+                    [1, 3, 6, 12, 18, 24, 30, 36, 42, 48],
+                    [True, False],
+                ),
+                itertools.product([ProdStatRange.LAST], [1, 3, 6, 12], [True, False]),
+                itertools.product([ProdStatRange.PEAKNORM], [1, 3, 6], [True, False]),
+                itertools.product([ProdStatRange.ALL], [None], [True, False]),
+            )
+        )
+
+        prodstat_dfs: List[pd.DataFrame] = []
+        for range_name, months, include_zeroes in prodstat_options:
+            prodstat_dfs.append(
+                monthly.prodstats.calc_prodstat(
+                    range_name=range_name,
+                    columns=prod_columns,
+                    months=months,
+                    agg_type=agg_type,
+                    include_zeroes=include_zeroes,
+                    norm_value=norm_value,
+                    norm_suffix=norm_suffix,
+                )
+            )
+
+        return pd.concat(prodstat_dfs, axis=0)
+
+    def _process_prodstat_ratios(
+        self,
+        monthly: pd.DataFrame,
+        prod_columns: List[str] = ["oil", "gas", "water", "boe"],
+    ):
+
+        logger.debug(f"(Production) calculating prodstat ratios")
+
+        # * gor/oil_percent/avg_daily
+        special_options = list(
+            itertools.chain(
+                itertools.product(
+                    [ProdStatRange.FIRST], [1, 3, 6, 12, 18, 24], [True, False]
+                ),
+                itertools.product([ProdStatRange.LAST], [1, 3, 6], [True, False]),
+                itertools.product([ProdStatRange.PEAKNORM], [1, 3, 6], [True, False]),
+                itertools.product([ProdStatRange.ALL], [None], [True, False]),
+            )
+        )
+
+        gor_dfs: List[pd.DataFrame] = []
+        oil_percent_dfs: List[pd.DataFrame] = []
+        avgdaily_dfs: List[pd.DataFrame] = []
+        for range_name, months, include_zeroes in special_options:
+            kwargs = {
+                "range_name": range_name,
+                "months": months,
+                "include_zeroes": include_zeroes,
+            }
+            gor_dfs.append(monthly.prodstats.gor_by_well(**kwargs))
+            oil_percent_dfs.append(monthly.prodstats.oil_percent_by_well(**kwargs))
+            for col in prod_columns:
+                avgdaily_dfs.append(
+                    monthly.prodstats.avg_daily_by_well(numerator=col, **kwargs)
+                )
+
+        return pd.concat(gor_dfs + oil_percent_dfs + avgdaily_dfs, axis=0)
+
+    async def process(
+        self,
+        dataset: DataSet,
+        prod_columns: List[str] = ["oil", "gas", "water", "boe"],
+        **kwargs,
+    ) -> ProdSet:
         kwargs = {**self.process_kwargs, **kwargs}
-        ps = ProdSet()
         ts = timer()
-        df: pd.DataFrame = dataset.data
 
         try:
-            if df is not None and not df.empty:
-                ps = df.prodstats.calc(**kwargs)
-                exc_time = round(timer() - ts, 2)
 
-                total_count = sum([x.shape[0] for x in list(ps) if x is not None])
-                for name, model, df in ps.items():
-                    if df is not None and not df.empty:
-                        seconds = round(
-                            df.shape[0] * (exc_time / (total_count or 1)), 2
-                        )
-                        self.add_metric(
-                            operation="process",
-                            name=name,
-                            seconds=seconds,
-                            count=df.shape[0],
-                        )
-            else:
-                logger.info(f"({self}) nothing to process",)
-            return ps
+            dataset = self._process_monthly(dataset)
+            dataset = self._process_headers(dataset)
+            monthly = dataset.monthly
+
+            prodstats = pd.concat(
+                [
+                    self._process_prodstats(monthly, prod_columns=prod_columns),
+                    self._process_prodstats(
+                        monthly, norm_value=1000, prod_columns=prod_columns,
+                    ),
+                    self._process_prodstat_ratios(monthly, prod_columns=prod_columns),
+                ],
+                axis=0,
+            )
+
+            dataset.stats = prodstats
+
+            if "perfll" in dataset.monthly.columns:
+                dataset.monthly = dataset.monthly.drop(columns=["perfll"])
+
+            exc_time = round(timer() - ts, 2)
+
+            total_count = sum([x.shape[0] for x in list(dataset) if x is not None])
+            for name, model, df in dataset.items():
+                if df is not None and not df.empty:
+                    seconds = round(df.shape[0] * (exc_time / (total_count or 1)), 2)
+                    self.add_metric(
+                        operation="process",
+                        name=name,
+                        seconds=seconds,
+                        count=df.shape[0],
+                    )
+
+            logger.debug(f"(Production) processing finished")
+            return dataset
 
         except Exception as e:
             api10s = df.util.column_as_set("api10")
@@ -594,11 +773,16 @@ class WellExecutor(BaseExecutor):
     async def process(
         self,
         dataset: WellSet,
+        use_local_geoms: bool = False,
+        use_local_prod: bool = False,
         geoms: WellGeometrySet = None,
         prod_headers: pd.DataFrame = None,
         **kwargs,
     ) -> WellSet:
-        kwargs = {**self.process_kwargs, **kwargs}
+        kwargs = {
+            **self.process_kwargs,
+            **kwargs,
+        }  # FIXME: where should this be used now?
         try:
             ts = timer()
             wells, depths, fracs, ips, *other = dataset
@@ -609,35 +793,27 @@ class WellExecutor(BaseExecutor):
             if self.hole_dir == HoleDirection.H:  # TODO:  Move to router
                 gpath = IHSPath.well_h_geoms
                 prodpath = IHSPath.prod_h_headers
+                if geoms is None:
+                    logger.debug(f"({self}) fetching fresh geometries")
+                    geoms = await pd.DataFrame.shapes.from_ihs(gpath, api14s=api14s)
 
             elif self.hole_dir == HoleDirection.V:  # TODO:  Move to router
-                gpath = IHSPath.well_v_geoms
                 prodpath = IHSPath.prod_v_headers
-
-            if geoms is None:
-                logger.debug(f"({self}) fetching fresh geometries")
-                geoms = await pd.DataFrame.shapes.from_ihs(gpath, api14s=api14s)
 
             if prod_headers is None:
                 logger.debug(f"({self}) fetching fresh production headers")
                 prod_headers = await wells.wells.last_prod_date(
-                    path=prodpath, prefer_local=False
+                    path=prodpath, prefer_local=use_local_prod
                 )
 
-            # ? begin process
-            # depths
+            #  * process depths
             if self.hole_dir == HoleDirection.H:
-
                 if depths is not None:
                     depth_stats: pd.DataFrame = depths.wells.melt_depths()
 
-                if geoms.points is not None and not geoms.points.empty:
+                if geoms and geoms.points is not None and not geoms.points.empty:
                     depth_stats = depth_stats.append(geoms.points.shapes.depth_stats())
                     wells["lateral_length"] = geoms.points.shapes.lateral_length()
-
-                # if depths is not None and geoms.points is not None:
-                #     depth_stats = geoms.points.shapes.depth_stats()
-                #     depth_stats = depth_stats.append(depths.wells.melt_depths())
 
                 md_tvd: pd.DataFrame = depth_stats[
                     depth_stats.name.isin(["md", "tvd"])
@@ -646,28 +822,31 @@ class WellExecutor(BaseExecutor):
 
                 # combine md and tvd columns from geoms and header, preferring header
                 md_tvd = depths.loc[:, ["md", "tvd"]].combine_first(md_tvd)
-
-                # calc and merge lateral lengths
-                # wells["lateral_length"] = geoms.points.shapes.lateral_length()
                 wells = wells.join(md_tvd)
                 depths = depth_stats.dropna(subset=["value"])
 
             elif self.hole_dir == HoleDirection.V:
-                # copy md to tvd where tvd is missing
                 if depths is not None and not depths.empty:
+                    # copy md to tvd where tvd is missing
                     depths.tvd = depths.tvd.combine_first(depths.md)
                     md_tvd = depths.loc[:, ["md", "tvd"]]
                     depth_stats = depths.wells.melt_depths()
                     wells = wells.join(md_tvd)
                     depths = depth_stats.dropna(subset=["value"])
 
-            # well status
+            # * norm ip prod values
+            if ips is not None and not ips.empty:
+                ip_norm_cols = ["oil", "gas", "water", "perfll"]
+                ip_norms = ips.loc[:, ip_norm_cols].prodstats.norm_to_ll(10000)
+                ips = ips.join(ip_norms)
 
+            # * determine well status
             wells["provider_status"] = wells.status.str.upper()
             if wells is not None and not wells.empty:
                 wells["status"] = wells.join(prod_headers).wells.assign_status()
                 wells["is_producing"] = wells.wells.is_producing()
 
+            # * process fracs
             lateral_lengths = wells.wells.merge_lateral_lengths()
             fracs = fracs.join(lateral_lengths)
             fracs = fracs.wells.process_fracs()
@@ -782,7 +961,9 @@ class WellExecutor(BaseExecutor):
         **kwargs,
     ) -> Tuple[int, Optional[WellSet]]:
 
-        return super().run(api14s=api14s, api10s=api10s, return_data=return_data,)
+        return super().run(
+            api14s=api14s, api10s=api10s, return_data=return_data, **kwargs
+        )
 
 
 if __name__ == "__main__":
@@ -790,25 +971,24 @@ if __name__ == "__main__":
     import calc.prod  # noqa
     from db import db  # noqa
     from collector import IHSClient
-    import random
 
     # import itertools
     # import multiprocessing as mp
 
     loggers.config(level=10, formatter="funcname")
 
-    def get_id_sets(area: str) -> Tuple[List[str], List[str]]:
-        loop = asyncio.get_event_loop()
-        coroh = IHSClient.get_ids_by_area(path=IHSPath.well_h_ids, area=area)
-        corov = IHSClient.get_ids_by_area(path=IHSPath.well_v_ids, area=area)
-        return loop.run_until_complete(asyncio.gather(coroh, corov))
+    # def get_id_sets(area: str) -> Tuple[List[str], List[str]]:
+    #     loop = asyncio.get_event_loop()
+    #     coroh = IHSClient.get_ids_by_area(path=IHSPath.well_h_ids, area=area)
+    #     corov = IHSClient.get_ids_by_area(path=IHSPath.well_v_ids, area=area)
+    #     return loop.run_until_complete(asyncio.gather(coroh, corov))
 
-    area = "tx-upton"
-    sample_size = 25
+    # area = "tx-upton"
+    # sample_size = 25
 
-    api14h, api14v = get_id_sets(area)
-    h_sample: List[str] = random.choices(api14h, k=sample_size)
-    v_sample: List[str] = random.choices(api14v, k=sample_size)
+    # api14h, api14v = get_id_sets(area)
+    # h_sample: List[str] = random.choices(api14h, k=sample_size)
+    # v_sample: List[str] = random.choices(api14v, k=sample_size)
 
     deo_api14h = [
         "42461409160000",
@@ -852,6 +1032,8 @@ if __name__ == "__main__":
     hole_direction = HoleDirection.H
     # from db import db
     # import util
+
+    # ! TEST PROD EXECUTOR
 
     util.aio.async_to_sync(db.startup())
 
@@ -935,7 +1117,7 @@ if __name__ == "__main__":
             api14s = await IHSClient.get_ids_by_area(
                 path=IHSPath.well_v_ids, area="tx-upton"
             )
-            api14s = api14s[:100]
+            api14s = api14s[:25]
             wellset = await wexec.download(api14s=api14s)
             wellset_processed = await wexec.process(wellset)
             await wexec.persist(wellset_processed)
@@ -944,13 +1126,17 @@ if __name__ == "__main__":
             if not db.is_bound():
                 await db.startup()
 
-            hole_dir = HoleDirection.V
-            id_path = IHSPath.prod_v_ids
+            api14s = await IHSClient.get_ids_by_area(
+                path=IHSPath.well_v_ids, area="tx-upton"
+            )
+            api14s = api14s[:5]
 
-            pexec = ProdExecutor(hole_dir)
-            entities = await IHSClient.get_ids_by_area(path=id_path, area="tx-upton")
+            pexec = ProdExecutor(HoleDirection.V)
+            entities = await IHSClient.get_ids_by_area(
+                path=IHSPath.prod_v_ids, area="tx-upton"
+            )
             entities = entities[:10]
-            ds: DataSet = await pexec.download(entities=entities)
+            ds: DataSet = await pexec.download(api14s=api14s)
             ps: ProdSet = await pexec.process(ds)
             await pexec.persist(ps)
 
@@ -977,7 +1163,7 @@ if __name__ == "__main__":
 
             pexec = ProdExecutor(hole_dir)
             entities = await IHSClient.get_ids_by_area(path=id_path, area="tx-upton")
-            entities = entities[:10]
+            entities = entities[:25]
             # entity12s = [x[:12] for x in entities]
             ds: DataSet = await pexec.download(entities=entities)
             ps: ProdSet = await pexec.process(ds)

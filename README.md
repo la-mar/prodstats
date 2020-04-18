@@ -18,37 +18,37 @@
 
 # TODO:
 
-1. Chord GeomExecutor -> ProdExecutor -> WellExecutor(use local geoms and prod_headers)
-1. Formation grid sourcing (cli upload, s3, dropbox)
-1. Formation Assignment
-1. Implement wellstats
-   - wellbore_crow_length
-   - wellbore_direction
-   - wellbore_bearing
-   - wellbore_dls_roc
-   - lateral_dls_roc
-   - wellbore_dls_mc
-   - lateral_dls_mc
-   - nearest_prospect
-   - dist_to_prospect_mi
-   - nearest_api10
-   - dist_to_company_well_mi
-1. Capture comments on production calculations and prodstats
+- Chord GeomExecutor -> ProdExecutor -> WellExecutor(use local geoms and prod_headers)
+- Formation grid sourcing (cli upload, s3, dropbox)
+- Formation Assignment
+- Implement wellstats
+  - wellbore_crow_length
+  - wellbore_direction
+  - wellbore_bearing
+  - wellbore_dls_roc
+  - lateral_dls_roc
+  - wellbore_dls_mc
+  - lateral_dls_mc
+  - nearest_prospect
+  - dist_to_prospect_mi
+  - nearest_api10
+  - dist_to_company_well_mi
+- Capture comments on production calculations and prodstats
 
-   - material changes in allocation well count
+  - material changes in allocation well count
 
-1. Generate well links to relevant RRC filings
-1. Production links needed?
-1. Well Spacing
-1. RequestRouter for provider requests:
-   - input: const.DataType, const.Provider, const.HoleDirection
-   - output: PathComponent
-1. Standardize log messages
-1. Refactor executors.py functionality into base class
-1. Populate lat/lon on well_location
-1. Add geom_webmercator to well_location, survey_points, surveys
-1. Change prodstat aggregate_type stored in database from 'mean' to 'avg' for consistency
-1. Set httpx timeouts
-1. refactor jsontools and ext.orjson to jsonlib module with api
-1. Normalize Area/Provider related tables when incorporating drillinginfo. Change Area to ProviderArea and add providers.IDMaster.
-1. Schema provider fields to Enum
+- Generate well links to relevant RRC filings
+- Production links needed?
+- Well Spacing
+- RequestRouter for provider requests:
+  - input: const.DataType, const.Provider, const.HoleDirection
+  - output: PathComponent
+- Standardize log messages
+  <!-- - Refactor executors.py functionality into base class -->
+  <!-- - Populate lat/lon on well_location -->
+- Add geom_webmercator to well_location, survey_points, surveys
+<!-- - Change prodstat aggregate_type stored in database from 'mean' to 'avg' for consistency -->
+- Set httpx timeouts
+- refactor jsontools and ext.orjson to jsonlib module with api
+- Normalize Area/Provider related tables when incorporating drillinginfo. Change Area to ProviderArea and add providers.IDMaster.
+- Schema provider fields to Enum

@@ -12,7 +12,7 @@ class ProdHeader(Base):
     status = db.Column(db.String())
     first_prod_date = db.Column(db.Date())
     last_prod_date = db.Column(db.Date())
-    prod_months = db.Column(db.Integer())  # months producing
+    prod_months = db.Column(db.Integer())
     prod_days = db.Column(db.Integer())
     peak_norm_months = db.Column(db.Integer())
     peak_norm_days = db.Column(db.Integer())
@@ -30,7 +30,7 @@ class ProdHeader(Base):
     provider_last_update_at = db.Column(db.DateTime(timezone=True))
     related_well_count = db.Column(db.Integer())
     related_wells = db.Column(db.JSONB(), nullable=False, server_default="[]")
-    comments = db.Column(db.JSONB(), nullable=False, server_default="[]")
+    comments = db.Column(db.JSONB(), nullable=False, server_default="{}")
 
 
 class ProdMonthly(Base):
@@ -50,31 +50,31 @@ class ProdMonthly(Base):
     water_cut = db.Column(db.Numeric(19, 2))
     oil_percent = db.Column(db.Numeric(19, 2))
     gor = db.Column(db.Integer())
-    oil_norm_1k = db.Column(db.Integer())
-    gas_norm_1k = db.Column(db.Integer())
-    water_norm_1k = db.Column(db.Integer())
-    boe_norm_1k = db.Column(db.Integer())
-    gas_norm_3k = db.Column(db.Integer())
-    oil_norm_3k = db.Column(db.Integer())
-    water_norm_3k = db.Column(db.Integer())
-    boe_norm_3k = db.Column(db.Integer())
-    gas_norm_5k = db.Column(db.Integer())
-    oil_norm_5k = db.Column(db.Integer())
-    water_norm_5k = db.Column(db.Integer())
-    boe_norm_5k = db.Column(db.Integer())
-    gas_norm_7500 = db.Column(db.Integer())
-    oil_norm_7500 = db.Column(db.Integer())
-    water_norm_7500 = db.Column(db.Integer())
-    boe_norm_7500 = db.Column(db.Integer())
-    gas_norm_10k = db.Column(db.Integer())
-    oil_norm_10k = db.Column(db.Integer())
-    water_norm_10k = db.Column(db.Integer())
-    boe_norm_10k = db.Column(db.Integer())
+    oil_per1k = db.Column(db.Integer())
+    gas_per1k = db.Column(db.Integer())
+    water_per1k = db.Column(db.Integer())
+    boe_per1k = db.Column(db.Integer())
+    gas_per3k = db.Column(db.Integer())
+    oil_per3k = db.Column(db.Integer())
+    water_per3k = db.Column(db.Integer())
+    boe_per3k = db.Column(db.Integer())
+    gas_per5k = db.Column(db.Integer())
+    oil_per5k = db.Column(db.Integer())
+    water_per5k = db.Column(db.Integer())
+    boe_per5k = db.Column(db.Integer())
+    gas_per7500 = db.Column(db.Integer())
+    oil_per7500 = db.Column(db.Integer())
+    water_per7500 = db.Column(db.Integer())
+    boe_per7500 = db.Column(db.Integer())
+    gas_per10k = db.Column(db.Integer())
+    oil_per10k = db.Column(db.Integer())
+    water_per10k = db.Column(db.Integer())
+    boe_per10k = db.Column(db.Integer())
     oil_avg_daily = db.Column(db.Integer())
     gas_avg_daily = db.Column(db.Numeric(19, 2))
     water_avg_daily = db.Column(db.Numeric(19, 2))
     boe_avg_daily = db.Column(db.Numeric(19, 2))
-    comments = db.Column(db.JSONB(), nullable=False, server_default="[]")
+    comments = db.Column(db.JSONB(), nullable=False, server_default="{}")
 
 
 class ProdStat(Base):
@@ -95,6 +95,6 @@ class ProdStat(Base):
     end_month = db.Column(db.Integer())
     comments = db.Column(db.JSONB(), nullable=False, server_default="{}")
 
-    prodstat_api10_prop_agg_idx = db.Index(
-        "prodstat_api10_prop_agg_idx", "api10", "property_name", "aggregate_type"
+    ix_prodstat_api10_prop_agg = db.Index(
+        "ix_prodstat_api10_prop_agg", "api10", "property_name", "aggregate_type"
     )

@@ -162,6 +162,7 @@ class IPTestSet(WellSetBase):
 class WellRecord(WellBase):
     api14: str
     api10: str
+    well_name: str
     hole_direction: str
     status: str
     county: Optional[str]

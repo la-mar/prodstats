@@ -19,6 +19,7 @@ def setup_periodic_tasks(sender, **kwargs):
 
     add_task(30, tasks.post_heartbeat, name="heartbeat")
     # add_task(30, tasks.log.s(), name="heartbeat")
-    # add_task(30, tasks.sync_area_manifest.s(), name="sync_area_manifest")
-    # add_task(60, tasks.run_driftwood.s(), name="run_driftwood")
+    add_task(30, tasks.sync_area_manifest.s(), name="sync_area_manifest")
+    # add_task(300, tasks.run_driftwood.s(), name="run_driftwood")
+    add_task(300, tasks.run_test_apilist.s())
     # add_task(60, tasks.run_next_available.s(HoleDirection.H), name="run_next_available")

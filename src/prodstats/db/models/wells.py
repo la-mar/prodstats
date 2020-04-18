@@ -21,6 +21,7 @@ class WellHeader(WellBase):
     __tablename__ = "wells"
 
     api10 = db.Column(db.String(10), index=True)
+    well_name = db.Column(db.String())
     hole_direction = db.Column(db.String(1))
     status = db.Column(db.String(50))
     is_producing = db.Column(db.Boolean(), index=True)
@@ -28,12 +29,12 @@ class WellHeader(WellBase):
     operator_alias = db.Column(db.String(), index=True)
     hist_operator = db.Column(db.String(), index=True)
     hist_operator_alias = db.Column(db.String(), index=True)
-    perfll = db.Column(db.Integer())
     tvd = db.Column(db.Integer())
     md = db.Column(db.Integer())
+    perfll = db.Column(db.Integer())
+    lateral_length = db.Column(db.Integer())
     ground_elev = db.Column(db.Integer())
     kb_elev = db.Column(db.Integer())
-    lateral_length = db.Column(db.Integer())
     comp_date = db.Column(db.Date())
     spud_date = db.Column(db.Date())
     permit_date = db.Column(db.Date())
@@ -51,9 +52,9 @@ class WellHeader(WellBase):
     provider = db.Column(db.String())
     provider_last_update_at = db.Column(db.DateTime(timezone=True))
     basin_holedir_isprod_idx = db.Index(
-        "well_basin_holedir_isprod_idx", "basin", "hole_direction", "is_producing"
+        "ix_well_basin_holedir_isprod", "basin", "hole_direction", "is_producing"
     )
-    basin_status_idx = db.Index("well_basin_status_idx", "basin", "status")
+    basin_status_idx = db.Index("ix_well_basin_status", "basin", "status")
 
 
 class FracParameters(WellBase):
@@ -111,21 +112,6 @@ class WellDepth(WellBase):
     overlap_percent = db.Column(db.Float())
     in_target = db.Column(db.Boolean())
     assignment_method = db.Column(db.String())  # TODO: enum
-    # tvd = db.Column(db.Integer())
-    # td = db.Column(db.Integer())
-    # tvd_min = db.Column(db.Integer())
-    # tvd_max = db.Column(db.Integer())
-    # tvd_avg = db.Column(db.Integer())
-    # tvd_heel = db.Column(db.Integer())
-    # tvd_mid = db.Column(db.Integer())  # tvd_midpoint
-    # tvd_toe = db.Column(db.Integer())
-    # md_min = db.Column(db.Integer())
-    # md_max = db.Column(db.Integer())
-    # md_avg = db.Column(db.Integer())
-    # perf_upper_min = db.Column(db.Integer())  # perf_upper_min
-    # perf_lower_max = db.Column(db.Integer())  # perf_lower_max
-    # top_min = db.Column(db.Integer())  # well_depthtop_min
-    # base_max = db.Column(db.Integer())  # well_depthbase_max
 
 
 class WellLink(WellBase):
@@ -146,10 +132,7 @@ class WellLocation(WellBase):
     metes_bounds = db.Column(db.String(50))
     lon = db.Column(db.Float())
     lat = db.Column(db.Float())
-    geom = db.Column(
-        db.Geometry("POINT", srid=4326)
-    )  # shl, bhl, pbhl, kop, heel, mid, toe
-    geom_webmercator = db.Column(db.Geometry("POINT", srid=3857))
+    geom = db.Column(db.Geometry("POINT", srid=4326))
 
 
 class Survey(WellBase):
@@ -166,10 +149,6 @@ class Survey(WellBase):
     lateral_only = db.Column(db.Geometry("LINESTRING", srid=4326))
     stick = db.Column(db.Geometry("LINESTRING", srid=4326))
     bent_stick = db.Column(db.Geometry("LINESTRING", srid=4326))
-    wellbore_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
-    lateral_only_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
-    stick_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
-    bent_stick_webmercator = db.Column(db.Geometry("LINESTRING", srid=3857))
 
 
 class SurveyPoint(WellBase):
@@ -180,16 +159,29 @@ class SurveyPoint(WellBase):
     dip = db.Column(db.Float())
     sequence = db.Column(db.Integer())
     theta = db.Column(db.Float())
-    is_in_lateral = db.Column(db.Boolean())
-    is_heel_point = db.Column(db.Boolean())
-    is_mid_point = db.Column(db.Boolean())
-    is_toe_point = db.Column(db.Boolean())
-    is_soft_corner = db.Column(db.Boolean())
-    is_hard_corner = db.Column(db.Boolean())
-    is_kop = db.Column(db.Boolean())
-
+    is_in_lateral = db.Column(db.Boolean(), nullable=False, default=False)
+    is_heel_point = db.Column(db.Boolean(), nullable=False, default=False)
+    is_mid_point = db.Column(db.Boolean(), nullable=False, default=False)
+    is_toe_point = db.Column(db.Boolean(), nullable=False, default=False)
+    is_soft_corner = db.Column(db.Boolean(), nullable=False, default=False)
+    is_hard_corner = db.Column(db.Boolean(), nullable=False, default=False)
+    is_kop = db.Column(db.Boolean(), nullable=False, default=False)
     geom = db.Column(db.Geometry("POINT", srid=4326))
-    geom_webmercator = db.Column(db.Geometry("POINT", srid=3857))
+    ix_lateral_partial = db.Index(
+        "ix_lateral_partial",
+        "api14",
+        "is_in_lateral",
+        postgresql_where=(is_in_lateral),
+    )
+    ix_heel_partial = db.Index(
+        "ix_heel_partial", "api14", "is_heel_point", postgresql_where=(is_heel_point),
+    )
+    ix_mid_partial = db.Index(
+        "ix_mid_partial", "api14", "is_mid_point", postgresql_where=(is_mid_point),
+    )
+    ix_toe_partial = db.Index(
+        "ix_toe_partial", "api14", "is_toe_point", postgresql_where=(is_toe_point),
+    )
 
 
 class IPTest(WellBase):
@@ -201,10 +193,13 @@ class IPTest(WellBase):
     test_method = db.Column(db.String())
     completion = db.Column(db.Integer())
     oil = db.Column(db.Integer())
+    oil_per10k = db.Column(db.Integer())
     oil_uom = db.Column(db.String(10))
     gas = db.Column(db.Integer())
+    gas_per10k = db.Column(db.Integer())
     gas_uom = db.Column(db.String(10))
     water = db.Column(db.Integer())
+    water_per10k = db.Column(db.Integer())
     water_uom = db.Column(db.String(10))
     choke = db.Column(db.String(25))
     depth_top = db.Column(db.Integer())

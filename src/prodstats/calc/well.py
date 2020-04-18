@@ -356,7 +356,7 @@ class Well:
 
         if prod_headers is None:
             logger.debug("fetching production headers from ihs service")
-            prod = await IHSClient.get_production(path, api14s=api14s_in)
+            prod = await IHSClient.get_production(path, api14s=api14s_in, related=False)
 
             prod_df = pd.DataFrame(prod)
 
@@ -624,15 +624,33 @@ if __name__ == "__main__":
     kwargs: dict = {}
     create_index = True
 
+    wellset = util.aio.async_to_sync(
+        pd.DataFrame.wells.from_ihs(path=path, api14s=api14s)
+    )
+    wells, depths, fracs, ips, *other = wellset
+
     async def coro():
         from db import db
 
         if not db.is_bound():
             await db.startup()
 
-        wells, depths, fracs, ips, *other = await pd.DataFrame.wells.from_ihs(
-            path=IHSPath.well_h, api10s=api10s[:5]
+        load_cols = (WellDepth.api14, WellDepth.name, WellDepth.value)
+        md_tvd_from_db = (
+            await WellDepth.query.where(
+                WellDepth.api14.in_(api14s) & WellDepth.name.in_(["md", "tvd"])
+            )
+            .gino.load(load_cols)
+            .all()
         )
+
+        md_tvd_from_db = pd.DataFrame.from_records(md_tvd_from_db).pivot(
+            index=0, columns=1
+        )
+        md_tvd_from_db.columns = md_tvd_from_db.columns.droplevel(0)
+        md_tvd_from_db.index.name = "api14"
+        md_tvd_from_db.columns.name = ""
+        md_tvd_from_db
 
 
 # # geoms = await pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)

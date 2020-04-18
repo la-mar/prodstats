@@ -8,6 +8,7 @@ import pandas as pd
 from shapely.geometry import LineString, Point
 
 import schemas as sch
+import util
 import util.geo as geo
 from calc.sets import WellGeometrySet
 from collector import IHSClient, IHSPath
@@ -435,6 +436,13 @@ if __name__ == "__main__":
 
     pd.set_option("display.float_format", lambda x: "%.2f" % x)
     pd.set_option("precision", 2)
+
+    geoms = util.aio.async_to_sync(
+        pd.DataFrame.shapes.from_ihs(IHSPath.well_h_geoms, api14s=api14s)
+    )
+    locations, surveys, points, *other = geoms
+
+    # def
 
     async def async_wrapper():
 
