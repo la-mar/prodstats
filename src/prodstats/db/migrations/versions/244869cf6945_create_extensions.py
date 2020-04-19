@@ -1,4 +1,4 @@
-""" initial
+"""create extensions
 
 Revision ID: 244869cf6945
 Revises:
