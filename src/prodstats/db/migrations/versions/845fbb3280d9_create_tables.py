@@ -362,7 +362,9 @@ def upgrade():
         sa.Column("is_kop", sa.Boolean(), nullable=False),
         sa.Column(
             "geom",
-            geoalchemy2.types.Geometry(geometry_type="POINT", srid=4326),
+            geoalchemy2.types.Geometry(
+                geometry_type="POINT", srid=4326, spatial_index=False
+            ),
             nullable=True,
         ),
         sa.Column(
@@ -422,22 +424,30 @@ def upgrade():
         sa.Column("survey_base_uom", sa.String(length=10), nullable=True),
         sa.Column(
             "wellbore",
-            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=4326),
+            geoalchemy2.types.Geometry(
+                geometry_type="LINESTRING", srid=4326, spatial_index=False
+            ),
             nullable=True,
         ),
         sa.Column(
             "lateral_only",
-            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=4326),
+            geoalchemy2.types.Geometry(
+                geometry_type="LINESTRING", srid=4326, spatial_index=False
+            ),
             nullable=True,
         ),
         sa.Column(
             "stick",
-            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=4326),
+            geoalchemy2.types.Geometry(
+                geometry_type="LINESTRING", srid=4326, spatial_index=False
+            ),
             nullable=True,
         ),
         sa.Column(
             "bent_stick",
-            geoalchemy2.types.Geometry(geometry_type="LINESTRING", srid=4326),
+            geoalchemy2.types.Geometry(
+                geometry_type="LINESTRING", srid=4326, spatial_index=False
+            ),
             nullable=True,
         ),
         sa.Column(
@@ -489,7 +499,9 @@ def upgrade():
         sa.Column("lat", sa.Float(), nullable=True),
         sa.Column(
             "geom",
-            geoalchemy2.types.Geometry(geometry_type="POINT", srid=4326),
+            geoalchemy2.types.Geometry(
+                geometry_type="POINT", srid=4326, spatial_index=False
+            ),
             nullable=True,
         ),
         sa.Column(
@@ -618,6 +630,46 @@ def upgrade():
     )
     op.create_index(op.f("ix_wellstats_api14"), "wellstats", ["api14"], unique=False)
     # ### end Alembic commands ###
+
+    # * Create spatial indices
+    op.create_index(
+        "ix_survey_point_geom",
+        "survey_points",
+        ["geom"],
+        unique=False,
+        postgresql_using="gist",
+    )
+    op.create_index(
+        "ix_survey_bent_stick",
+        "surveys",
+        ["bent_stick"],
+        unique=False,
+        postgresql_using="gist",
+    )
+    op.create_index(
+        "ix_survey_lateral_only",
+        "surveys",
+        ["lateral_only"],
+        unique=False,
+        postgresql_using="gist",
+    )
+    op.create_index(
+        "ix_survey_stick", "surveys", ["stick"], unique=False, postgresql_using="gist"
+    )
+    op.create_index(
+        "ix_survey_wellbore",
+        "surveys",
+        ["wellbore"],
+        unique=False,
+        postgresql_using="gist",
+    )
+    op.create_index(
+        "ix_well_location_geom",
+        "well_locations",
+        ["geom"],
+        unique=False,
+        postgresql_using="gist",
+    )
 
 
 def downgrade():

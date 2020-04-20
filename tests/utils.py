@@ -181,6 +181,12 @@ async def seed_model(model: Model, n: int = 10):
 # n=10
 
 
+async def seed_models(models: List[str]):
+    # async with db.with_bind(DATABASE_CONFIG.url):
+    for m in models:
+        await seed_model(m, n=50)
+
+
 async def refresh_fixtures(hole_dir: HoleDirection, n: int = 10):
 
     fixture_path = Path("tests/fixtures")

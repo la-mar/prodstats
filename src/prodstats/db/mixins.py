@@ -218,7 +218,9 @@ class DataFrameMixin(BulkIOMixin):
 
         # drop rows with any missing primary keys
         ct_before = df.shape[0]
-        df = df.dropna(subset=cls.pk.names, how="any")
+        for col in cls.pk.names:
+            if col in df.columns:
+                df = df.dropna(subset=[col], how="all")
         ct_after = df.shape[0]
 
         # TODO: capture rows when in debug mode, similar to execute_statement()

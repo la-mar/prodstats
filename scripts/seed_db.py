@@ -1,18 +1,10 @@
-import asyncio
-from typing import List
+import loggers
+import util
+from cq.tasks import sync_area_manifest
+from db import db
 
-from tests.utils import seed_model
+loggers.config(level=10)
 
-from db import DATABASE_CONFIG, db
+util.aio.async_to_sync(db.startup())
 
-
-async def seed_models(models: List[str]):
-    async with db.with_bind(DATABASE_CONFIG.url):
-        for m in models:
-            await seed_model(m, n=50)
-
-
-def run():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(seed_models())
-    loop.close()
+sync_area_manifest.apply()

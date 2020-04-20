@@ -133,6 +133,9 @@ class WellLocation(WellBase):
     lon = db.Column(db.Float())
     lat = db.Column(db.Float())
     geom = db.Column(db.Geometry("POINT", srid=4326))
+    ix_well_location_geom = db.Index(
+        "ix_well_location_geom", "geom", postgresql_using="gist"
+    )
 
 
 class Survey(WellBase):
@@ -145,10 +148,20 @@ class Survey(WellBase):
     survey_top_uom = db.Column(db.String(10))
     survey_base = db.Column(db.Integer())
     survey_base_uom = db.Column(db.String(10))
-    wellbore = db.Column(db.Geometry("LINESTRING", srid=4326))
-    lateral_only = db.Column(db.Geometry("LINESTRING", srid=4326))
-    stick = db.Column(db.Geometry("LINESTRING", srid=4326))
-    bent_stick = db.Column(db.Geometry("LINESTRING", srid=4326))
+    wellbore = db.Column(db.Geometry("LINESTRING", srid=4326, spatial_index=False))
+    lateral_only = db.Column(db.Geometry("LINESTRING", srid=4326, spatial_index=False))
+    stick = db.Column(db.Geometry("LINESTRING", srid=4326, spatial_index=False))
+    bent_stick = db.Column(db.Geometry("LINESTRING", srid=4326, spatial_index=False))
+    ix_survey_wellbore = db.Index(
+        "ix_survey_wellbore", "wellbore", postgresql_using="gist"
+    )
+    ix_survey_lateral_only = db.Index(
+        "ix_survey_lateral_only", "lateral_only", postgresql_using="gist"
+    )
+    ix_survey_stick = db.Index("ix_survey_stick", "stick", postgresql_using="gist")
+    ix_survey_bent_stick = db.Index(
+        "ix_survey_bent_stick", "bent_stick", postgresql_using="gist"
+    )
 
 
 class SurveyPoint(WellBase):
@@ -166,7 +179,7 @@ class SurveyPoint(WellBase):
     is_soft_corner = db.Column(db.Boolean(), nullable=False, default=False)
     is_hard_corner = db.Column(db.Boolean(), nullable=False, default=False)
     is_kop = db.Column(db.Boolean(), nullable=False, default=False)
-    geom = db.Column(db.Geometry("POINT", srid=4326))
+    geom = db.Column(db.Geometry("POINT", srid=4326, spatial_index=False))
     ix_lateral_partial = db.Index(
         "ix_lateral_partial",
         "api14",
@@ -181,6 +194,9 @@ class SurveyPoint(WellBase):
     )
     ix_toe_partial = db.Index(
         "ix_toe_partial", "api14", "is_toe_point", postgresql_where=(is_toe_point),
+    )
+    ix_survey_point_geom = db.Index(
+        "ix_survey_point_geom", "geom", postgresql_using="gist"
     )
 
 
