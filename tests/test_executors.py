@@ -219,23 +219,23 @@ class TestProdExecutor:
         assert ps.monthly.shape[0] == prod_df_v.shape[0]
         assert ps.stats.shape[0] > 0
 
-    @pytest.mark.cionly
-    @pytest.mark.asyncio
-    async def test_process_and_persist_v_with_default_option_sets(
-        self, prod_df_v, bind
-    ):
+    # @pytest.mark.cionly
+    # @pytest.mark.asyncio
+    # async def test_process_and_persist_v_with_default_option_sets(
+    #     self, prod_df_v, bind
+    # ):
 
-        prodset_v = prod_df_v.prodstats.to_prodset()
-        pexec = ProdExecutor(HoleDirection.V)
-        ps = await pexec.process(prodset_v)
-        await pexec.persist(ps)
-        expected = ps.stats.shape[0]
-        actual = await Model.agg.count()
+    #     prodset_v = prod_df_v.prodstats.to_prodset()
+    #     pexec = ProdExecutor(HoleDirection.V)
+    #     ps = await pexec.process(prodset_v)
+    #     await pexec.persist(ps)
+    #     expected = ps.stats.shape[0]
+    #     actual = await Model.agg.count()
 
-        assert expected == actual
-        assert ps.header.shape[0] == prod_df_v.index.levels[0].shape[0]
-        assert ps.monthly.shape[0] == prod_df_v.groupby(level=[0, 1]).first().shape[0]
-        assert ps.stats.shape[0] > 0
+    #     assert expected == actual
+    #     assert ps.header.shape[0] == prod_df_v.index.levels[0].shape[0]
+    #     assert ps.monthly.shape[0] == prod_df_v.groupby(level=[0, 1]).first().shape[0]
+    #     assert ps.stats.shape[0] > 0
 
     @pytest.mark.asyncio
     async def test_process_and_persist_h_tiny_batch(self, prod_df_h, bind):
