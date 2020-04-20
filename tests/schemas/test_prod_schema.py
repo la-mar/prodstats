@@ -66,20 +66,7 @@ class TestProdRecord:
 class TestProdWell:
     def test_records(self, well):
         actual = ProductionWell(**well).records()
-
         assert len(actual) == len(well["production"])
-
-    def test_df(self, well):
-        actual = {*ProductionWell(**well).df(create_index=False).columns.tolist()}
-        expected = {
-            *[x for x in ProductionWell.__fields__.keys() if x not in ["production"]],
-            *ProductionRecord.__fields__.keys(),
-        }
-        assert actual == expected
-
-    def test_df_with_index(self, well):
-        df = ProductionWell(**well).df(create_index=True)
-        assert {*df.index.names} == {"api10", "prod_date"}
 
 
 class TestProdWellSet:
@@ -90,7 +77,10 @@ class TestProdWellSet:
         assert len(actual) == expected
 
     def test_df(self, well):
-        actual = {*ProductionWell(**well).df(create_index=False).columns.tolist()}
+        wells = [well for x in range(0, 5)]
+        actual = {
+            *ProductionWellSet(wells=wells).df(create_index=False).columns.tolist()
+        }
         expected = {
             *[x for x in ProductionWell.__fields__.keys() if x not in ["production"]],
             *ProductionRecord.__fields__.keys(),

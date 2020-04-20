@@ -3,7 +3,8 @@ import logging
 import pytest  # noqa
 
 import util
-from util import apply_transformation, chunks, hf_number, hf_size
+from util.humanize import short_number, size_bytes
+from util.iterables import apply_transformation, chunks
 
 logger = logging.getLogger(__name__)
 
@@ -56,15 +57,6 @@ class TestGenericUtils:
         result = [list(x) for x in chunks(values, n=2)]
         assert result == expected
 
-    def test_safe_load_yaml(self, tmpyaml):
-        loaded = util.safe_load_yaml(tmpyaml)
-        assert "container" in loaded.keys()
-
-    def test_load_config_from_yaml_file_no_exists(self, capsys):
-        util.safe_load_yaml("/path/that/doesnt/exist/hopefully/test.yaml")
-        captured = capsys.readouterr()
-        assert "Failed to load configuration" in captured.out
-
     @pytest.mark.parametrize(
         "data,expected", [(1, [1]), ([1, 2, 3], [1, 2, 3]), ((1), [(1)]), ({}, [{}])]
     )
@@ -88,18 +80,18 @@ class TestGenericUtils:
 
 
 class TestHumanize:
-    def test_hf_size_zero_bytes(self):
-        assert hf_size(0) == "0B"
+    def test_size_bytes_zero_bytes(self):
+        assert size_bytes(0) == "0B"
 
-    def test_hf_size_string_arg(self):
-        assert hf_size("123") == "123.0 B"
+    def test_size_bytes_string_arg(self):
+        assert size_bytes("123") == "123.0 B"
 
     @pytest.mark.parametrize(
         "number,expected",
         [(123456, "120.56 KB"), (1200000, "1.14 MB"), (1200000000, "1.12 GB")],
     )
-    def test_hf_size_format(self, number, expected):
-        assert hf_size(number) == expected
+    def test_size_bytes_format(self, number, expected):
+        assert size_bytes(number) == expected
 
     @pytest.mark.parametrize(
         "number,round_digits,expected",
@@ -112,8 +104,8 @@ class TestHumanize:
             (1400000, 1, "1.4M"),
         ],
     )
-    def test_hf_number(self, number, round_digits, expected):
-        assert hf_number(number, round_digits) == expected
+    def test_short_number(self, number, round_digits, expected):
+        assert short_number(number, round_digits) == expected
 
 
 class TestApplyTransformation:

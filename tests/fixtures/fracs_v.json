@@ -1,0 +1,36 @@
+[
+    {
+        "total_base_water_volume": 1782354,
+        "provider_last_update_at": "2020-03-18T03:21:36.311813+00:00",
+        "ingredient_mass": 1116850,
+        "mass_diff_pct": -0.09,
+        "water_mass": 14847008,
+        "hf_job_pct": 6.86,
+        "api14": "42329389700000",
+        "prop_mass": 1017932,
+        "api10": "4232938970",
+        "total_base_water_uom": "GAL",
+        "fluid": 42437,
+        "fluid_uom": "BBL",
+        "proppant": 1116850,
+        "proppant_uom": "LB",
+        "provider": "FracFocus"
+    },
+    {
+        "total_base_water_volume": 841650,
+        "provider_last_update_at": "2020-03-18T03:01:25.058090+00:00",
+        "ingredient_mass": 1002091,
+        "mass_diff_pct": -0.14,
+        "water_mass": 7010944,
+        "hf_job_pct": 12.26,
+        "api14": "42329389930000",
+        "prop_mass": 859722,
+        "api10": "4232938993",
+        "total_base_water_uom": "GAL",
+        "fluid": 20039,
+        "fluid_uom": "BBL",
+        "proppant": 1002091,
+        "proppant_uom": "LB",
+        "provider": "FracFocus"
+    }
+]

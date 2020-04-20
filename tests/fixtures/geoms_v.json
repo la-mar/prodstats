@@ -1,0 +1,362 @@
+[
+    {
+        "api14": "42329402520000",
+        "api10": "4232940252",
+        "status": "OIL PRODUCER",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:46:05.880000",
+        "well_name": "AVOCADO 13 1",
+        "hole_direction": "V",
+        "shl": {
+            "block": "37",
+            "section": "13",
+            "abstract": "1051",
+            "survey": "STOKES J V",
+            "metes_bounds": "2165 FS 1816 FW TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -101.84546860547837,
+                    31.999996984495848
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    },
+    {
+        "api14": "42329389700000",
+        "api10": "4232938970",
+        "status": "OIL PRODUCER",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:45:08.587000",
+        "well_name": "TRIPLE HOP 404",
+        "hole_direction": "V",
+        "shl": {
+            "block": "37",
+            "section": "40",
+            "abstract": "1036",
+            "survey": "LEECH LEONARD",
+            "metes_bounds": "1400 FN 1915 FW TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -101.87810611782938,
+                    31.93674976052019
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    },
+    {
+        "api14": "42329389930000",
+        "api10": "4232938993",
+        "status": "OIL PRODUCER",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:45:07.542000",
+        "well_name": "SCHARBAUER C 4201M",
+        "hole_direction": "V",
+        "shl": {
+            "block": "39",
+            "section": "42",
+            "abstract": "694",
+            "survey": "T&P RR CO",
+            "metes_bounds": "1060 FN 1980 FE TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -102.1059207477533,
+                    31.885066844074075
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    },
+    {
+        "api14": "42329368180000",
+        "api10": "4232936818",
+        "status": "OIL PRODUCER",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:42:40.185000",
+        "well_name": "HOOPER `39` 3",
+        "hole_direction": "V",
+        "shl": {
+            "block": "38",
+            "section": "39",
+            "abstract": "29",
+            "survey": "T&P RR CO",
+            "metes_bounds": "660 FSE 660 FNE TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -101.985993273248,
+                    32.02367195039136
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    },
+    {
+        "api14": "42329365820000",
+        "api10": "4232936582",
+        "status": "OIL PRODUCER",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:42:03.783000",
+        "well_name": "COWDEN `32` 7",
+        "hole_direction": "V",
+        "shl": {
+            "block": "39",
+            "section": "32",
+            "abstract": "1420",
+            "survey": "T&P RR CO",
+            "metes_bounds": "660 FN 810 FE TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -102.01925475663043,
+                    31.68003564091848
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    },
+    {
+        "api14": "42329362250000",
+        "api10": "4232936225",
+        "status": "OIL PRODUCER",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:41:27.527000",
+        "well_name": "FEE `AS` 105",
+        "hole_direction": "V",
+        "shl": {
+            "block": "40",
+            "section": "1",
+            "abstract": "242",
+            "survey": "T&P RR CO",
+            "metes_bounds": "1650 FN 1300 FW TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -102.19151412676122,
+                    32.074638971354744
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    },
+    {
+        "api14": "42329358880000",
+        "api10": "4232935888",
+        "status": "OIL PRODUCER",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:41:00.795000",
+        "well_name": "TXL N 39-2 5",
+        "hole_direction": "V",
+        "shl": {
+            "block": "39",
+            "section": "39",
+            "abstract": "214",
+            "survey": "T&P RR CO",
+            "metes_bounds": "2000 FS 661 FE TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -102.04846526358686,
+                    31.771660072216633
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    },
+    {
+        "api14": "42329328530000",
+        "api10": "4232932853",
+        "status": "OIL PRODUCER",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:35:23.519000",
+        "well_name": "PARKS FIELD UNIT 2 2618",
+        "hole_direction": "V",
+        "shl": {
+            "block": "40",
+            "section": "13",
+            "abstract": "279",
+            "survey": "T&P RR CO",
+            "metes_bounds": "1348 FN 2126 FE TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -102.13450790438597,
+                    31.802350585112528
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    },
+    {
+        "api14": "42329013410001",
+        "api10": "4232901341",
+        "status": "J&AW",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:23:38.223000",
+        "well_name": "BROOKS A 1",
+        "hole_direction": "V",
+        "shl": {
+            "block": "38",
+            "section": "30",
+            "abstract": "820",
+            "survey": "T&P RR CO",
+            "metes_bounds": "990 FS 660 FW TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -101.92976326993164,
+                    31.916526447609844
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    },
+    {
+        "api14": "42329002040002",
+        "api10": "4232900204",
+        "status": "GAS-WO",
+        "provider": "IHS",
+        "last_update_at": "2020-04-16T20:19:22.635000",
+        "well_name": "HEADLEE DEVONIAN UNIT 3205R",
+        "hole_direction": "V",
+        "shl": {
+            "block": "41",
+            "section": "28",
+            "abstract": "716",
+            "survey": "EDWARDS CHARLEY",
+            "metes_bounds": "660 FN 1980 FW TEXAS SECTION",
+            "geom": {
+                "type": "Point",
+                "coordinates": [
+                    -102.28571137892179,
+                    31.873339744112698
+                ]
+            }
+        },
+        "bhl": null,
+        "pbhl": null,
+        "survey": {
+            "survey_type": null,
+            "survey_method": null,
+            "survey_end_date": null,
+            "survey_top": null,
+            "survey_top_uom": null,
+            "survey_base": null,
+            "survey_base_uom": null,
+            "line": null,
+            "points": null
+        }
+    }
+]

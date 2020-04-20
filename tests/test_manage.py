@@ -1,5 +1,4 @@
 import logging
-import os
 import subprocess
 
 import psutil
@@ -52,10 +51,7 @@ class TestCLIFast:
         logger.info(captured.out)
 
 
-@pytest.mark.skipif(
-    not os.getenv("CI"),
-    reason="Skipping slow CLI tests. These are configured to only run on CI.",
-)
+@pytest.mark.cionly
 class TestCLISlow:
     def test_run_web(self, capfd):
         manage.web(get_open_port())

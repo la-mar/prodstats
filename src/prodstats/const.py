@@ -34,7 +34,6 @@ class Provider(str, Enum):
 class IHSPath(str, Enum):
     prod_h = "prod/h"
     prod_h_ids = "prod/h/ids"
-    prod_h_geoms = "prod/h/geoms"
     prod_h_sample = "prod/h/sample"
     prod_h_headers = "prod/h/headers"
 
@@ -46,7 +45,6 @@ class IHSPath(str, Enum):
 
     prod_v = "prod/v"
     prod_v_ids = "prod/v/ids"
-    prod_v_geoms = "prod/v/geoms"
     prod_v_sample = "prod/v/sample"
     prod_v_headers = "prod/v/headers"
 

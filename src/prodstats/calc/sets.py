@@ -28,6 +28,9 @@ class SetItem:
             yield getattr(self, x)
 
 
+# TODO: add autosort option: auto sort by each df index on assignment
+
+
 class BaseSet:
     models: Dict[str, db.models.Model] = None  # type: ignore
 
@@ -78,7 +81,8 @@ class DataSet(BaseSet):
     def __init__(
         self, data: pd.DataFrame = None, models: Dict[str, db.models.Model] = None
     ):
-        super().__init__(models={"data": None})
+        models = {"data": None} if not models else models
+        super().__init__(models=models)
         self.data = data
 
 

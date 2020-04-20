@@ -18,6 +18,7 @@
 
 ## Roadmap
 
+0. Terraform and deployment scripts
 1. Formation grid sourcing (cli upload, s3, dropbox)
 2. Formation Assignment
 3. Well Spacing
@@ -49,3 +50,11 @@
 4. Refactor jsontools and ext.orjson to jsonlib
 5. Standardize log messages
 6. Normalize Area/Provider related tables when incorporating drillinginfo. Change Area to ProviderArea and add providers.IDMaster.
+
+### Development
+
+#### Installation
+
+#### Testing
+
+- note about custom pytest markers

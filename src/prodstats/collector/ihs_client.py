@@ -268,7 +268,7 @@ if __name__ == "__main__":
         #     entity12s=entity12s, path=IHSPath.prod_h, params={"related": False}
         # )
 
-        await IHSClient.get_sample(IHSPath.well_h_sample, n=5)
+        await IHSClient.get_sample(IHSPath.well_v_sample, n=10)
         await IHSClient.get_sample(IHSPath.prod_h_sample, n=5)
         #         # await IHSClient.get_areas(path=IHSPath.well_h_ids)
         #         # await IHSClient.get_ids_by_area(path=IHSPath.well_h_ids, area="tx-upton")

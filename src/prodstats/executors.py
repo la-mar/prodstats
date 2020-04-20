@@ -1,5 +1,4 @@
 import asyncio
-import itertools
 import logging
 import uuid
 from timeit import default_timer as timer
@@ -7,15 +6,17 @@ from typing import Coroutine, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
-import calc.geom  # noqa
-import calc.prod  # noqa
-import calc.well  # noqa
+import calc  # noqa
 import db.models as models
 import util
 from calc.sets import DataSet, ProdSet, WellGeometrySet, WellSet
 from const import HoleDirection, IHSPath, ProdStatRange
+from db import db
 
 logger = logging.getLogger(__name__)
+
+
+# TODO: there is a better way to pass kwargs into run() and arun()
 
 
 class BaseExecutor:
@@ -49,10 +50,10 @@ class BaseExecutor:
         return f"{self.__class__.__name__}[{self.hole_dir.value}]"
 
     def raise_execution_error(
-        self, operation: str, record_count: int, e: Exception, extra: Dict
+        self, operation: str, record_count: int, e: Exception, extra: Dict = None
     ):
         logger.error(
-            f"({self}) error during {operation}ing: {record_count} records in batch -- {e}",
+            f"({self}) error during {operation}ing: {record_count} records in batch -- {e.__class__.__name__}: {e}",  # noqa
             extra=extra,
         )
         raise e
@@ -85,7 +86,7 @@ class BaseExecutor:
         raise NotImplementedError
 
     async def _persist(
-        self, name: str, model: models.Model, df: pd.DataFrame, **kwargs
+        self, name: str, model: models.Model, df: Optional[pd.DataFrame], **kwargs
     ) -> int:
 
         count = 0
@@ -93,12 +94,10 @@ class BaseExecutor:
             logger.debug(
                 f"({self}) scheduling persistance of {df.shape[0]} {name} records)"
             )
+
             ts = timer()
             count = await model.bulk_upsert(df, **kwargs)
             exc_time = round(timer() - ts, 2)
-            # logger.info(
-            #     f"({self}) persisted {df.shape[0]} {name} records ({exc_time}s)"
-            # )
             self.add_metric(
                 operation="persist", name=name, seconds=exc_time, count=df.shape[0],
             )
@@ -112,16 +111,21 @@ class BaseExecutor:
     # TODO: download_kwargs, process_kwargs, persist_kwargs
     async def arun(self, **kwargs) -> Tuple[int, Optional[DataSet]]:
 
-        return_data = kwargs.pop("return_data", None)
+        return_data = kwargs.pop("return_data", True)
+        persist = kwargs.pop("persist", True)
 
         exec_id = uuid.uuid4().hex
 
         try:
-            logger.warning(f"({self}) execution started {exec_id=}")
+            logger.info(f"({self}) execution started {exec_id=}")
             ds: DataSet = await self.download(**kwargs)
             ds_proc = await self.process(ds)
-            ct = await self.persist(ds_proc)
-            logger.warning(f"({self}) execution completed {exec_id=}")
+            if persist:
+                ct = await self.persist(ds_proc)
+            else:
+                logger.info(f"({self}) skipping persistance {exec_id=}")
+                ct = 0
+            logger.info(f"({self}) execution completed {exec_id=}")
             return ct, ds_proc if return_data else None
 
         except Exception as e:
@@ -296,26 +300,26 @@ class ProdExecutor(BaseExecutor):
         norm_value: int = None,
         norm_suffix: str = None,
         prod_columns: List[str] = ["oil", "gas", "water", "boe"],
+        option_sets: List[Tuple[ProdStatRange, int, bool]] = None,
     ) -> pd.DataFrame:
 
-        logger.debug(f"(Production) calculating prodstats {agg_type=} {norm_value=}")
-
         # * oil/gas/water/boe
-        prodstat_options = list(
-            itertools.chain(
-                itertools.product(
-                    [ProdStatRange.FIRST],
-                    [1, 3, 6, 12, 18, 24, 30, 36, 42, 48],
-                    [True, False],
-                ),
-                itertools.product([ProdStatRange.LAST], [1, 3, 6, 12], [True, False]),
-                itertools.product([ProdStatRange.PEAKNORM], [1, 3, 6], [True, False]),
-                itertools.product([ProdStatRange.ALL], [None], [True, False]),
+        if option_sets is None:
+            option_sets = calc.PRODSTAT_DEFAULT_OPTIONS
+            logger.debug(
+                f"({self}) prodstats: using default option_sets -- {option_sets=}"
             )
+        else:
+            logger.debug(
+                f"({self}) prodstats: using passed option_sets -- {option_sets=}"
+            )
+
+        logger.debug(
+            f"({self}) prodstats: calculating {agg_type=} {norm_value=} option_sets={len(option_sets)}"  # noqa
         )
 
         prodstat_dfs: List[pd.DataFrame] = []
-        for range_name, months, include_zeroes in prodstat_options:
+        for range_name, months, include_zeroes in option_sets:
             prodstat_dfs.append(
                 monthly.prodstats.calc_prodstat(
                     range_name=range_name,
@@ -334,26 +338,26 @@ class ProdExecutor(BaseExecutor):
         self,
         monthly: pd.DataFrame,
         prod_columns: List[str] = ["oil", "gas", "water", "boe"],
+        option_sets: List[Tuple[ProdStatRange, int, bool]] = None,
     ):
+
+        if option_sets is None:
+            option_sets = calc.PRODSTAT_DEFAULT_RATIO_OPTIONS
+            logger.debug(
+                f"({self}) prodstats: using default ratio option_sets -- {option_sets=}"
+            )
+        else:
+            logger.debug(
+                f"({self}) prodstats: using passed ratio option_sets -- {option_sets=}"
+            )
 
         logger.debug(f"(Production) calculating prodstat ratios")
 
         # * gor/oil_percent/avg_daily
-        special_options = list(
-            itertools.chain(
-                itertools.product(
-                    [ProdStatRange.FIRST], [1, 3, 6, 12, 18, 24], [True, False]
-                ),
-                itertools.product([ProdStatRange.LAST], [1, 3, 6], [True, False]),
-                itertools.product([ProdStatRange.PEAKNORM], [1, 3, 6], [True, False]),
-                itertools.product([ProdStatRange.ALL], [None], [True, False]),
-            )
-        )
-
         gor_dfs: List[pd.DataFrame] = []
         oil_percent_dfs: List[pd.DataFrame] = []
         avgdaily_dfs: List[pd.DataFrame] = []
-        for range_name, months, include_zeroes in special_options:
+        for range_name, months, include_zeroes in option_sets:
             kwargs = {
                 "range_name": range_name,
                 "months": months,
@@ -372,9 +376,14 @@ class ProdExecutor(BaseExecutor):
         self,
         dataset: DataSet,
         prod_columns: List[str] = ["oil", "gas", "water", "boe"],
+        prodstat_opts: List[Tuple[ProdStatRange, int, bool]] = None,
+        ratio_opts: List[Tuple[ProdStatRange, int, bool]] = None,
         **kwargs,
     ) -> ProdSet:
         kwargs = {**self.process_kwargs, **kwargs}
+        prodstat_opts = prodstat_opts or kwargs.pop("prodstat_opts", None)
+        ratio_opts = ratio_opts or kwargs.pop("ratio_opts", None)
+
         ts = timer()
 
         try:
@@ -385,11 +394,18 @@ class ProdExecutor(BaseExecutor):
 
             prodstats = pd.concat(
                 [
-                    self._process_prodstats(monthly, prod_columns=prod_columns),
                     self._process_prodstats(
-                        monthly, norm_value=1000, prod_columns=prod_columns,
+                        monthly, prod_columns=prod_columns, option_sets=prodstat_opts,
                     ),
-                    self._process_prodstat_ratios(monthly, prod_columns=prod_columns),
+                    self._process_prodstats(
+                        monthly,
+                        norm_value=1000,
+                        prod_columns=prod_columns,
+                        option_sets=prodstat_opts,
+                    ),
+                    self._process_prodstat_ratios(
+                        monthly, prod_columns=prod_columns, option_sets=ratio_opts,
+                    ),
                 ],
                 axis=0,
             )
@@ -416,7 +432,7 @@ class ProdExecutor(BaseExecutor):
             return dataset
 
         except Exception as e:
-            api10s = df.util.column_as_set("api10")
+            api10s = dataset.header.util.column_as_set("api10")
             self.raise_execution_error(
                 operation="process",
                 record_count=len(api10s),
@@ -449,6 +465,7 @@ class ProdExecutor(BaseExecutor):
                         name, model, df, **{**self.model_kwargs[name], **kwargs}
                     )
                 )
+
             return sum(await asyncio.gather(*coros))
 
         except Exception as e:
@@ -630,7 +647,7 @@ class GeomExecutor(BaseExecutor):
             return geomset
 
         except Exception as e:
-            api14s = locations.util.column_as_set("api14")
+            api14s = dataset.locations.util.column_as_set("api14")
             self.raise_execution_error(
                 operation="process",
                 record_count=len(api14s),
@@ -976,6 +993,13 @@ if __name__ == "__main__":
     # import multiprocessing as mp
 
     loggers.config(level=10, formatter="funcname")
+
+    ranges = ProdStatRange.PEAKNORM
+    months = [3, 6]
+    include_zeroes = [True, False]
+    calc.prodstat_option_matrix(
+        ranges=ranges, months=months, include_zeroes=include_zeroes
+    )
 
     # def get_id_sets(area: str) -> Tuple[List[str], List[str]]:
     #     loop = asyncio.get_event_loop()

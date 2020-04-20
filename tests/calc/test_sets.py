@@ -14,7 +14,7 @@ def item():
 
 @pytest.fixture
 def dataset():
-    yield DataSet(models={"frame1": db.models.Model, "frame2": db.models.Model})
+    yield DataSet(models={"data": db.models.Model})
 
 
 class TestSetItem:
@@ -33,24 +33,24 @@ class TestDataSet:
         repr(dataset)
 
     def test_describe(self, dataset):
-        assert dataset.describe() == {"frame1": 0, "frame2": 0}
+        assert dataset.describe() == {"data": 0}
 
     def test_iter(self, dataset):
-        assert list(dataset) == [None, None]
+        assert list(dataset) == [None]
 
     def test_items(self, dataset):
         expected = [
-            SetItem(name="frame1", model=db.models.Model, df=pd.DataFrame()),
-            SetItem(name="frame2", model=db.models.Model, df=pd.DataFrame()),
+            SetItem(name="data", model=db.models.Model, df=pd.DataFrame()),
         ]
         actual = list(dataset.items())
 
-        for idx in range(0, 2):
+        for idx in range(0, 1):
             assert expected[idx].name == actual[idx].name
             assert expected[idx].model == actual[idx].model
-            assert isinstance(expected[idx].df, pd.DataFrame) and isinstance(
-                actual[idx].df, pd.DataFrame
-            )
+
+            # assert empty df becomes None
+            assert isinstance(expected[idx].df, pd.DataFrame)
+            assert actual[idx].df is None
 
 
 class TestProdSet:

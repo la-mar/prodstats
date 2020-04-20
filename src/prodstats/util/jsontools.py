@@ -53,6 +53,11 @@ def to_string(data: Union[List, Dict], pretty: bool = True) -> str:
     return json.dumps(data, indent=indent, cls=UniversalEncoder)
 
 
+def dumps(data: Union[List, Dict], pretty: bool = True) -> str:
+    """ placeholder: alias for jsontools.to_string """
+    return to_string(data, pretty)
+
+
 def to_json(d: dict, path: str, cls=DateTimeEncoder):
     with open(path, "w") as f:
         json.dump(d, f, cls=cls, indent=4)
@@ -66,3 +71,14 @@ def load_json(path: str):
 def make_repr(data: Union[List, Dict], pretty: bool = True) -> str:
     """wraps to_string to encapsulate repr specific edge cases """
     return to_string(data=data, pretty=pretty)
+
+
+# if __name__ == "__main__":
+#     from util.dt import utcnow
+#     from pandas import Timestamp
+
+#     obj = {"dt": datetime.now(), "utcnow": utcnow(), "ts": Timestamp.utcnow()}
+#     json.dumps(obj, cls=DateTimeEncoder)
+
+#     ts = Timestamp.utcnow()
+#     ts.isoformat()

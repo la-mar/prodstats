@@ -35,11 +35,12 @@ class Yammler(dict):
         return self
 
     def __exit__(self, *exc):
-        if not exc:
+        if not exc[0]:
             self.dump()
 
     def dump(self) -> None:
         with self.durable(self.fspath, "w") as f:
+            logger.debug(f"(Yammler) dumping to {self.fspath}")
             yaml.safe_dump(dict(self), f, default_flow_style=False)
 
     @staticmethod

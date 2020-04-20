@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 import geopandas as gp
 import numpy as np
@@ -38,15 +38,26 @@ class Shapes:
             api14s=api14s, api10s=api10s, path=path, **kwargs
         )
 
-        # WellSurveyPoints(**data[0]["survey"])
-        # WellSurveyPoints(**data[0]["survey"])
-        # WellSurveyPoint(**data[0]["survey"]["points"][0])
-
         locations = sch.WellLocationSet(wells=data).df()
         surveys = sch.WellSurveySet(wells=data).df()
         points = sch.WellSurveyPointSet(wells=data).df()
 
         return WellGeometrySet(locations=locations, surveys=surveys, points=points)
+
+    @staticmethod
+    def _to_geomset(data: List[Dict[str, Any]], create_index: bool) -> WellGeometrySet:
+        locations = sch.WellLocationSet(wells=data).df()
+        surveys = sch.WellSurveySet(wells=data).df()
+        points = sch.WellSurveyPointSet(wells=data).df()
+
+        geomset = WellGeometrySet(locations=locations, surveys=surveys, points=points)
+        return geomset
+
+    @classmethod
+    def from_records(
+        cls, data: List[Dict[str, Any]], create_index: bool = True
+    ) -> WellGeometrySet:
+        return cls._to_geomset(data=data, create_index=create_index)
 
     def mark_lateral_points(self, dip_threshold: int = None) -> pd.DataFrame:
         dip_threshold = dip_threshold or LATERAL_DIP_THRESHOLD

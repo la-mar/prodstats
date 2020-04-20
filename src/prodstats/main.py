@@ -1,6 +1,6 @@
 import loggers
+from __init__ import app
 from ext.orjson import ORJSONMiddleware
-from prodstats import app
 
 loggers.config()
 

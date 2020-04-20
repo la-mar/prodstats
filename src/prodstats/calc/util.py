@@ -1,17 +1,40 @@
 import asyncio
-from typing import List, Union
+import itertools
+from typing import List, Optional, Tuple, Union
 
 import pandas as pd
 
-from const import HoleDirection, IHSPath
+import util
+from const import HoleDirection, IHSPath, ProdStatRange
+
+__all__ = [
+    "prodstat_option_matrix",
+    "status_assignment_detail",
+    "PRODSTAT_DEFAULT_OPTIONS",
+    "PRODSTAT_DEFAULT_RATIO_OPTIONS",
+]
 
 
-def print_status_assignment_detail(
+def prodstat_option_matrix(
+    ranges: Union[ProdStatRange, List[ProdStatRange]],
+    months: Optional[Union[int, List[int]]],
+    include_zeroes: Union[bool, List[bool]] = [True, False],
+) -> List[Tuple[ProdStatRange, int, bool]]:
+    return list(
+        itertools.product(
+            util.ensure_list(ranges),
+            util.ensure_list(months),
+            util.ensure_list(include_zeroes),
+        )
+    )
+
+
+def status_assignment_detail(
     hole_dir: Union[HoleDirection, str], api14s: List[str]
-):
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     hole_dir = HoleDirection(hole_dir)
 
-    async def coro():
+    async def coro() -> Tuple[pd.DataFrame, pd.DataFrame]:
 
         wells, *other = await pd.DataFrame.wells.from_multiple(
             hole_dir=hole_dir, api14s=api14s
@@ -33,9 +56,31 @@ def print_status_assignment_detail(
         print(f"\n{indicators.T}\n")
         labels = wells.wells.assign_status(detail=True, as_labels=True)
         print(f"\n{labels.T}\n")
+        return indicators, labels
 
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(coro())
+    return loop.run_until_complete(coro())
+
+
+PRODSTAT_DEFAULT_OPTIONS: frozenset = frozenset(  # TODO: define this in config somehow?
+    itertools.chain(
+        prodstat_option_matrix(
+            ProdStatRange.FIRST, months=[1, 3, 6, 12, 18, 24, 30, 36, 42, 48],
+        ),
+        prodstat_option_matrix(ProdStatRange.LAST, months=[1, 3, 6, 12],),
+        prodstat_option_matrix(ProdStatRange.PEAKNORM, months=[1, 3, 6],),
+        prodstat_option_matrix(ProdStatRange.ALL, months=None),
+    )
+)
+
+PRODSTAT_DEFAULT_RATIO_OPTIONS: frozenset = frozenset(
+    itertools.chain(
+        prodstat_option_matrix(ProdStatRange.FIRST, months=[1, 3, 6, 12, 18, 24]),
+        prodstat_option_matrix(ProdStatRange.LAST, months=[1, 3, 6]),
+        prodstat_option_matrix(ProdStatRange.PEAKNORM, months=[1, 3, 6]),
+        prodstat_option_matrix(ProdStatRange.ALL, months=None),
+    )
+)
 
 
 if __name__ == "__main__":
@@ -61,4 +106,4 @@ if __name__ == "__main__":
         "42383402790000",
     ]
 
-    print_status_assignment_detail(hole_dir="H", api14s=api14s)
+    status_assignment_detail(hole_dir="H", api14s=api14s)

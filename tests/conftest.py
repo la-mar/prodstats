@@ -16,6 +16,7 @@ environ["DATABASE_POOL_SIZE_MAX"] = "10"
 
 import random
 import string
+import os
 
 import gino
 import pytest
@@ -24,15 +25,26 @@ from sqlalchemy.engine import Engine
 from async_asgi_testclient import TestClient
 from async_generator import async_generator, yield_
 from sqlalchemy_utils import create_database, database_exists, drop_database
+import pandas as pd
 
 import config
 from db import db
-from prodstats.main import app
+from main import app
+
 from tests.models import TestModel  # noqa
+from tests.utils import MockAsyncDispatch
+import util
 from util.jsontools import load_json
-from schemas import ProductionWellSet
+import calc  # noqa
 
 ECHO = False
+
+import pytest
+
+# * custom markers
+pytest.mark.cionly = pytest.mark.skipif(
+    not util.to_bool(os.getenv("CI")), reason="run on CI only",
+)
 
 
 @pytest.fixture(scope="session")
@@ -92,33 +104,117 @@ async def client(bind) -> TestClient:
 
 @pytest.fixture(scope="session")
 def json_fixture():
-
     yield lambda x: load_json(f"tests/fixtures/{x}")
 
 
 @pytest.fixture(scope="session")
-def ihs_prod(json_fixture):
-    yield json_fixture("ihs_prod.json")
-
-
-@pytest.fixture
-def prod_df(ihs_prod):
-    yield ProductionWellSet(wells=ihs_prod).df().copy(deep=True)
+def prod_h(json_fixture):
+    yield json_fixture("prod_h.json")
 
 
 @pytest.fixture(scope="session")
-def ihs_wells(json_fixture):
-    yield json_fixture("ihs_wells.json")
+def prod_v(json_fixture):
+    yield json_fixture("prod_v.json")
 
 
 @pytest.fixture
-def well_df(ihs_wells):
-    yield ProductionWellSet(wells=ihs_wells).df().copy(deep=True)
+def prod_df_h(prod_h):
+    yield pd.DataFrame.prodstats.from_records(prod_h, create_index=True)
+
+
+@pytest.fixture
+def prod_df_v(prod_v):
+    yield pd.DataFrame.prodstats.from_records(prod_v, create_index=True)
+
+
+@pytest.fixture
+def prodset_h(prod_df_h):
+    yield prod_df_h.prodstats.to_prodset()
+
+
+@pytest.fixture
+def prodset_v(prod_df_v):
+    yield prod_df_v.prodstats.to_prodset()
+
+
+@pytest.fixture
+def prod_h_dispatcher(prod_h):
+    yield MockAsyncDispatch({"data": prod_h})
+
+
+@pytest.fixture
+def prod_v_dispatcher(prod_v):
+    yield MockAsyncDispatch({"data": prod_v})
 
 
 @pytest.fixture(scope="session")
-def ihs_well_shapes(json_fixture):
-    yield json_fixture("ihs_well_shapes.json")
+def fracs_h(json_fixture):
+    yield json_fixture("fracs_h.json")
+
+
+@pytest.fixture(scope="session")
+def fracs_v(json_fixture):
+    yield json_fixture("fracs_v.json")
+
+
+@pytest.fixture(scope="session")
+def wells_h(json_fixture):
+    yield json_fixture("wells_h.json")
+
+
+@pytest.fixture(scope="session")
+def wells_v(json_fixture):
+    yield json_fixture("wells_v.json")
+
+
+@pytest.fixture
+def wellset_h(wells_h):
+    yield pd.DataFrame.wells.from_records(wells_h)
+
+
+@pytest.fixture
+def wellset_v(wells_v):
+    yield pd.DataFrame.wells.from_records(wells_v)
+
+
+@pytest.fixture
+def wells_h_dispatcher(wells_h):
+    yield MockAsyncDispatch({"data": wells_h})
+
+
+@pytest.fixture
+def wells_v_dispatcher(wells_v):
+    yield MockAsyncDispatch({"data": wells_v})
+
+
+@pytest.fixture(scope="session")
+def geoms_h(json_fixture):
+    yield json_fixture("geoms_h.json")
+
+
+@pytest.fixture(scope="session")
+def geoms_v(json_fixture):
+    yield json_fixture("geoms_v.json")
+
+
+@pytest.fixture
+def geomset_h(geoms_h):
+    yield pd.DataFrame.shapes.from_records(geoms_h)
+
+
+@pytest.fixture
+def geomset_v(geoms_v):
+    yield pd.DataFrame.shapes.from_records(geoms_v)
+
+
+@pytest.fixture
+def geoms_h_dispatcher(geoms_h):
+    yield MockAsyncDispatch({"data": geoms_h})
+
+
+@pytest.fixture
+def geoms_v_dispatcher(geoms_v):
+    yield MockAsyncDispatch({"data": geoms_v})
 
 
 @pytest.fixture
@@ -128,3 +224,37 @@ def random_string(length=8) -> str:
 
 def _random_string(length=8):
     return "".join(random.choice(string.ascii_letters) for _ in range(length))
+
+
+if __name__ == "__main__":
+    from const import ProdStatRange
+
+    json_fixture = lambda x: load_json(f"tests/fixtures/{x}")
+
+    wells_h = json_fixture("wells_h.json")
+    wellset_h = pd.DataFrame.wells.from_records(wells_h, create_index=True)
+
+    fracs_h = json_fixture("fracs_h.json")
+    fracs_v = json_fixture("fracs_v.json")
+
+    geoms_h = json_fixture("geoms_h.json")
+    geomsset_h = pd.DataFrame.shapes.from_records(geoms_h, create_index=True)
+
+    prod_h = json_fixture("prod_h.json")
+    prod_df_h = pd.DataFrame.prodstats.from_records(prod_h, create_index=True)
+    prodset_h = prod_df_h.prodstats.to_prodset()
+
+    wells_v = json_fixture("wells_v.json")
+    wellset_v = pd.DataFrame.wells.from_records(wells_v, create_index=True)
+
+    geoms_v = json_fixture("geoms_v.json")
+    geomset_v = pd.DataFrame.shapes.from_records(geoms_v, create_index=True)
+
+    prod_v = json_fixture("prod_v.json")
+    prod_df_v = pd.DataFrame.prodstats.from_records(prod_v, create_index=True)
+    prodset_v = prod_df_v.prodstats.to_prodset()
+
+    prod_df_v.loc[prod_df_v.entity12 == "142080037872"]
+
+    range = ProdStatRange.FIRST
+    months = 3

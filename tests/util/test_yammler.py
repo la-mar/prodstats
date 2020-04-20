@@ -49,15 +49,15 @@ class TestYammler:
         assert isinstance(yml.stamp(), datetime)
 
     def test_generic_context_manager(self, tmpyaml):
-        with Yammler.context(tmpyaml) as f:
+        with Yammler(tmpyaml) as f:
             f["tempvar"] = "tempvalue"
 
         # open another context to check the result was persisted
-        with Yammler.context(tmpyaml) as f:
+        with Yammler(tmpyaml) as f:
             assert f["tempvar"] == "tempvalue"
 
     def test_dump_revert_on_error(self, tmpyaml):
-        with Yammler.context(tmpyaml) as f:
+        with Yammler(tmpyaml) as f:
             f["tempvar"] = "tempvalue"
 
         try:
@@ -65,5 +65,5 @@ class TestYammler:
                 yaml.safe_dump({"test": "value"}, f, default_flow_style=False)
                 raise Exception()
         except Exception:
-            with Yammler.context(tmpyaml) as f:
+            with Yammler(tmpyaml) as f:
                 assert isinstance(f["container"], dict)

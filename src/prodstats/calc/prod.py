@@ -1,6 +1,5 @@
-import itertools
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterable, List, Union
 
 import numpy as np
 import pandas as pd
@@ -15,31 +14,6 @@ from util.pd import validate_required_columns
 from util.types import PandasObject
 
 logger = logging.getLogger(__name__)
-
-CALC_MONTHS: List[Optional[int]] = [1, 3, 6, 12, 18, 24, 30, 36, 42, 48]
-CALC_NORM_VALUES = [  # change to List[int] now that the label can be derived
-    (None, None),
-    (1000, "1k"),
-    # (3000, "3k"),
-    # (5000, "5k"),
-    # (7500, "7500"),
-    # (10000, "10k"),
-]
-MONTHLY_NORM_VALUES = [
-    (None, None),
-    (1000, "1k"),
-    (3000, "3k"),
-    (5000, "5k"),
-    (7500, "7500"),
-    (10000, "10k"),
-]
-
-
-CALC_RANGES = ProdStatRange.members()
-# CALC_AGG_TYPES = ["sum", "mean"]
-CALC_AGG_TYPES = ["sum"]
-CALC_INCLUDE_ZEROES = [True, False]
-CALC_PROD_COLUMNS: List[str] = ["oil", "gas", "water", "boe"]
 
 
 @pd.api.extensions.register_dataframe_accessor("prodstats")
@@ -88,9 +62,23 @@ class ProdStats:
             path=path,
             **kwargs,
         )
-        df = ProductionWellSet(wells=data).df(create_index=create_index)
-        prodset: ProdSet = df.prodstats.preprocess_header_and_monthly_records()
+
+        df = cls.from_records(data=data, create_index=create_index)
+        return df.prodstats.to_prodset()
+
+    def to_prodset(self) -> ProdSet:
+        # df = ProductionWellSet(wells=data).df(create_index=create_index)
+        prodset: ProdSet = self.preprocess_header_and_monthly_records()
         return prodset
+
+    @classmethod
+    def from_records(
+        cls, data: List[Dict[str, Any]], create_index: bool
+    ) -> pd.DataFrame:
+        df = ProductionWellSet(wells=data).df(create_index=create_index)
+        return df
+
+        return cls.to_prodset(data=data, create_index=create_index)
 
     def preprocess_header_and_monthly_records(self) -> ProdSet:
         """ Split raw monthly production into production headers and monthly records
@@ -158,6 +146,11 @@ class ProdStats:
                 "api14",
             ],
         ]
+
+        force_numeric_cols = ["oil", "gas", "water", "gor", "water_cut", "perfll"]
+        monthly.loc[:, force_numeric_cols] = monthly.loc[:, force_numeric_cols].astype(
+            float
+        )
 
         # * ensure deduplication of api10+prod_month and sort
         monthly = monthly.groupby(level=[0, 1]).first().drop(columns=["api14"])
@@ -360,66 +353,6 @@ class ProdStats:
 
         return aggregated
 
-    @staticmethod
-    def _generate_option_sets(
-        months: List[Optional[int]],
-        norm_values: List[Tuple[Optional[int], Optional[str]]],
-        range_names: List[ProdStatRange],
-        agg_types: List[str],
-        include_zeroes: List[bool],
-    ) -> List[Dict[str, Any]]:
-        interval_configs = list(
-            itertools.product(
-                months, norm_values, range_names, agg_types, include_zeroes
-            )
-        )
-
-        option_sets = []
-        for params in interval_configs:
-            option_sets.append(
-                {
-                    "months": params[0],
-                    "norm_by_ll": params[1][0],
-                    "norm_by_label": params[1][1],
-                    "range_name": params[2],
-                    "agg_type": params[3],
-                    "include_zeroes": params[4],
-                }
-            )
-
-        return option_sets
-
-    @classmethod
-    def generate_option_sets(
-        cls,
-        months: List[Optional[int]] = CALC_MONTHS,
-        norm_values: List[Tuple[Optional[int], Optional[str]]] = CALC_NORM_VALUES,
-        range_names: List[ProdStatRange] = CALC_RANGES,
-        agg_types: List[str] = CALC_AGG_TYPES,
-        include_zeroes: List[bool] = CALC_INCLUDE_ZEROES,
-    ) -> List[Dict[str, Any]]:
-        bounded_intervals = [x for x in range_names if x != ProdStatRange.ALL]
-        unbounded_intervals = [x for x in range_names if x == ProdStatRange.ALL]
-        bounded = cls._generate_option_sets(
-            months=months,
-            norm_values=norm_values,
-            range_names=bounded_intervals,
-            agg_types=agg_types,
-            include_zeroes=include_zeroes,
-        )
-        logger.debug(f"(Prodstats) generated {len(bounded)} bounded option sets")
-
-        unbounded = cls._generate_option_sets(
-            months=[None],
-            norm_values=norm_values,
-            range_names=unbounded_intervals,
-            agg_types=agg_types,
-            include_zeroes=include_zeroes,
-        )
-        logger.debug(f"(Prodstats) generated {len(unbounded)} unbounded option sets")
-
-        return bounded + unbounded
-
     def boe(self) -> pd.Series:
         validate_required_columns(["oil", "gas"], self._obj.columns)
         return self._obj.oil + (self._obj.gas.div(const.MCF_TO_BBL_FACTOR))
@@ -479,7 +412,7 @@ class ProdStats:
     ) -> pd.DataFrame:
         """ calculate the daily average production by month for each column in
             the input columns list."""
-
+        validate_required_columns([days_column], self._obj.columns)
         df = pd.DataFrame()
         for col in columns:
             if col in self._obj.columns:
@@ -835,26 +768,6 @@ if __name__ == "__main__":
     header, monthly, prodstats, *other = prodset
     self = monthly.prodstats
 
-    pd.DataFrame(pd.DataFrame.prodstats.generate_option_sets())
-
-    option_set = {
-        "months": None,
-        "norm_by_ll": 1000,
-        "norm_by_label": "1k",
-        "range_name": ProdStatRange.ALL,
-        "agg_type": "sum",
-        "include_zeroes": False,
-    }
-
-    monthly.prodstats.calc_prodstat(
-        range_name=ProdStatRange.FIRST,
-        columns=["oil", "gas"],
-        months=6,
-        agg_type="sum",
-        include_zeroes=True,
-        norm_by_ll=1000,
-    )
-
     range_name = ProdStatRange.FIRST
     columns = ["oil", "gas"]
     months = 6
@@ -863,113 +776,104 @@ if __name__ == "__main__":
     norm_by_ll = 3000
     norm_by_label = None
 
-    # ! START HERE:
+    # monthly.prodstats.oil_percent_by_well(
+    #     range_name=ProdStatRange.ALL, months=None, include_zeroes=True
+    # )
 
-    """
-        1. make concrete list of prodstat definitions using generation_option_sets()
-        2. add definitions for special cases to thed definitions
-        3. create prodstat_definitions db model
-        4. seed them in the db
-        5. query them out at run time and feed them into calc_prodstat()
-    """
-    monthly.prodstats.oil_percent_by_well(
-        range_name=ProdStatRange.ALL, months=None, include_zeroes=True
-    )
+    # monthly.prodstats.gor_by_well(
+    #     range_name=ProdStatRange.FIRST, months=6, include_zeroes=True
+    # )
 
-    monthly.prodstats.gor_by_well(
-        range_name=ProdStatRange.FIRST, months=6, include_zeroes=True
-    )
+    # monthly.prodstats.oil_percent_by_well(
+    #     range_name=ProdStatRange.FIRST, months=6, include_zeroes=True
+    # )
 
-    monthly.prodstats.oil_percent_by_well(
-        range_name=ProdStatRange.FIRST, months=6, include_zeroes=True
-    )
+    # monthly.prodstats.ratio_over_interval(
+    #     numerator="oil",
+    #     denominator="days_in_month",
+    #     prod_column="oil_avg_daily",
+    #     range_name=ProdStatRange.FIRST,
+    #     months=6,
+    #     include_zeroes=True,
+    # )
 
-    monthly.prodstats.ratio_over_interval(
-        numerator="oil",
-        denominator="days_in_month",
-        prod_column="oil_avg_daily",
-        range_name=ProdStatRange.FIRST,
-        months=6,
-        include_zeroes=True,
-    )
+    # mask = monthly.prod_month <= 6
+    # monthly.loc[mask, ["oil", "days_in_month"]].groupby(level=0).sum()
 
-    mask = monthly.prod_month <= 6
-    monthly.loc[mask, ["oil", "days_in_month"]].groupby(level=0).sum()
+    # monthly.prodstats.ratio_over_interval(
+    #     numerator="gas",
+    #     denominator="oil",
+    #     prod_column="gor",
+    #     range_name=ProdStatRange.FIRST,
+    #     months=6,
+    #     include_zeroes=True,
+    # ).value.mul(1000)
 
-    monthly.prodstats.ratio_over_interval(
-        numerator="gas",
-        denominator="oil",
-        prod_column="gor",
-        range_name=ProdStatRange.FIRST,
-        months=6,
-        include_zeroes=True,
-    ).value.mul(1000)
+    # test = (
+    #     monthly.prodstats.ratio_over_interval(
+    #         numerator="oil",
+    #         denominator="boe",
+    #         prod_column="oil_percent",
+    #         range_name=ProdStatRange.FIRST,
+    #         months=6,
+    #         include_zeroes=True,
+    #     )
+    #     .reset_index(level=1)
+    #     .loc[:, ["value"]]
+    #     .mul(100)
+    # )
 
-    test = (
-        monthly.prodstats.ratio_over_interval(
-            numerator="oil",
-            denominator="boe",
-            prod_column="oil_percent",
-            range_name=ProdStatRange.FIRST,
-            months=6,
-            include_zeroes=True,
-        )
-        .reset_index(level=1)
-        .loc[:, ["value"]]
-        .mul(100)
-    )
+    # test["nonzero"] = (
+    #     monthly.prodstats.ratio_over_interval(
+    #         numerator="oil",
+    #         denominator="boe",
+    #         prod_column="oil_percent",
+    #         range_name=ProdStatRange.FIRST,
+    #         months=6,
+    #         include_zeroes=False,
+    #     )
+    #     .reset_index(level=1)
+    #     .loc[:, ["value"]]
+    #     .mul(100)
+    # )
 
-    test["nonzero"] = (
-        monthly.prodstats.ratio_over_interval(
-            numerator="oil",
-            denominator="boe",
-            prod_column="oil_percent",
-            range_name=ProdStatRange.FIRST,
-            months=6,
-            include_zeroes=False,
-        )
-        .reset_index(level=1)
-        .loc[:, ["value"]]
-        .mul(100)
-    )
+    # test["aor"] = (
+    #     monthly.prodstats.ratio_over_interval(
+    #         numerator="oil",
+    #         denominator="boe",
+    #         prod_column="oil_percent",
+    #         range_name=ProdStatRange.FIRST,
+    #         months=6,
+    #         include_zeroes=True,
+    #         method="average_of_ratios",
+    #     )
+    #     .reset_index(level=1)
+    #     .loc[:, ["value"]]
+    # )
 
-    test["aor"] = (
-        monthly.prodstats.ratio_over_interval(
-            numerator="oil",
-            denominator="boe",
-            prod_column="oil_percent",
-            range_name=ProdStatRange.FIRST,
-            months=6,
-            include_zeroes=True,
-            method="average_of_ratios",
-        )
-        .reset_index(level=1)
-        .loc[:, ["value"]]
-    )
+    # test["aor_nonzero"] = (
+    #     monthly.prodstats.ratio_over_interval(
+    #         numerator="oil",
+    #         denominator="boe",
+    #         prod_column="oil_percent",
+    #         range_name=ProdStatRange.FIRST,
+    #         months=6,
+    #         include_zeroes=False,
+    #         method="average_of_ratios",
+    #     )
+    #     .reset_index(level=1)
+    #     .loc[:, ["value"]]
+    # )
 
-    test["aor_nonzero"] = (
-        monthly.prodstats.ratio_over_interval(
-            numerator="oil",
-            denominator="boe",
-            prod_column="oil_percent",
-            range_name=ProdStatRange.FIRST,
-            months=6,
-            include_zeroes=False,
-            method="average_of_ratios",
-        )
-        .reset_index(level=1)
-        .loc[:, ["value"]]
-    )
+    # test["manual"] = (
+    #     monthly[monthly.prod_month <= 6]
+    #     .oil.div(monthly[monthly.prod_month <= 6].boe)
+    #     .mul(100)
+    #     .groupby(level=0)
+    #     .mean()
+    # )
 
-    test["manual"] = (
-        monthly[monthly.prod_month <= 6]
-        .oil.div(monthly[monthly.prod_month <= 6].boe)
-        .mul(100)
-        .groupby(level=0)
-        .mean()
-    )
-
-    test
+    # test
 
     # monthly.loc[monthly.prod_month <= 6, ["oil", "boe"]].groupby(level=0).sum().head()
     # calcs.head()

@@ -2,13 +2,18 @@ import json
 import random
 import string
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Dict, List
 
 from httpx import Response
 from httpx.dispatch.base import AsyncDispatcher, SyncDispatcher
 
+import util
+from collector import FracFocusClient, IHSClient
+from const import HoleDirection, IHSPath
 from db.models import Model
 from util.enums import Enum
+from util.jsontools import to_json
 
 
 class MockBaseDispatch:
@@ -19,7 +24,7 @@ class MockBaseDispatch:
         if headers is None:
             headers = {}
         if isinstance(body, (dict, list)):
-            body = json.dumps(body).encode()
+            body = json.dumps(body, cls=util.jsontools.UniversalEncoder).encode()
             headers["Content-Type"] = "application/json"
         else:
             if isinstance(body, str):
@@ -170,3 +175,50 @@ async def seed_model(model: Model, n: int = 10):
     # print(to_string(items))
     await model.bulk_insert(items)
     print(f"Created {len(items)} {model.__tablename__}")
+
+
+# hole_dir = HoleDirection.H
+# n=10
+
+
+async def refresh_fixtures(hole_dir: HoleDirection, n: int = 10):
+
+    fixture_path = Path("tests/fixtures")
+    hd = hole_dir.value.lower()
+
+    if hole_dir == HoleDirection.H:
+        wellpath = IHSPath.well_h_sample
+        prodpath = IHSPath.prod_h
+        geompath = IHSPath.well_h_geoms
+
+    elif HoleDirection.V:
+        wellpath = IHSPath.well_v_sample
+        prodpath = IHSPath.prod_v
+        geompath = IHSPath.well_v_geoms
+    else:
+        raise ValueError(f"invalid hole direction")
+
+    wells = await IHSClient.get_sample(wellpath, n=n, area="tx-midland")
+    api14s = [x["api14"] for x in wells]
+
+    to_json(wells, fixture_path / f"wells_{hd}.json")
+
+    prod = await IHSClient.get_production(prodpath, api14s=api14s)
+    to_json(
+        prod, fixture_path / f"prod_{hd}.json",
+    )
+
+    geoms = await IHSClient.get_wells(geompath, api14s=api14s)
+    to_json(
+        geoms, fixture_path / f"geoms_{hd}.json",
+    )
+
+    fracs = await FracFocusClient.get_jobs(api14s=api14s)
+    to_json(
+        fracs, fixture_path / f"fracs_{hd}.json",
+    )
+
+
+if __name__ == "__main__":
+    util.aio.async_to_sync(refresh_fixtures(HoleDirection.H, n=25))
+    util.aio.async_to_sync(refresh_fixtures(HoleDirection.V, n=10))

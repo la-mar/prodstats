@@ -1,8 +1,12 @@
+import logging
 from datetime import date, datetime
 
 import pytest
+from pydantic import ValidationError
 
 import schemas.well as sch
+
+logger = logging.getLogger(__name__)
 
 
 class TestWellDates:
@@ -67,7 +71,7 @@ class TestWellElevations:
 class TestWellDepths:
     @pytest.fixture
     def depths(self):
-        yield {
+        depths = {
             "api14": "42461409160000",
             "tvd": "2200",
             "md": "2100",
@@ -75,6 +79,7 @@ class TestWellDepths:
             "perf_lower": "2100",
             "plugback_depth": "2100",
         }
+        yield depths
 
     def test_aliases(self, depths):
 
@@ -86,31 +91,32 @@ class TestWellDepths:
             if key not in ["api14"]:
                 assert isinstance(value, int)
 
-    def test_extract_from_document(self, ihs_wells):
-        data = ihs_wells[0]
+    def test_extract_from_document(self, wells_h):
+        data = wells_h[0]
         actual = sch.WellDepths(**data).dict()
+
         expected = {
-            "api14": "42461409160000",
-            "tvd": 8503,
-            "md": 19272,
-            "perf_upper": 8805,
-            "perf_lower": 19166,
-            "plugback_depth": 19189,
+            "api14": data["api14"],
+            "tvd": data["tvd"],
+            "md": data["md"],
+            "perf_upper": data["perf_upper"],
+            "perf_lower": data["perf_lower"],
+            "plugback_depth": data["plugback_depth"],
         }
         assert expected == actual
 
 
 class TestWellRecord:
-    def test_aliases(self, ihs_wells):
-        data = ihs_wells[0]
+    def test_aliases(self, wells_h):
+        data = wells_h[0]
         obj = sch.WellRecord(**data)
         parsed = obj.dict()
         actual = {*parsed.keys()}
         expected = {*obj.__fields__.keys()}
         assert expected == actual
 
-    def test_convert_to_record(self, ihs_wells):
-        data = ihs_wells[0]
+    def test_convert_to_record(self, wells_h):
+        data = wells_h[0]
         obj = sch.WellRecord(**data)
         record = obj.record()
         fields = {
@@ -122,38 +128,46 @@ class TestWellRecord:
 
 
 class TestWellRecordSet:
-    def test_records(self, ihs_wells):
-        obj = sch.WellRecordSet(wells=ihs_wells)
+    def test_records(self, wells_h):
+        obj = sch.WellRecordSet(wells=wells_h)
         records = obj.records()
         assert isinstance(records, list)
         assert isinstance(records[0], dict)
         assert isinstance(records[0]["api14"], str)
-        assert len(records) == 2
+        assert len(records) == len(wells_h)
 
-    def test_df(self, ihs_wells):
-        obj = sch.WellRecordSet(wells=ihs_wells)
+    def test_df_record_count(self, wells_h):
+        obj = sch.WellRecordSet(wells=wells_h)
         df = obj.df()
-        assert df.shape[0] == 2
-        assert {*df.index.values} == {"42383406370000", "42461409160000"}
+
+        assert df.shape[0] == len(wells_h)
+        assert {*df.index.values} == {x["api14"] for x in wells_h}
 
 
 class TestIPTest:
-    def test_aliases(self, ihs_wells):
-        data = ihs_wells[0]
-        obj = sch.IPTest(**data["ip"][0])
-        parsed = obj.dict()
-        actual = {*parsed.keys()}
-        expected = {*obj.__fields__.keys()}
-        assert expected == actual
+    def test_aliases(self, wells_h, wells_v):
+        for row in wells_h + wells_v:
+            for ip in row.get("ip", []):
+                try:
+                    obj = sch.IPTest(**ip)
+                    parsed = obj.dict()
+                    actual = {*parsed.keys()}
+                    expected = {*obj.__fields__.keys()}
+                    assert expected == actual
+                except ValidationError as ve:
+                    logger.info(ve)
 
-    def test_records(self, ihs_wells):
-        data = ihs_wells[0]
-        records = sch.IPTests(**data).records()
-        assert isinstance(records, list)
-        assert isinstance(records[0], dict)
-        assert isinstance(records[0]["api14"], str)
+    def test_records(self, wells_h, wells_v):
+        for row in wells_h + wells_v:
+            records = sch.IPTests(**row).records()
+            if records:
+                assert isinstance(records, list)
+                assert isinstance(records[0], dict)
+                assert isinstance(records[0]["api14"], str)
+            else:
+                assert records == []
 
 
 # if __name__ == "__main__":
 #     from util.jsontools import load_json
-#     ihs_wells = load_json(f"tests/fixtures/ihs_wells.json")
+#     wells_h = load_json(f"tests/fixtures/wells_h.json")

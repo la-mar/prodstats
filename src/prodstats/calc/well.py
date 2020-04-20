@@ -68,6 +68,12 @@ class Well:
         return cls._to_wellset(data, create_index)
 
     @classmethod
+    def from_records(
+        cls, data: List[Dict[str, Any]], create_index: bool = True
+    ) -> WellSet:
+        return cls._to_wellset(data=data, create_index=create_index)
+
+    @classmethod
     async def from_fracfocus(
         cls,
         api14s: Union[str, List[str]] = None,
@@ -162,6 +168,9 @@ class Well:
         frac: float = None,
         area: str = None,
         create_index: bool = True,
+        ihs_kwargs: Dict = None,
+        fracfocus_kwargs: Dict = None,
+        drillinginfo_kwargs: Dict = None,
     ) -> WellSet:
         optcount = sum([n is not None, frac is not None])
         if optcount < 1:
@@ -169,12 +178,20 @@ class Well:
         if optcount > 1:
             raise ValueError("Only one of ['n', 'frac'] can be specified")
 
+        ihs_kwargs = ihs_kwargs or {}
+        fracfocus_kwargs = fracfocus_kwargs or {}
+        drillinginfo_kwargs = drillinginfo_kwargs or {}
+
         # if isinstance(path, IHSPath):
         wellset = cls._to_wellset(
-            await IHSClient.get_sample(path, n=n, frac=frac, area=area), create_index,
+            await IHSClient.get_sample(path, n=n, frac=frac, area=area, **ihs_kwargs),
+            create_index,
         )
+
+        api14s = list({*wellset.wells.index})
+
         fracs = wellset.fracs
-        fracfocus: WellSet = await cls.from_fracfocus(api14s=api14s, api10s=api10s)
+        fracfocus: WellSet = await cls.from_fracfocus(api14s=api14s, **fracfocus_kwargs)
         fracs = fracs.combine_first(fracfocus.fracs)
         fracs = fracs[(~fracs.fluid.isna()) & (~fracs.proppant.isna())]
         wellset.fracs = fracs

@@ -4,9 +4,9 @@ import pandas as pd
 import pytest
 from asyncpg.exceptions import DataError, UniqueViolationError
 from sqlalchemy.exc import IntegrityError
-from tests.utils import rand_str
 
 from db.models import ProdStat as Model
+from tests.utils import rand_str
 
 logger = logging.getLogger(__name__)
 
@@ -60,13 +60,27 @@ class TestMixins:
         with pytest.raises((IntegrityError, UniqueViolationError)):
             await Model.bulk_insert(records)
 
-    async def test_bulk_upsert_handle_data_error(self, bind):
-        ids = [(rand_str(length=10), rand_str(length=20)) for i in range(1, 10)]
-        records = [{"api10": i, "name": v} for i, v in ids]
-        records.append({"api10": 99999999999999999999, "name": rand_str()})
+    async def test_bulk_upsert_fracture_on_data_error(self, bind):
+        ids = [(rand_str(length=10), rand_str(length=20)) for i in range(1, 11)]
+        good = [{"api10": i, "name": v} for i, v in ids]
+        mixed = good + [
+            {"api10": 99999999999999999999, "name": "lets hope this record fails"}
+        ]
+
+        expected = [tuple(x.values()) for x in good]
+        await Model.bulk_upsert(mixed, errors="fractionalize")
+        assert len(await Model.pk.values) == len(expected)
+
+    async def test_bulk_upsert_fail_batch_on_data_error(self, bind):
+        ids = [(rand_str(length=10), rand_str(length=20)) for i in range(1, 11)]
+        good = [{"api10": i, "name": v} for i, v in ids]
+        mixed = good + [
+            {"api10": 99999999999999999999, "name": "lets hope this record fails"}
+        ]
+
         with pytest.raises(DataError):
-            await Model.bulk_upsert(records)
-            assert await Model.pk.values == []
+            await Model.bulk_upsert(mixed, errors="raise")
+            assert len(await Model.pk.values) == 0
 
     async def test_bulk_upsert_handle_generic_error(self, bind):
 
@@ -84,8 +98,8 @@ class TestDataFrameMixin:
     @pytest.fixture
     def records(self):
         yield [
-            {"name": "test1", "value": 1, "other_value": "v"},
-            {"name": "test2", "value": 2, "other_value": "v"},
+            {"api10": "22222", "name": "test1", "value": 1, "other_value": "v"},
+            {"api10": "11111", "name": "test2", "value": 2, "other_value": "v"},
         ]
 
     def test_prepare_df_keep_index(self, records):

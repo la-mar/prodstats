@@ -32,6 +32,10 @@ logger = logging.getLogger(__name__)
 
 class BulkIOMixin(object):
     @classmethod
+    def log_prefix(cls, exc: Exception) -> str:
+        return f"({cls.__name__}) {exc.__class__.__name__}"
+
+    @classmethod
     async def execute_statement(
         cls,
         stmt,
@@ -50,30 +54,47 @@ class BulkIOMixin(object):
 
         except (IntegrityError, UniqueViolationError, DataError) as ie:
 
-            if retry_func and n > 1:
-                first_half = records[: n // 2]
-                second_half = records[n // 2 :]
-                first_n = len(first_half)
-                second_n = len(second_half)
+            if retry_func:
+                if n > 1:
+                    first_half = records[: n // 2]
+                    second_half = records[n // 2 :]
+                    first_n = len(first_half)
+                    second_n = len(second_half)
 
+                    logger.info(
+                        f"{cls.log_prefix}: retrying with fractured records (first_half={first_n} second_half={second_n}) -- {ie}"  # noqa
+                    )
+                    await retry_func(first_half, batch_size=first_n // 4)
+                    await retry_func(second_half, batch_size=second_n // 4)
+                else:
+                    record = util.reduce(records)
+                    record = {k: v for k, v in record.items() if k in cls.pk.names}
+
+                    # include primary key names/values in log message
+                    # values can be scrubbed later, if needed
+                    logger.error(
+                        f"{cls.log_prefix}: {ie} -- primary_key={record}",
+                        extra={"primary_key": record},
+                    )
+
+            else:  # fail whole batch
                 log_records: str = ""
+
+                # print records to log if in debug mode
                 if conf.DEBUG:
                     log_records = f"\n{util.jsontools.to_string(records)}\n"
 
-                logger.warning(
-                    f"({cls.__name__}) {ie.__class__.__name__}: retrying with fractured records (first_half={first_n} second_half={second_n}) -- {ie.args[0]} {log_records}"  # noqa
-                )
-                await retry_func(first_half, batch_size=first_n // 4)
-                await retry_func(second_half, batch_size=second_n // 4)
+                logger.error(f"{cls.log_prefix}:  {ie} -- {log_records}",)
+                raise ie
 
         except Exception as e:
+
             log_records: str = ""
+            # print records to log if in debug mode
             if conf.DEBUG:
                 log_records = f"\n{util.jsontools.to_string(records)}\n"
 
-            logger.exception(
-                f"({cls.__name__}) {e.__class__.__name__}:  {e} -- {e.args} {log_records}"  # noqa
-            )
+            logger.exception(f"{cls.log_prefix}: {e} -- {e.args} {log_records}")
             raise e
 
         return n
@@ -82,7 +103,7 @@ class BulkIOMixin(object):
     async def bulk_upsert(
         cls,
         records: List[Dict],
-        batch_size: int = 100,
+        batch_size: int = 500,
         exclude_cols: list = None,
         update_on_conflict: bool = True,
         ignore_on_conflict: bool = False,
@@ -127,8 +148,11 @@ class BulkIOMixin(object):
                 )
             elif errors == "raise":  # placeholder for later
                 partial = None
+                # TODO: Log failed table_name and primary keys and capture for later reprocessing (no mechanism for this exists yet) # noqa
             else:
-                partial = None
+                raise ValueError(
+                    f"Invalid value for 'errors': must be one of [fractionalize, raise]"
+                )
 
             coros.append(
                 cls.execute_statement(
@@ -180,16 +204,27 @@ class BulkIOMixin(object):
 
 
 class DataFrameMixin(BulkIOMixin):
-    @staticmethod
-    def _prepare(df: pd.DataFrame, reset_index: bool) -> List[Dict]:
+    @classmethod
+    def _prepare(cls, df: pd.DataFrame, reset_index: bool) -> List[Dict]:
 
         if reset_index:
             df = df.reset_index()
 
+        df = df.replace([-np.inf, np.inf], np.nan)
         df = df.replace({np.nan: None})  # catch NaT
 
         # handles NaNs in pandas 1.0+; does NOT catch NaT
         df = df.where(df.notnull(), None)
+
+        # drop rows with any missing primary keys
+        ct_before = df.shape[0]
+        df = df.dropna(subset=cls.pk.names, how="any")
+        ct_after = df.shape[0]
+
+        # TODO: capture rows when in debug mode, similar to execute_statement()
+        logger.info(
+            f"({cls.__name__}) Dropped {ct_before - ct_after} records with missing primary keys"
+        )
 
         return df.to_dict(orient="records")
 
