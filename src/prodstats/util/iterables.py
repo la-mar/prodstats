@@ -2,7 +2,7 @@ import functools
 import hashlib
 import itertools
 from collections import OrderedDict
-from typing import Any, Callable, Dict, Generator, Iterable, List, Union
+from typing import Any, Callable, Dict, Generator, Iterable, List, Tuple, Union
 
 
 class AttrDict(dict):
@@ -145,3 +145,85 @@ def apply_transformation(
     else:
         return data
     return new
+
+
+def flatten(
+    d: Union[List, Dict], path=None
+) -> Generator[Tuple[List[str], Any], None, None]:
+    """
+    flatten a nested collection of lists/dicts or arbitrary depth, returning a tuple
+    of path elements and the value at the end of the path.
+
+    Example:
+    >>> x = {
+            "paper_id": "6875684534q5ywthr65234t5yqwegrs",
+            "metadata": {
+                "title": "Salivary Gland Responses to Sparkling Water",
+                "authors": [
+                    {
+                        "first": "Topo",
+                        "middle": [],
+                        "last": "Chico",
+                        "suffix": "",
+                        "affiliation": {},
+                        "email": "",
+                    },
+                    {
+                        "first": "San",
+                        "middle": [],
+                        "last": "Pellegrino",
+                        "suffix": "",
+                        "affiliation": {
+                            "laboratory": "",
+                            "institution": "Generic Bottling Co.",
+                            "location": {
+                                "addrLine": "Nowhere",
+                                "region": "CA",
+                                "country": "United States",
+                            },
+                        },
+                        "email": "",
+                    },
+                ],
+            },
+            "abstract": [],
+            }
+
+    >>> flatten(x)
+
+        [(['paper_id'], '6875684534q5ywthr65234t5yqwegrs'),
+        (['metadata', 'title'], 'Salivary Gland Responses to Sparkling Water'),
+        (['metadata', 'authors', 'first'], 'Topo'),
+        (['metadata', 'authors', 'last'], 'Chico'),
+        (['metadata', 'authors', 'suffix'], ''),
+        (['metadata', 'authors', 'affiliation'], {}),
+        (['metadata', 'authors', 'email'], ''),
+        (['metadata', 'authors'],
+        {'first': 'Topo',
+        'middle': [],
+        'last': 'Chico',
+        'suffix': '',
+        'affiliation': {},
+        'email': ''}),
+        (['metadata', 'authors', 'first'], 'San'),
+        (['metadata', 'authors', 'last'], 'Pellegrino')]
+
+    """
+
+    if not path:
+        path = []
+    if isinstance(d, dict):
+        for x in d.keys():
+            local_path = path[:]
+            local_path.append(x)
+            for b in flatten(d[x], local_path):
+                yield b
+    if isinstance(d, list):
+        for idx, x in enumerate(d):
+            local_path = path[:]
+            if isinstance(x, (str, int)):
+                local_path.append(f"{idx}.{x}")
+            for b in flatten(d[idx], local_path):
+                yield b
+    else:
+        yield path, d

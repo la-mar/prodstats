@@ -1,9 +1,16 @@
 import json
+import logging
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
-# TODO: support shapely geometries
+logger = logging.getLogger(__name__)
+
+# try:
+#     import shapely.geometry as geom
+# except ImportError as e:
+#     logger.warning(f"failed to load shapely -- {e}", stack_info=True)
+#     geom = None
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -17,31 +24,26 @@ class DateTimeEncoder(json.JSONEncoder):
 
 
 class ObjectEncoder(json.JSONEncoder):
-    """Class to convert an object into JSON."""
+    """Class to convert an object into json"""
 
     def default(self, obj: Any):
-        """Convert `obj` to JSON."""
+        """Convert `obj` to json"""
 
         if isinstance(obj, (int, float, str, list, dict, tuple)):
+            # return super().default(obj)
             return obj
+        elif hasattr(obj, "to_dict"):
+            return self.default(obj.to_dict())
+        elif hasattr(obj, "dict"):
+            return self.default(obj.dict())
+        elif isinstance(obj, set):
+            return list(obj)
+        elif isinstance(obj, Path):
+            return str(obj)
+        elif hasattr(obj, "__geo_interface__"):
+            return self.default(obj.__geo_interface__)
         else:
-            if hasattr(obj, "to_dict"):
-                return self.default(obj.to_dict())
-            if hasattr(obj, "dict"):
-                return self.default(obj.dict())
-            elif isinstance(obj, set):
-                return list(obj)
-            elif isinstance(obj, Path):
-                return str(obj)
-            else:
-                # generic fallback
-                cls = type(obj)
-                result = {
-                    "__custom__": True,
-                    "__module__": cls.__module__,
-                    "__name__": cls.__name__,
-                }
-                return result
+            return super().default(obj)
 
 
 class UniversalEncoder(DateTimeEncoder, ObjectEncoder):
@@ -73,12 +75,28 @@ def make_repr(data: Union[List, Dict], pretty: bool = True) -> str:
     return to_string(data=data, pretty=pretty)
 
 
-# if __name__ == "__main__":
-#     from util.dt import utcnow
-#     from pandas import Timestamp
+if __name__ == "__main__":
+    from util.dt import utcnow
+    from pandas import Timestamp
+    from shapely.geometry import asShape
 
-#     obj = {"dt": datetime.now(), "utcnow": utcnow(), "ts": Timestamp.utcnow()}
-#     json.dumps(obj, cls=DateTimeEncoder)
+    pt = {"type": "Point", "coordinates": [-102.15990376316262, 31.882545563762434]}
+    line = {
+        "type": "LineString",
+        "coordinates": [
+            [-102.1658373327804, 31.90677101457917],
+            [-102.1658377151659, 31.906770789271725],
+            [-102.16583857765673, 31.906770392266168],
+            [-102.1658401362329, 31.906769325679146],
+            [-102.16584303140229, 31.906765711084283],
+        ],
+    }
 
-#     ts = Timestamp.utcnow()
-#     ts.isoformat()
+    obj = {
+        "dt": datetime.now(),
+        "utcnow": utcnow(),
+        "ts": Timestamp.utcnow(),
+        "pt": asShape(pt),
+        "line": asShape(line),
+    }
+    json.dumps(obj, cls=UniversalEncoder)

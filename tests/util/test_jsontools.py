@@ -46,28 +46,11 @@ class TestDatetimeEncoder:
     def test_encode_timedelta(self):
         data = {"test_obj": timedelta(hours=1)}
         expected = '{"test_obj": 3600}'
-        json.dumps(data, cls=ObjectEncoder)
-        assert json.dumps(data, cls=DateTimeEncoder) == expected
+        result = json.dumps(data, cls=DateTimeEncoder)
+        assert result == expected
 
 
 class TestObjectEncoder:
-    def test_encode_datetime(self):
-        data = {"key": datetime.utcfromtimestamp(0), "key2": "test_string"}
-        expected = '{"key": {"__custom__": true, "__module__": "datetime", "__name__": "datetime"}, "key2": "test_string"}'  # noqa
-        result = json.dumps(data, cls=ObjectEncoder)
-        assert result == expected
-
-    def test_encode_with_dunder_dict_attribute(self):
-        class ObjectForEncoding:
-            key = "value"
-
-            def __dict__(self):
-                return {"key": self.key}
-
-        data = {"test_obj": ObjectForEncoding()}
-        expected = '{"test_obj": {"__custom__": true, "__module__": "test_jsontools", "__name__": "ObjectForEncoding"}}'  # noqa
-        assert json.dumps(data, cls=ObjectEncoder) == expected
-
     def test_encode_with_to_dict_attribute(self):
         class ObjectForEncoding:
             key = "value"
@@ -111,6 +94,30 @@ class TestObjectEncoder:
         data = 1
         expected = "1"
         assert json.dumps(data, cls=ObjectEncoder) == expected
+
+    # @pytest.mark.parametrize(
+    #     "geom",
+    #     [
+    #         {"type": "Point", "coordinates": [-102.15990376316262, 31.882545563762434]},
+    #         {
+    #             "type": "LineString",
+    #             "coordinates": [
+    #                 [-102.1658373327804, 31.90677101457917],
+    #                 [-102.1658377151659, 31.906770789271725],
+    #                 [-102.16583857765673, 31.906770392266168],
+    #                 [-102.1658401362329, 31.906769325679146],
+    #                 [-102.16584303140229, 31.906765711084283],
+    #             ],
+    #         },
+    #     ],
+    # )
+    # @pytest.importorskip("shapely")
+    # def test_encode_geometry(self, geom):
+    #     import shapely
+
+    #     g = shapely.geometry.asShape(geom)
+    #     actual = json.loads(json.dumps(g, cls=ObjectEncoder))
+    #     assert actual == geom
 
 
 class TestIO:

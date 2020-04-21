@@ -461,6 +461,19 @@ class TestWellExecutor:
         ihs_dispatch = MockAsyncDispatch({"data": wells_v})
         fracfocus_dispatch = MockAsyncDispatch({"data": fracs_v})
         geoms_dispatch = MockAsyncDispatch({"data": geoms_v})
+
+        # geoms = await pd.DataFrame.shapes.from_ihs(
+        #     IHSPath.well_h_geoms,
+        #     api14s=api14h,
+        #     # dispatch=geoms_dispatch,
+        # )
+        # await IHSClient.get_wells(
+        #     IHSPath.well_h_geoms,
+        #     api14s=api14h
+        #     # , dispatch=geoms_dispatch
+        # )
+        # geoms_h
+
         prod_headers_dispatch = MockAsyncDispatch({"data": prod_headers_v})
         exv = WellExecutor(
             HoleDirection.V,
@@ -554,7 +567,7 @@ class TestWellExecutor:
     #     dataset: WellSet = await ex.process(wellset)
     #     await ex.persist(dataset)
 
-    @pytest.mark.cionly
+    # @pytest.mark.cionly
     @pytest.mark.asyncio
     async def test_process_and_persist_v_full(self, exv, wellset_v, bind):
         dataset: WellSet = await exv.process(wellset_v)
