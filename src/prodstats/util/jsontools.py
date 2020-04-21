@@ -58,12 +58,12 @@ def dumps(data: Union[List, Dict], pretty: bool = True) -> str:
     return to_string(data, pretty)
 
 
-def to_json(d: dict, path: str, cls=DateTimeEncoder):
+def to_json(d: dict, path: Union[Path, str], cls=DateTimeEncoder):
     with open(path, "w") as f:
         json.dump(d, f, cls=cls, indent=4)
 
 
-def load_json(path: str):
+def load_json(path: Union[Path, str]):
     with open(path, "r") as f:
         return json.load(f)
 

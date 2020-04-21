@@ -538,7 +538,7 @@ class TestWellExecutor:
         with pytest.raises(Exception):
             await ex.download(zaza=["a", "b", "c"])
 
-    @pytest.mark.cionly
+    # @pytest.mark.cionly
     @pytest.mark.asyncio
     async def test_process_and_persist_h_full(self, exh, wellset_h, bind):
         # exh = WellExecutor(HoleDirection.H)
