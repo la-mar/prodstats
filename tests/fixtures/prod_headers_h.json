@@ -1,0 +1,5841 @@
+[
+    {
+        "api10": "4232942610",
+        "api14": "42329426100000",
+        "entity": "1420800432590071LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:26.861000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-09-01",
+            "first_gas": "2019-09-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942614",
+        "api14": "42329426140000",
+        "entity": "1420800432590075LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:26.684000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-09-01",
+            "first_gas": "2019-09-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942613",
+        "api14": "42329426130000",
+        "entity": "1420800432590074LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:26.524000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942612",
+        "api14": "42329426120000",
+        "entity": "1420800432590073LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:26.333000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-09-01",
+            "first_gas": "2019-09-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942611",
+        "api14": "42329426110000",
+        "entity": "1420800432590072LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:26.158000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942615",
+        "api14": "42329426150000",
+        "entity": "1420800432590076LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:25.956000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-09-01",
+            "first_gas": "2019-09-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942640",
+        "api14": "42329426400000",
+        "entity": "1420800432590065LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:25.775000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942639",
+        "api14": "42329426390000",
+        "entity": "1420800432590064LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:25.572000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942638",
+        "api14": "42329426380000",
+        "entity": "1420800432590063LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:25.292000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942637",
+        "api14": "42329426370000",
+        "entity": "1420800432590062LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:25.087000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942607",
+        "api14": "42329426070000",
+        "entity": "1420800432590024LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:20.712000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-07-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-07-01",
+            "first_gas": "2019-07-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942062",
+        "api14": "42329420620000",
+        "entity": "1420800432590032LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:20.395000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9439,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19715,
+        "perf_lower_uom": "FT",
+        "perfll": 10276,
+        "dates": {
+            "first_prod": "2018-12-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-12-01",
+            "first_gas": "2018-12-01",
+            "first_water": "2019-06-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942061",
+        "api14": "42329420610000",
+        "entity": "1420800432590031WB",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:20.028000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10082,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20380,
+        "perf_lower_uom": "FT",
+        "perfll": 10298,
+        "dates": {
+            "first_prod": "2019-01-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-01-01",
+            "first_gas": "2019-01-01",
+            "first_water": "2019-01-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE PIPELINE LLC",
+            "liquid_alias": "ENTCP",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942609",
+        "api14": "42329426090000",
+        "entity": "1420800432590026LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:19.611000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9480,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19799,
+        "perf_lower_uom": "FT",
+        "perfll": 10319,
+        "dates": {
+            "first_prod": "2019-07-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-07-01",
+            "first_gas": "2019-07-01",
+            "first_water": "2019-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942608",
+        "api14": "42329426080000",
+        "entity": "1420800432590025WB",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:19.248000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942063",
+        "api14": "42329420630000",
+        "entity": "1420800432590033WB",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:18.799000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9958,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20279,
+        "perf_lower_uom": "FT",
+        "perfll": 10321,
+        "dates": {
+            "first_prod": "2019-01-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-01-01",
+            "first_gas": "2019-01-01",
+            "first_water": "2019-01-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE PIPELINE LLC",
+            "liquid_alias": "ENTCP",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942606",
+        "api14": "42329426060000",
+        "entity": "1420800432590023WB",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:18.471000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942605",
+        "api14": "42329426050000",
+        "entity": "1420800432590022LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:18.191000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9461,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19770,
+        "perf_lower_uom": "FT",
+        "perfll": 10309,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942604",
+        "api14": "42329426040000",
+        "entity": "1420800432590021WB",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:17.855000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10082,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20400,
+        "perf_lower_uom": "FT",
+        "perfll": 10318,
+        "dates": {
+            "first_prod": "2019-07-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-07-01",
+            "first_gas": "2019-07-01",
+            "first_water": "2019-10-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940680",
+        "api14": "42329406800000",
+        "entity": "1420800432594124H",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:14.777000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9936,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19637,
+        "perf_lower_uom": "FT",
+        "perfll": 9701,
+        "dates": {
+            "first_prod": "2016-06-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-06-01",
+            "first_gas": "2016-06-01",
+            "first_water": "2016-06-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940684",
+        "api14": "42329406840000",
+        "entity": "1420800432594134H",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:14.308000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9935,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19838,
+        "perf_lower_uom": "FT",
+        "perfll": 9903,
+        "dates": {
+            "first_prod": "2016-10-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-10-01",
+            "first_gas": "2016-10-01",
+            "first_water": "2016-10-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940683",
+        "api14": "42329406830000",
+        "entity": "1420800432594133H",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:13.757000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9693,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19719,
+        "perf_lower_uom": "FT",
+        "perfll": 10026,
+        "dates": {
+            "first_prod": "2016-10-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-10-01",
+            "first_gas": "2016-10-01",
+            "first_water": "2016-10-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940682",
+        "api14": "42329406820000",
+        "entity": "1420800432594132H",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:13.257000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9847,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19811,
+        "perf_lower_uom": "FT",
+        "perfll": 9964,
+        "dates": {
+            "first_prod": "2016-10-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-10-01",
+            "first_gas": "2016-10-01",
+            "first_water": "2016-10-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940681",
+        "api14": "42329406810000",
+        "entity": "1420800432594131H",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:12.789000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9839,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19719,
+        "perf_lower_uom": "FT",
+        "perfll": 9880,
+        "dates": {
+            "first_prod": "2016-10-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-10-01",
+            "first_gas": "2016-10-01",
+            "first_water": "2016-10-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940679",
+        "api14": "42329406790000",
+        "entity": "1420800432594123H",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:11.972000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9820,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19601,
+        "perf_lower_uom": "FT",
+        "perfll": 9781,
+        "dates": {
+            "first_prod": "2016-06-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-06-01",
+            "first_gas": "2016-06-01",
+            "first_water": "2016-06-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940678",
+        "api14": "42329406780000",
+        "entity": "1420800432594122H",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:11.444000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9749,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19760,
+        "perf_lower_uom": "FT",
+        "perfll": 10011,
+        "dates": {
+            "first_prod": "2016-06-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-06-01",
+            "first_gas": "2016-06-01",
+            "first_water": "2016-06-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940677",
+        "api14": "42329406770000",
+        "entity": "1420800432594121H",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:11.049000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9733,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19699,
+        "perf_lower_uom": "FT",
+        "perfll": 9966,
+        "dates": {
+            "first_prod": "2016-06-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-06-01",
+            "first_gas": "2016-06-01",
+            "first_water": "2016-06-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232933283",
+        "api14": "42329332830100",
+        "entity": "1420800432591H",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:10.915000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-03-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-03-01",
+            "first_gas": null,
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": null,
+            "gas_alias": null
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942332",
+        "api14": "42329423320100",
+        "entity": "1420800432590042LS",
+        "entity12": "142080043259",
+        "status": "INACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:51.278000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": null,
+            "last_prod": null,
+            "first_oil": null,
+            "first_gas": null,
+            "first_water": null,
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "INACTIVE",
+            "current_code": "P",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": null,
+            "liquid_alias": null,
+            "gas_name": null,
+            "gas_alias": null
+        },
+        "well_counts": {
+            "active_producing": null,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942335",
+        "api14": "42329423350000",
+        "entity": "1420800432590053LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:51.133000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9341,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19335,
+        "perf_lower_uom": "FT",
+        "perfll": 9994,
+        "dates": {
+            "first_prod": "2019-03-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-03-01",
+            "first_gas": "2019-03-01",
+            "first_water": "2019-03-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE PIPELINE LLC",
+            "liquid_alias": "ENTCP",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942334",
+        "api14": "42329423340100",
+        "entity": "1420800432590052LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:50.976000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9248,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19272,
+        "perf_lower_uom": "FT",
+        "perfll": 10024,
+        "dates": {
+            "first_prod": "2019-03-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-03-01",
+            "first_gas": "2019-03-01",
+            "first_water": "2019-03-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE PIPELINE LLC",
+            "liquid_alias": "ENTCP",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942333",
+        "api14": "42329423330100",
+        "entity": "1420800432590051LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:50.840000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9298,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19189,
+        "perf_lower_uom": "FT",
+        "perfll": 9891,
+        "dates": {
+            "first_prod": "2019-03-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-03-01",
+            "first_gas": "2019-03-01",
+            "first_water": "2019-03-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE PIPELINE LLC",
+            "liquid_alias": "ENTCP",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942330",
+        "api14": "42329423300000",
+        "entity": "1420800432590043LS",
+        "entity12": "142080043259",
+        "status": "INACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:50.798000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": null,
+            "last_prod": null,
+            "first_oil": null,
+            "first_gas": null,
+            "first_water": null,
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "INACTIVE",
+            "current_code": "P",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": null,
+            "liquid_alias": null,
+            "gas_name": null,
+            "gas_alias": null
+        },
+        "well_counts": {
+            "active_producing": null,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942636",
+        "api14": "42329426360000",
+        "entity": "1420800432590061LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:50.689000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942331",
+        "api14": "42329423310000",
+        "entity": "1420800432590041LS",
+        "entity12": "142080043259",
+        "status": "INACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:50.645000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": null,
+            "last_prod": null,
+            "first_oil": null,
+            "first_gas": null,
+            "first_water": null,
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "INACTIVE",
+            "current_code": "P",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": null,
+            "liquid_alias": null,
+            "gas_name": null,
+            "gas_alias": null
+        },
+        "well_counts": {
+            "active_producing": null,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942066",
+        "api14": "42329420660100",
+        "entity": "1420800432590036LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:50.522000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9363,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19517,
+        "perf_lower_uom": "FT",
+        "perfll": 10154,
+        "dates": {
+            "first_prod": "2018-12-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-12-01",
+            "first_gas": "2018-12-01",
+            "first_water": "2019-06-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942065",
+        "api14": "42329420650000",
+        "entity": "1420800432590035WB",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:50.382000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10010,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20196,
+        "perf_lower_uom": "FT",
+        "perfll": 10186,
+        "dates": {
+            "first_prod": "2019-01-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-01-01",
+            "first_gas": "2019-01-01",
+            "first_water": "2019-01-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE PIPELINE LLC",
+            "liquid_alias": "ENTCP",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942064",
+        "api14": "42329420640100",
+        "entity": "1420800432590034LS",
+        "entity12": "142080043259",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:50.282000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9404,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19565,
+        "perf_lower_uom": "FT",
+        "perfll": 10161,
+        "dates": {
+            "first_prod": "2018-12-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-12-01",
+            "first_gas": "2018-12-01",
+            "first_water": "2019-06-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941986",
+        "api14": "42329419860000",
+        "entity": "1420800495141216AH",
+        "entity12": "142080049514",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:40.911000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10118,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20458,
+        "perf_lower_uom": "FT",
+        "perfll": 10340,
+        "dates": {
+            "first_prod": "2018-04-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-04-01",
+            "first_gas": "2018-04-01",
+            "first_water": "2018-04-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941990",
+        "api14": "42329419900000",
+        "entity": "1420800495141218AH",
+        "entity12": "142080049514",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:40.698000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9577,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19745,
+        "perf_lower_uom": "FT",
+        "perfll": 10168,
+        "dates": {
+            "first_prod": "2018-04-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-04-01",
+            "first_gas": "2018-04-01",
+            "first_water": "2018-04-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941988",
+        "api14": "42329419880000",
+        "entity": "1420800495141217AH",
+        "entity12": "142080049514",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:40.630000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9888,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20274,
+        "perf_lower_uom": "FT",
+        "perfll": 10386,
+        "dates": {
+            "first_prod": "2018-04-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-04-01",
+            "first_gas": "2018-04-01",
+            "first_water": "2018-04-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941984",
+        "api14": "42329419840000",
+        "entity": "1420800495141215AH",
+        "entity12": "142080049514",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:40.468000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10251,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20576,
+        "perf_lower_uom": "FT",
+        "perfll": 10325,
+        "dates": {
+            "first_prod": "2018-04-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-04-01",
+            "first_gas": "2018-04-01",
+            "first_water": "2018-04-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940531",
+        "api14": "42329405310000",
+        "entity": "1420800495141208BH",
+        "entity12": "142080049514",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:40.376000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10410,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20708,
+        "perf_lower_uom": "FT",
+        "perfll": 10298,
+        "dates": {
+            "first_prod": "2017-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2017-09-01",
+            "first_gas": "2017-09-01",
+            "first_water": "2017-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940524",
+        "api14": "42329405240000",
+        "entity": "1420800495141207BH",
+        "entity12": "142080049514",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:40.255000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9935,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20183,
+        "perf_lower_uom": "FT",
+        "perfll": 10248,
+        "dates": {
+            "first_prod": "2017-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2017-09-01",
+            "first_gas": "2017-09-01",
+            "first_water": "2017-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940532",
+        "api14": "42329405320000",
+        "entity": "1420800495141206BH",
+        "entity12": "142080049514",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:40.135000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9877,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20081,
+        "perf_lower_uom": "FT",
+        "perfll": 10204,
+        "dates": {
+            "first_prod": "2017-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2017-09-01",
+            "first_gas": "2017-09-01",
+            "first_water": "2017-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940509",
+        "api14": "42329405090000",
+        "entity": "1420800495141205BH",
+        "entity12": "142080049514",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:33.470000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10450,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20729,
+        "perf_lower_uom": "FT",
+        "perfll": 10279,
+        "dates": {
+            "first_prod": "2017-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2017-09-01",
+            "first_gas": "2017-09-01",
+            "first_water": "2017-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940541",
+        "api14": "42329405410000",
+        "entity": "1420800389058SH",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:22.487000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9797,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14229,
+        "perf_lower_uom": "FT",
+        "perfll": 4432,
+        "dates": {
+            "first_prod": "2016-02-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-02-01",
+            "first_gas": "2016-02-01",
+            "first_water": "2016-03-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942533",
+        "api14": "42329425330000",
+        "entity": "1420800389052H",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:22.071000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10218,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14621,
+        "perf_lower_uom": "FT",
+        "perfll": 4403,
+        "dates": {
+            "first_prod": "2018-10-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2018-10-01",
+            "first_gas": "2018-10-01",
+            "first_water": "2018-10-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942532",
+        "api14": "42329425320000",
+        "entity": "14208003890521AH",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:21.699000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9925,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14351,
+        "perf_lower_uom": "FT",
+        "perfll": 4426,
+        "dates": {
+            "first_prod": "2018-10-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2018-10-01",
+            "first_gas": "2018-10-01",
+            "first_water": "2018-10-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942531",
+        "api14": "42329425310000",
+        "entity": "1420800389051H",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:21.272000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10181,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14588,
+        "perf_lower_uom": "FT",
+        "perfll": 4407,
+        "dates": {
+            "first_prod": "2018-10-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2018-10-01",
+            "first_gas": "2018-10-01",
+            "first_water": "2018-10-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940542",
+        "api14": "42329405420000",
+        "entity": "1420800389059SH",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:43:20.384000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9735,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13915,
+        "perf_lower_uom": "FT",
+        "perfll": 4180,
+        "dates": {
+            "first_prod": "2016-02-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-02-01",
+            "first_gas": "2016-02-01",
+            "first_water": "2016-03-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940999",
+        "api14": "42329409990000",
+        "entity": "14208003890515LL",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:02.292000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9415,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13815,
+        "perf_lower_uom": "FT",
+        "perfll": 4400,
+        "dates": {
+            "first_prod": "2016-12-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-12-01",
+            "first_gas": "2016-12-01",
+            "first_water": "2016-12-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940998",
+        "api14": "42329409980000",
+        "entity": "14208003890514UL",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:02.099000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9406,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13718,
+        "perf_lower_uom": "FT",
+        "perfll": 4312,
+        "dates": {
+            "first_prod": "2016-12-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-12-01",
+            "first_gas": "2016-12-01",
+            "first_water": "2016-12-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940997",
+        "api14": "42329409970000",
+        "entity": "14208003890513LL",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:01.916000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9370,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13932,
+        "perf_lower_uom": "FT",
+        "perfll": 4562,
+        "dates": {
+            "first_prod": "2016-12-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-12-01",
+            "first_gas": "2016-12-01",
+            "first_water": "2016-12-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941556",
+        "api14": "42329415560000",
+        "entity": "14208003890512LL",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:01.795000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9611,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13915,
+        "perf_lower_uom": "FT",
+        "perfll": 4304,
+        "dates": {
+            "first_prod": "2018-01-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2018-01-01",
+            "first_gas": "2018-01-01",
+            "first_water": "2018-01-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941544",
+        "api14": "42329415440000",
+        "entity": "14208003890516UL",
+        "entity12": "142080038905",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:01.639000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9422,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13726,
+        "perf_lower_uom": "FT",
+        "perfll": 4304,
+        "dates": {
+            "first_prod": "2018-01-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2018-01-01",
+            "first_gas": "2018-01-01",
+            "first_water": "2018-01-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232943324",
+        "api14": "42329433240000",
+        "entity": "142080P95274MULTIWELL01",
+        "entity12": "142080P95274",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:45:16.236000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "PIONEER NAT RES USA",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": null,
+        "perf_upper_uom": null,
+        "perf_lower": null,
+        "perf_lower_uom": null,
+        "perfll": null,
+        "dates": {
+            "first_prod": "2020-01-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2020-01-01",
+            "first_gas": "2020-01-01",
+            "first_water": null,
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": null,
+            "liquid_alias": null,
+            "gas_name": null,
+            "gas_alias": null
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942846",
+        "api14": "42329428460000",
+        "entity": "14208003887319H",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:07.105000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10528,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14490,
+        "perf_lower_uom": "FT",
+        "perfll": 3962,
+        "dates": {
+            "first_prod": "2019-02-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2019-02-01",
+            "first_gas": "2019-02-01",
+            "first_water": "2019-02-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942094",
+        "api14": "42329420940000",
+        "entity": "14208003887314H",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:06.866000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10427,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14859,
+        "perf_lower_uom": "FT",
+        "perfll": 4432,
+        "dates": {
+            "first_prod": "2018-04-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2018-04-01",
+            "first_gas": "2018-04-01",
+            "first_water": "2018-04-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941447",
+        "api14": "42329414470000",
+        "entity": "14208003887310UL",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:06.625000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9512,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13797,
+        "perf_lower_uom": "FT",
+        "perfll": 4285,
+        "dates": {
+            "first_prod": "2017-12-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2017-12-01",
+            "first_gas": "2017-12-01",
+            "first_water": "2017-12-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940501",
+        "api14": "42329405010000",
+        "entity": "1420800388731SH",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:06.097000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9911,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14091,
+        "perf_lower_uom": "FT",
+        "perfll": 4180,
+        "dates": {
+            "first_prod": "2016-02-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-02-01",
+            "first_gas": "2016-02-01",
+            "first_water": "2016-02-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232939560",
+        "api14": "42329395600000",
+        "entity": "1420800388734LS",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:10.240000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9549,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13945,
+        "perf_lower_uom": "FT",
+        "perfll": 4396,
+        "dates": {
+            "first_prod": "2015-01-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2015-01-01",
+            "first_gas": "2015-01-01",
+            "first_water": "2015-01-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940951",
+        "api14": "42329409510000",
+        "entity": "1420800388738LL",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:10.086000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9481,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14104,
+        "perf_lower_uom": "FT",
+        "perfll": 4623,
+        "dates": {
+            "first_prod": "2016-10-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-10-01",
+            "first_gas": "2016-10-01",
+            "first_water": "2016-10-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940950",
+        "api14": "42329409500000",
+        "entity": "1420800388737UL",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:09.882000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9229,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13579,
+        "perf_lower_uom": "FT",
+        "perfll": 4350,
+        "dates": {
+            "first_prod": "2016-10-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-10-01",
+            "first_gas": "2016-10-01",
+            "first_water": "2016-10-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940949",
+        "api14": "42329409490100",
+        "entity": "1420800388736LL",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:09.677000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9399,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13872,
+        "perf_lower_uom": "FT",
+        "perfll": 4473,
+        "dates": {
+            "first_prod": "2016-10-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-10-01",
+            "first_gas": "2016-10-01",
+            "first_water": "2016-10-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941445",
+        "api14": "42329414450000",
+        "entity": "1420800388735LL",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:09.506000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9611,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14093,
+        "perf_lower_uom": "FT",
+        "perfll": 4482,
+        "dates": {
+            "first_prod": "2017-12-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2017-12-01",
+            "first_gas": "2017-12-01",
+            "first_water": "2017-12-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941446",
+        "api14": "42329414460000",
+        "entity": "1420800388739UL",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:09.320000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9319,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13875,
+        "perf_lower_uom": "FT",
+        "perfll": 4556,
+        "dates": {
+            "first_prod": "2017-12-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2017-12-01",
+            "first_gas": "2017-12-01",
+            "first_water": "2017-12-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940503",
+        "api14": "42329405030000",
+        "entity": "1420800388732SH",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:09.102000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9661,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14093,
+        "perf_lower_uom": "FT",
+        "perfll": 4432,
+        "dates": {
+            "first_prod": "2016-02-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2016-02-01",
+            "first_gas": "2016-02-01",
+            "first_water": "2016-02-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942848",
+        "api14": "42329428480000",
+        "entity": "14208003887326AH",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:09.028000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9772,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14403,
+        "perf_lower_uom": "FT",
+        "perfll": 4631,
+        "dates": {
+            "first_prod": "2019-02-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2019-02-01",
+            "first_gas": "2019-02-01",
+            "first_water": "2019-02-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941858",
+        "api14": "42329418580100",
+        "entity": "14208003887321AH",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:08.874000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10009,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14196,
+        "perf_lower_uom": "FT",
+        "perfll": 4187,
+        "dates": {
+            "first_prod": "2018-04-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2018-04-01",
+            "first_gas": "2018-04-01",
+            "first_water": "2018-04-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942847",
+        "api14": "42329428470000",
+        "entity": "14208003887320H",
+        "entity12": "142080038873",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:39:08.740000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CALLON PET OPERATING",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10153,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14692,
+        "perf_lower_uom": "FT",
+        "perfll": 4539,
+        "dates": {
+            "first_prod": "2019-02-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2019-02-01",
+            "first_gas": "2019-02-01",
+            "first_water": "2019-02-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941482",
+        "api14": "42329414820100",
+        "entity": "1420800506386UA",
+        "entity12": "142080050638",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:11.638000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "ENDEAVOR ENERGY RES",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9761,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20012,
+        "perf_lower_uom": "FT",
+        "perfll": 10251,
+        "dates": {
+            "first_prod": "2018-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-08-01",
+            "first_gas": "2018-08-01",
+            "first_water": "2018-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "NUSTAR PERMIAN TRANS & STG LLC",
+            "liquid_alias": "NPTSL",
+            "gas_name": "NAVITAS MDSTR MIDLAND BASIN LLC",
+            "gas_alias": "NAVIT"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941481",
+        "api14": "42329414810000",
+        "entity": "1420800506386LB",
+        "entity12": "142080050638",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:11.482000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "ENDEAVOR ENERGY RES",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10167,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20391,
+        "perf_lower_uom": "FT",
+        "perfll": 10224,
+        "dates": {
+            "first_prod": "2018-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-08-01",
+            "first_gas": "2018-08-01",
+            "first_water": "2018-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "NUSTAR PERMIAN TRANS & STG LLC",
+            "liquid_alias": "NPTSL",
+            "gas_name": "NAVITAS MDSTR MIDLAND BASIN LLC",
+            "gas_alias": "NAVIT"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941480",
+        "api14": "42329414800000",
+        "entity": "1420800506386LA",
+        "entity12": "142080050638",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:11.298000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "ENDEAVOR ENERGY RES",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9797,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19933,
+        "perf_lower_uom": "FT",
+        "perfll": 10136,
+        "dates": {
+            "first_prod": "2018-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-08-01",
+            "first_gas": "2018-08-01",
+            "first_water": "2018-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "NUSTAR PERMIAN TRANS & STG LLC",
+            "liquid_alias": "NPTSL",
+            "gas_name": "NAVITAS MDSTR MIDLAND BASIN LLC",
+            "gas_alias": "NAVIT"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940102",
+        "api14": "42329401020000",
+        "entity": "142080047349601H",
+        "entity12": "142080047349",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:40:15.425000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "DIAMONDBACK E&P LLC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 8107,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14434,
+        "perf_lower_uom": "FT",
+        "perfll": 6327,
+        "dates": {
+            "first_prod": "2015-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2015-08-01",
+            "first_gas": "2015-08-01",
+            "first_water": "2015-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "NUSTAR PERMIAN TRANS & STG LLC",
+            "liquid_alias": "NPTSL",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940101",
+        "api14": "42329401010000",
+        "entity": "142080047349501H",
+        "entity12": "142080047349",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:40:14.882000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "DIAMONDBACK E&P LLC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 8849,
+        "perf_upper_uom": "FT",
+        "perf_lower": 15277,
+        "perf_lower_uom": "FT",
+        "perfll": 6428,
+        "dates": {
+            "first_prod": "2015-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2015-08-01",
+            "first_gas": "2015-08-01",
+            "first_water": "2015-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "NUSTAR PERMIAN TRANS & STG LLC",
+            "liquid_alias": "NPTSL",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232939634",
+        "api14": "42329396340000",
+        "entity": "1420800481970102BH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:51:54.498000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10115,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17798,
+        "perf_lower_uom": "FT",
+        "perfll": 7683,
+        "dates": {
+            "first_prod": "2016-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-09-01",
+            "first_gas": "2016-09-01",
+            "first_water": "2016-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ETP CRUDE LLC",
+            "liquid_alias": "ETPCR",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232939633",
+        "api14": "42329396330000",
+        "entity": "1420800481970101BH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:51:54.331000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10200,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17552,
+        "perf_lower_uom": "FT",
+        "perfll": 7352,
+        "dates": {
+            "first_prod": "2016-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-09-01",
+            "first_gas": "2016-09-01",
+            "first_water": "2016-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ETP CRUDE LLC",
+            "liquid_alias": "ETPCR",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942953",
+        "api14": "42329429530100",
+        "entity": "1420800481970114AH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:39.014000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10395,
+        "perf_upper_uom": "FT",
+        "perf_lower": 18100,
+        "perf_lower_uom": "FT",
+        "perfll": 7705,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942954",
+        "api14": "42329429540000",
+        "entity": "1420800481970124SH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:38.968000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10155,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17773,
+        "perf_lower_uom": "FT",
+        "perfll": 7618,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942955",
+        "api14": "42329429550000",
+        "entity": "1420800481970123SH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:38.914000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9975,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17655,
+        "perf_lower_uom": "FT",
+        "perfll": 7680,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942958",
+        "api14": "42329429580000",
+        "entity": "1420800481970122SH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:38.853000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9912,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17494,
+        "perf_lower_uom": "FT",
+        "perfll": 7582,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942959",
+        "api14": "42329429590000",
+        "entity": "1420800481970121SH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:38.795000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10317,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17953,
+        "perf_lower_uom": "FT",
+        "perfll": 7636,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942952",
+        "api14": "42329429520000",
+        "entity": "1420800481970125SH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:38.752000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10143,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17761,
+        "perf_lower_uom": "FT",
+        "perfll": 7618,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942957",
+        "api14": "42329429570100",
+        "entity": "1420800481970112AH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:38.711000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10357,
+        "perf_upper_uom": "FT",
+        "perf_lower": 18010,
+        "perf_lower_uom": "FT",
+        "perfll": 7653,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941226",
+        "api14": "42329412260200",
+        "entity": "1420800481970111AH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:38.610000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10468,
+        "perf_upper_uom": "FT",
+        "perf_lower": 18152,
+        "perf_lower_uom": "FT",
+        "perfll": 7684,
+        "dates": {
+            "first_prod": "2017-02-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2017-02-01",
+            "first_gas": "2017-02-01",
+            "first_water": "2017-02-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232939636",
+        "api14": "42329396360000",
+        "entity": "1420800481970104BH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:38.463000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10192,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17899,
+        "perf_lower_uom": "FT",
+        "perfll": 7707,
+        "dates": {
+            "first_prod": "2016-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-09-01",
+            "first_gas": "2016-09-01",
+            "first_water": "2016-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ETP CRUDE LLC",
+            "liquid_alias": "ETPCR",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232939635",
+        "api14": "42329396350000",
+        "entity": "1420800481970103BH",
+        "entity12": "142080048197",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:38.267000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10260,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17963,
+        "perf_lower_uom": "FT",
+        "perfll": 7703,
+        "dates": {
+            "first_prod": "2016-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-09-01",
+            "first_gas": "2016-09-01",
+            "first_water": "2016-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ETP CRUDE LLC",
+            "liquid_alias": "ETPCR",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942915",
+        "api14": "42329429150000",
+        "entity": "1420800524554HM",
+        "entity12": "142080052455",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:46.191000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "APACHE CORP",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10238,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17929,
+        "perf_lower_uom": "FT",
+        "perfll": 7691,
+        "dates": {
+            "first_prod": "2019-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-09-01",
+            "first_gas": "2019-09-01",
+            "first_water": "2019-09-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "MEDALLION OPERATING CO LLC",
+            "liquid_alias": "MEDOP",
+            "gas_name": "NAVITAS MDSTR MIDLAND BASIN LLC",
+            "gas_alias": "NAVIT"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942917",
+        "api14": "42329429170000",
+        "entity": "14208005245512HS",
+        "entity12": "142080052455",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:46.094000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "APACHE CORP",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9598,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17298,
+        "perf_lower_uom": "FT",
+        "perfll": 7700,
+        "dates": {
+            "first_prod": "2019-11-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-11-01",
+            "first_gas": "2019-11-01",
+            "first_water": "2019-11-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "MEDALLION OPERATING CO LLC",
+            "liquid_alias": "MEDOP",
+            "gas_name": "NAVITAS MDSTR MIDLAND BASIN LLC",
+            "gas_alias": "NAVIT"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942916",
+        "api14": "42329429160000",
+        "entity": "14208005245511HS",
+        "entity12": "142080052455",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:41:46.015000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "APACHE CORP",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9453,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17133,
+        "perf_lower_uom": "FT",
+        "perfll": 7680,
+        "dates": {
+            "first_prod": "2019-10-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-10-01",
+            "first_gas": "2019-10-01",
+            "first_water": "2019-10-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "MEDALLION OPERATING CO LLC",
+            "liquid_alias": "MEDOP",
+            "gas_name": "NAVITAS MDSTR MIDLAND BASIN LLC",
+            "gas_alias": "NAVIT"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940216",
+        "api14": "42329402160000",
+        "entity": "1420800474483211AH",
+        "entity12": "142080047448",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:16.606000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9654,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17062,
+        "perf_lower_uom": "FT",
+        "perfll": 7408,
+        "dates": {
+            "first_prod": "2016-02-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-02-01",
+            "first_gas": "2016-02-01",
+            "first_water": "2016-02-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": null,
+            "gas_alias": null
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941189",
+        "api14": "42329411890000",
+        "entity": "1420800501883605LS",
+        "entity12": "142080050188",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:45:01.404000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "DIAMONDBACK E&P LLC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9567,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14219,
+        "perf_lower_uom": "FT",
+        "perfll": 4652,
+        "dates": {
+            "first_prod": "2017-04-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2017-04-01",
+            "first_gas": "2017-04-01",
+            "first_water": "2017-04-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": null,
+            "gas_alias": null
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941647",
+        "api14": "42329416470000",
+        "entity": "1420800497372616AH",
+        "entity12": "142080049737",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:13.879000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9540,
+        "perf_upper_uom": "FT",
+        "perf_lower": 16894,
+        "perf_lower_uom": "FT",
+        "perfll": 7354,
+        "dates": {
+            "first_prod": "2018-06-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2018-06-01",
+            "first_gas": "2018-06-01",
+            "first_water": "2018-06-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENERGY TRANSFER CO",
+            "gas_alias": "ENETR"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941715",
+        "api14": "42329417150000",
+        "entity": "1420800497372606BH",
+        "entity12": "142080049737",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:44:07.492000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9712,
+        "perf_upper_uom": "FT",
+        "perf_lower": 17364,
+        "perf_lower_uom": "FT",
+        "perfll": 7652,
+        "dates": {
+            "first_prod": "2018-06-01",
+            "last_prod": "2019-12-31",
+            "first_oil": "2018-06-01",
+            "first_gas": "2018-06-01",
+            "first_water": "2018-06-01",
+            "ihs_last_update": "2020-02-28"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENERGY TRANSFER CO",
+            "gas_alias": "ENETR"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942186",
+        "api14": "42329421860000",
+        "entity": "1420800387634LS",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:07.300000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9468,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14063,
+        "perf_lower_uom": "FT",
+        "perfll": 4595,
+        "dates": {
+            "first_prod": "2018-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-08-01",
+            "first_gas": "2018-08-01",
+            "first_water": "2018-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941033",
+        "api14": "42329410330000",
+        "entity": "1420800387634WB",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:06.441000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9815,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14447,
+        "perf_lower_uom": "FT",
+        "perfll": 4632,
+        "dates": {
+            "first_prod": "2018-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-08-01",
+            "first_gas": "2018-08-01",
+            "first_water": "2018-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941037",
+        "api14": "42329410370000",
+        "entity": "1420800387633WA",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:05.925000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9690,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14313,
+        "perf_lower_uom": "FT",
+        "perfll": 4623,
+        "dates": {
+            "first_prod": "2018-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-08-01",
+            "first_gas": "2018-08-01",
+            "first_water": "2018-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942184",
+        "api14": "42329421840000",
+        "entity": "1420800387633MS",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:05.729000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 8909,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13362,
+        "perf_lower_uom": "FT",
+        "perfll": 4453,
+        "dates": {
+            "first_prod": "2018-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-09-01",
+            "first_gas": "2018-09-01",
+            "first_water": "2018-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942187",
+        "api14": "42329421870000",
+        "entity": "1420800387633LS",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:42:05.511000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9396,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13987,
+        "perf_lower_uom": "FT",
+        "perfll": 4591,
+        "dates": {
+            "first_prod": "2018-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-09-01",
+            "first_gas": "2018-09-01",
+            "first_water": "2018-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941038",
+        "api14": "42329410380000",
+        "entity": "1420800387632LS",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:52.939000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9506,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13897,
+        "perf_lower_uom": "FT",
+        "perfll": 4391,
+        "dates": {
+            "first_prod": "2018-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-09-01",
+            "first_gas": "2018-09-01",
+            "first_water": "2018-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941030",
+        "api14": "42329410300000",
+        "entity": "1420800387632WB",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:52.118000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9877,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14480,
+        "perf_lower_uom": "FT",
+        "perfll": 4603,
+        "dates": {
+            "first_prod": "2017-06-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2017-06-01",
+            "first_gas": "2017-06-01",
+            "first_water": "2017-06-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941031",
+        "api14": "42329410310000",
+        "entity": "1420800387631WA",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:51.607000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9805,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14316,
+        "perf_lower_uom": "FT",
+        "perfll": 4511,
+        "dates": {
+            "first_prod": "2017-06-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2017-06-01",
+            "first_gas": "2017-06-01",
+            "first_water": "2017-06-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941157",
+        "api14": "42329411570100",
+        "entity": "1420800387631836HR",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:51.450000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9493,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14079,
+        "perf_lower_uom": "FT",
+        "perfll": 4586,
+        "dates": {
+            "first_prod": "2016-11-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-11-01",
+            "first_gas": "2016-11-01",
+            "first_water": "2016-11-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941029",
+        "api14": "42329410290000",
+        "entity": "1420800387631821H",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:51.238000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9079,
+        "perf_upper_uom": "FT",
+        "perf_lower": 13665,
+        "perf_lower_uom": "FT",
+        "perfll": 4586,
+        "dates": {
+            "first_prod": "2016-11-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-11-01",
+            "first_gas": "2016-11-01",
+            "first_water": "2016-11-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "PLAINS PIPELINE LP",
+            "liquid_alias": "PLAIP",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232938737",
+        "api14": "42329387370000",
+        "entity": "1420800387631818H",
+        "entity12": "142080038763",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:38:50.886000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "INDEPENDENCE RES MGM",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9920,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14419,
+        "perf_lower_uom": "FT",
+        "perfll": 4499,
+        "dates": {
+            "first_prod": "2013-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2013-09-01",
+            "first_gas": "2013-09-01",
+            "first_water": "2015-02-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "ENLINK NORTH TEXAS GATHERING LP",
+            "gas_alias": "ENLKN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232933943",
+        "api14": "42329339430200",
+        "entity": "1420800352969H",
+        "entity12": "142080035296",
+        "status": "INACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:37.788000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10198,
+        "perf_upper_uom": "FT",
+        "perf_lower": 10397,
+        "perf_lower_uom": "FT",
+        "perfll": 199,
+        "dates": {
+            "first_prod": "1998-09-01",
+            "last_prod": "2016-09-30",
+            "first_oil": "1998-09-01",
+            "first_gas": "1999-07-01",
+            "first_water": "1999-07-01",
+            "ihs_last_update": "2020-03-30"
+        },
+        "statuses": {
+            "current": "INACTIVE",
+            "current_code": "P",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": null,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940756",
+        "api14": "42329407560000",
+        "entity": "1420800352969HA",
+        "entity12": "142080035296",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:37.294000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9550,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14052,
+        "perf_lower_uom": "FT",
+        "perfll": 4502,
+        "dates": {
+            "first_prod": "2016-11-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-11-01",
+            "first_gas": "2016-11-01",
+            "first_water": "2016-11-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232941236",
+        "api14": "42329412360000",
+        "entity": "1420800352965HB",
+        "entity12": "142080035296",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:37.047000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9765,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14394,
+        "perf_lower_uom": "FT",
+        "perfll": 4629,
+        "dates": {
+            "first_prod": "2017-05-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2017-05-01",
+            "first_gas": "2017-05-01",
+            "first_water": "2017-05-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE PIPELINE LLC",
+            "liquid_alias": "ENTCP",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940599",
+        "api14": "42329405990000",
+        "entity": "14208003529616HB",
+        "entity12": "142080035296",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:36.875000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9716,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14348,
+        "perf_lower_uom": "FT",
+        "perfll": 4632,
+        "dates": {
+            "first_prod": "2016-05-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-05-01",
+            "first_gas": "2016-05-01",
+            "first_water": "2016-05-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940597",
+        "api14": "42329405970000",
+        "entity": "14208003529615HA",
+        "entity12": "142080035296",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:36.732000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9354,
+        "perf_upper_uom": "FT",
+        "perf_lower": 12839,
+        "perf_lower_uom": "FT",
+        "perfll": 3485,
+        "dates": {
+            "first_prod": "2016-05-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-05-01",
+            "first_gas": "2016-05-01",
+            "first_water": "2016-05-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940598",
+        "api14": "42329405980000",
+        "entity": "14208003529614HB",
+        "entity12": "142080035296",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:36.548000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9738,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14403,
+        "perf_lower_uom": "FT",
+        "perfll": 4665,
+        "dates": {
+            "first_prod": "2016-04-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-04-01",
+            "first_gas": "2016-04-01",
+            "first_water": "2016-04-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940758",
+        "api14": "42329407580000",
+        "entity": "14208003529612HB",
+        "entity12": "142080035296",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:29.550000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9897,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14399,
+        "perf_lower_uom": "FT",
+        "perfll": 4502,
+        "dates": {
+            "first_prod": "2016-11-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-11-01",
+            "first_gas": "2016-11-01",
+            "first_water": "2016-11-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940595",
+        "api14": "42329405950100",
+        "entity": "14208003529613HA",
+        "entity12": "142080035296",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:28.080000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9380,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14072,
+        "perf_lower_uom": "FT",
+        "perfll": 4692,
+        "dates": {
+            "first_prod": "2016-05-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-05-01",
+            "first_gas": "2016-05-01",
+            "first_water": "2016-05-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "ENTERPRISE CRUDE OIL LLC",
+            "liquid_alias": "ENTCO",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940759",
+        "api14": "42329407590000",
+        "entity": "14208003529611HA",
+        "entity12": "142080035296",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:27.613000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9386,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14128,
+        "perf_lower_uom": "FT",
+        "perfll": 4742,
+        "dates": {
+            "first_prod": "2016-11-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-11-01",
+            "first_gas": "2016-11-01",
+            "first_water": "2016-11-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232940757",
+        "api14": "42329407570000",
+        "entity": "14208003529610HB",
+        "entity12": "142080035296",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:27.388000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "CHEVRON U S A INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9386,
+        "perf_upper_uom": "FT",
+        "perf_lower": 14128,
+        "perf_lower_uom": "FT",
+        "perfll": 4742,
+        "dates": {
+            "first_prod": "2016-11-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2016-11-01",
+            "first_gas": "2016-11-01",
+            "first_water": "2016-11-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "CHEVRON U S A INC",
+            "gas_alias": "CHVRN"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942888",
+        "api14": "42329428880000",
+        "entity": "1420800505802923SH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:30.530000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9927,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20280,
+        "perf_lower_uom": "FT",
+        "perfll": 10353,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942891",
+        "api14": "42329428910000",
+        "entity": "1420800505802944SH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:30.178000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9717,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20070,
+        "perf_lower_uom": "FT",
+        "perfll": 10353,
+        "dates": {
+            "first_prod": "2019-07-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-07-01",
+            "first_gas": "2019-07-01",
+            "first_water": "2019-07-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942885",
+        "api14": "42329428850000",
+        "entity": "1420800505802942SH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:30.060000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9065,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19406,
+        "perf_lower_uom": "FT",
+        "perfll": 10341,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942368",
+        "api14": "42329423680000",
+        "entity": "1420800505802921SH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:29.738000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9522,
+        "perf_upper_uom": "FT",
+        "perf_lower": 19843,
+        "perf_lower_uom": "FT",
+        "perfll": 10321,
+        "dates": {
+            "first_prod": "2018-10-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-10-01",
+            "first_gas": "2018-10-01",
+            "first_water": "2018-10-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942890",
+        "api14": "42329428900000",
+        "entity": "1420800505802913AH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:29.618000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10480,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20834,
+        "perf_lower_uom": "FT",
+        "perfll": 10354,
+        "dates": {
+            "first_prod": "2019-07-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-07-01",
+            "first_gas": "2019-07-01",
+            "first_water": "2019-07-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942886",
+        "api14": "42329428860000",
+        "entity": "1420800505802912AH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:29.498000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10499,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20851,
+        "perf_lower_uom": "FT",
+        "perfll": 10352,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942883",
+        "api14": "42329428830000",
+        "entity": "1420800505802911AH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:29.365000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 9847,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20181,
+        "perf_lower_uom": "FT",
+        "perfll": 10334,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942887",
+        "api14": "42329428870000",
+        "entity": "1420800505802903BH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:24.929000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10798,
+        "perf_upper_uom": "FT",
+        "perf_lower": 21152,
+        "perf_lower_uom": "FT",
+        "perfll": 10354,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942884",
+        "api14": "42329428840000",
+        "entity": "1420800505802902BH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:24.774000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10163,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20517,
+        "perf_lower_uom": "FT",
+        "perfll": 10354,
+        "dates": {
+            "first_prod": "2019-08-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-08-01",
+            "first_gas": "2019-08-01",
+            "first_water": "2019-08-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942367",
+        "api14": "42329423670000",
+        "entity": "1420800505802901BH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:24.630000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10239,
+        "perf_upper_uom": "FT",
+        "perf_lower": 20593,
+        "perf_lower_uom": "FT",
+        "perfll": 10354,
+        "dates": {
+            "first_prod": "2018-09-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2018-09-01",
+            "first_gas": "2018-09-01",
+            "first_water": "2018-09-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "UNKNOWN",
+            "liquid_alias": "UNKWN",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    },
+    {
+        "api10": "4232942889",
+        "api14": "42329428890000",
+        "entity": "1420800505802904BH",
+        "entity12": "142080050580",
+        "status": "ACTIVE",
+        "provider": "IHS",
+        "last_update_at": "2020-04-17T09:37:24.381000",
+        "hole_direction": "H",
+        "county_code": 329,
+        "state_code": 42,
+        "operator_alias": "XTO ENERGY INC",
+        "products": "O",
+        "production_type": "ALLOCATED",
+        "product_primary": "CRUDE OIL",
+        "perf_upper": 10797,
+        "perf_upper_uom": "FT",
+        "perf_lower": 21134,
+        "perf_lower_uom": "FT",
+        "perfll": 10337,
+        "dates": {
+            "first_prod": "2019-07-01",
+            "last_prod": "2020-01-31",
+            "first_oil": "2019-07-01",
+            "first_gas": "2019-07-01",
+            "first_water": "2019-07-01",
+            "ihs_last_update": "2020-04-07"
+        },
+        "statuses": {
+            "current": "ACTIVE",
+            "current_code": "A",
+            "original": "ACTIVE",
+            "original_code": "A"
+        },
+        "gatherers": {
+            "liquid_name": "CENTURION PIPELINE LP",
+            "liquid_alias": "CENPI",
+            "gas_name": "TARGA PL MID-CONT WESTTEX LLC",
+            "gas_alias": "TARGW"
+        },
+        "well_counts": {
+            "active_producing": 1,
+            "active_total": 1,
+            "total": 1
+        }
+    }
+]

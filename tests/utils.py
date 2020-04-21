@@ -195,11 +195,13 @@ async def refresh_fixtures(hole_dir: HoleDirection, n: int = 10):
     if hole_dir == HoleDirection.H:
         wellpath = IHSPath.well_h_sample
         prodpath = IHSPath.prod_h
+        prodheaderpath = IHSPath.prod_h_headers
         geompath = IHSPath.well_h_geoms
 
     elif HoleDirection.V:
         wellpath = IHSPath.well_v_sample
         prodpath = IHSPath.prod_v
+        prodheaderpath = IHSPath.prod_v_headers
         geompath = IHSPath.well_v_geoms
     else:
         raise ValueError(f"invalid hole direction")
@@ -212,6 +214,11 @@ async def refresh_fixtures(hole_dir: HoleDirection, n: int = 10):
     prod = await IHSClient.get_production(prodpath, api14s=api14s)
     to_json(
         prod, fixture_path / f"prod_{hd}.json",
+    )
+
+    prod_headers = await IHSClient.get_production(prodheaderpath, api14s=api14s)
+    to_json(
+        prod_headers, fixture_path / f"prod_headers_{hd}.json",
     )
 
     geoms = await IHSClient.get_wells(geompath, api14s=api14s)

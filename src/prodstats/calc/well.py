@@ -347,7 +347,7 @@ class Well:
         return df.loc[:, return_columns]
 
     async def last_prod_date(
-        self, path: IHSPath, prefer_local: bool = False
+        self, path: IHSPath, prefer_local: bool = False, **kwargs
     ) -> pd.DataFrame:  # TODO: passing path here is clunky # noqa
         """ Fetch the last production dates from IHS service (default) or from
             the application's local database """
@@ -373,11 +373,14 @@ class Well:
 
         if prod_headers is None:
             logger.debug("fetching production headers from ihs service")
-            prod = await IHSClient.get_production(path, api14s=api14s_in, related=False)
+            prod = await IHSClient.get_production(
+                path, api14s=api14s_in, related=False, **kwargs
+            )
 
             prod_df = pd.DataFrame(prod)
 
             if not prod_df.empty:
+                # logger.warning(prod_df)
                 prod_headers = (
                     prod_df.set_index("api14")
                     .dates.apply(pd.Series)

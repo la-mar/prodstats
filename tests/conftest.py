@@ -102,9 +102,20 @@ async def client(bind) -> TestClient:
     yield TestClient(app)
 
 
+# --- json fixtures ---------------------------------------------------------- #
+
+
 @pytest.fixture(scope="session")
 def json_fixture():
     yield lambda x: load_json(f"tests/fixtures/{x}")
+
+
+# --- horizontal --- #
+
+
+@pytest.fixture(scope="session")
+def wells_h(json_fixture):
+    yield json_fixture("wells_h.json")
 
 
 @pytest.fixture(scope="session")
@@ -113,8 +124,49 @@ def prod_h(json_fixture):
 
 
 @pytest.fixture(scope="session")
+def prod_headers_h(json_fixture):
+    yield json_fixture("prod_headers_h.json")
+
+
+@pytest.fixture(scope="session")
+def fracs_h(json_fixture):
+    yield json_fixture("fracs_h.json")
+
+
+@pytest.fixture(scope="session")
+def geoms_h(json_fixture):
+    yield json_fixture("geoms_h.json")
+
+
+# --- vertical --- #
+
+
+@pytest.fixture(scope="session")
+def wells_v(json_fixture):
+    yield json_fixture("wells_v.json")
+
+
+@pytest.fixture(scope="session")
 def prod_v(json_fixture):
     yield json_fixture("prod_v.json")
+
+
+@pytest.fixture(scope="session")
+def prod_headers_v(json_fixture):
+    yield json_fixture("prod_headers_v.json")
+
+
+@pytest.fixture(scope="session")
+def fracs_v(json_fixture):
+    yield json_fixture("fracs_v.json")
+
+
+@pytest.fixture(scope="session")
+def geoms_v(json_fixture):
+    yield json_fixture("geoms_v.json")
+
+
+# --- dataframes ------------------------------------------------------------- #
 
 
 @pytest.fixture
@@ -127,44 +179,9 @@ def prod_df_v(prod_v):
     yield pd.DataFrame.prodstats.from_records(prod_v, create_index=True)
 
 
-@pytest.fixture
-def prodset_h(prod_df_h):
-    yield prod_df_h.prodstats.to_prodset()
+# --- sets ------------------------------------------------------------------- #
 
-
-@pytest.fixture
-def prodset_v(prod_df_v):
-    yield prod_df_v.prodstats.to_prodset()
-
-
-@pytest.fixture
-def prod_h_dispatcher(prod_h):
-    yield MockAsyncDispatch({"data": prod_h})
-
-
-@pytest.fixture
-def prod_v_dispatcher(prod_v):
-    yield MockAsyncDispatch({"data": prod_v})
-
-
-@pytest.fixture(scope="session")
-def fracs_h(json_fixture):
-    yield json_fixture("fracs_h.json")
-
-
-@pytest.fixture(scope="session")
-def fracs_v(json_fixture):
-    yield json_fixture("fracs_v.json")
-
-
-@pytest.fixture(scope="session")
-def wells_h(json_fixture):
-    yield json_fixture("wells_h.json")
-
-
-@pytest.fixture(scope="session")
-def wells_v(json_fixture):
-    yield json_fixture("wells_v.json")
+# --- horizontal --- #
 
 
 @pytest.fixture
@@ -173,8 +190,36 @@ def wellset_h(wells_h):
 
 
 @pytest.fixture
+def prodset_h(prod_df_h):
+    yield prod_df_h.prodstats.to_prodset()
+
+
+@pytest.fixture
+def geomset_h(geoms_h):
+    yield pd.DataFrame.shapes.from_records(geoms_h)
+
+
+# --- vertical --- #
+
+
+@pytest.fixture
 def wellset_v(wells_v):
     yield pd.DataFrame.wells.from_records(wells_v)
+
+
+@pytest.fixture
+def prodset_v(prod_df_v):
+    yield prod_df_v.prodstats.to_prodset()
+
+
+@pytest.fixture
+def geomset_v(geoms_v):
+    yield pd.DataFrame.shapes.from_records(geoms_v)
+
+
+# --- dispatchers ------------------------------------------------------------ #
+
+# --- horizontal --- #
 
 
 @pytest.fixture
@@ -183,28 +228,8 @@ def wells_h_dispatcher(wells_h):
 
 
 @pytest.fixture
-def wells_v_dispatcher(wells_v):
-    yield MockAsyncDispatch({"data": wells_v})
-
-
-@pytest.fixture(scope="session")
-def geoms_h(json_fixture):
-    yield json_fixture("geoms_h.json")
-
-
-@pytest.fixture(scope="session")
-def geoms_v(json_fixture):
-    yield json_fixture("geoms_v.json")
-
-
-@pytest.fixture
-def geomset_h(geoms_h):
-    yield pd.DataFrame.shapes.from_records(geoms_h)
-
-
-@pytest.fixture
-def geomset_v(geoms_v):
-    yield pd.DataFrame.shapes.from_records(geoms_v)
+def prod_h_dispatcher(prod_h):
+    yield MockAsyncDispatch({"data": prod_h})
 
 
 @pytest.fixture
@@ -212,9 +237,25 @@ def geoms_h_dispatcher(geoms_h):
     yield MockAsyncDispatch({"data": geoms_h})
 
 
+# --- vertical --- #
+
+
+@pytest.fixture
+def wells_v_dispatcher(wells_v):
+    yield MockAsyncDispatch({"data": wells_v})
+
+
+@pytest.fixture
+def prod_v_dispatcher(prod_v):
+    yield MockAsyncDispatch({"data": prod_v})
+
+
 @pytest.fixture
 def geoms_v_dispatcher(geoms_v):
     yield MockAsyncDispatch({"data": geoms_v})
+
+
+# --- other ------------------------------------------------------------------ #
 
 
 @pytest.fixture
@@ -238,9 +279,10 @@ if __name__ == "__main__":
     fracs_v = json_fixture("fracs_v.json")
 
     geoms_h = json_fixture("geoms_h.json")
-    geomsset_h = pd.DataFrame.shapes.from_records(geoms_h, create_index=True)
+    geomset_h = pd.DataFrame.shapes.from_records(geoms_h, create_index=True)
 
     prod_h = json_fixture("prod_h.json")
+    prod_headers_h = json_fixture("prod_headers_h.json")
     prod_df_h = pd.DataFrame.prodstats.from_records(prod_h, create_index=True)
     prodset_h = prod_df_h.prodstats.to_prodset()
 
@@ -251,6 +293,7 @@ if __name__ == "__main__":
     geomset_v = pd.DataFrame.shapes.from_records(geoms_v, create_index=True)
 
     prod_v = json_fixture("prod_v.json")
+    prod_headers_v = json_fixture("prod_headers_v.json")
     prod_df_v = pd.DataFrame.prodstats.from_records(prod_v, create_index=True)
     prodset_v = prod_df_v.prodstats.to_prodset()
 
@@ -258,3 +301,5 @@ if __name__ == "__main__":
 
     range = ProdStatRange.FIRST
     months = 3
+    api14h = [x["api14"] for x in wells_h]
+    api14v = [x["api14"] for x in wells_v]

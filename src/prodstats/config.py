@@ -28,18 +28,18 @@ from util.iterables import filter_by_prefix
 from util.toml import project, version
 from util.types import StringArray
 
-# --- Pandas ----------------------------------------------------------------- #
+# --- pandas ----------------------------------------------------------------- #
 
 pd.options.display.max_rows = 1000
 pd.set_option("display.float_format", lambda x: "%.2f" % x)
 pd.set_option("large_repr", "truncate")
 pd.set_option("precision", 2)
 
-# --- UVLoop ----------------------------------------------------------------- #
+# --- uvloop ----------------------------------------------------------------- #
 
 uvloop.install()
 
-# --- General ---------------------------------------------------------------- #
+# --- general ---------------------------------------------------------------- #
 
 conf: Config = Config(".env")
 
@@ -64,7 +64,7 @@ COLLECTOR_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "collectors.yaml"  # T
 PARSER_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "parsers.yaml"  # TODO: remove
 
 
-# --- Database --------------------------------------------------------------- #
+# --- database --------------------------------------------------------------- #
 
 DATABASE_DRIVER: str = conf("DATABASE_DRIVER", cast=str, default="postgresql+asyncpg")
 DATABASE_USERNAME: str = conf("DATABASE_USERNAME", cast=str, default=None)
@@ -85,7 +85,7 @@ DATABASE_CONFIG: DatabaseURL = DatabaseURL(
     database=DATABASE_NAME,
 )
 
-# --- Alembic ---------------------------------------------------------------- #
+# --- alembic ---------------------------------------------------------------- #
 
 MIGRATION_DIR: Path = Path("./src/prodstats/db/migrations").resolve()
 
@@ -98,13 +98,13 @@ ALEMBIC_CONFIG: DatabaseURL = DatabaseURL(
     database=DATABASE_NAME,
 )
 
-# --- Logging ---------------------------------------------------------------- #
+# --- logging ---------------------------------------------------------------- #
 
 LOG_LEVEL: str = conf("LOG_LEVEL", cast=str, default="20")
 LOG_FORMAT: str = conf("LOG_FORMAT", cast=str, default="json")
 LOG_HANDLER: str = conf("LOG_HANDLER", cast=str, default="colorized")
 
-# --- Extensions ------------------------------------------------------------- #
+# --- extensions ------------------------------------------------------------- #
 
 DATADOG_ENABLED: bool = conf("DATADOG_ENABLED", cast=bool, default=False)
 DATADOG_API_KEY: Optional[Secret] = conf(
@@ -128,7 +128,7 @@ IHS_BASE_URL = conf("PRODSTATS_IHS_URL", cast=HTTPUrl)
 FRACFOCUS_BASE_URL = conf("PRODSTATS_FRACFOCUS_URL", cast=HTTPUrl)
 
 
-# --- Accessors -------------------------------------------------------------- #
+# --- accessors -------------------------------------------------------------- #
 
 
 def items() -> Dict:
@@ -146,7 +146,7 @@ def with_prefix(prefix: str, tolower: bool = True, strip: bool = True) -> Dict:
     return filter_by_prefix(items(), prefix, tolower=tolower, strip=strip)
 
 
-# --- Celery ----------------------------------------------------------------- #
+# --- celery ----------------------------------------------------------------- #
 
 CELERY_LOG_LEVEL: str = conf("CELERY_LOG_LEVEL", cast=str, default=LOG_LEVEL)
 CELERY_LOG_FORMAT: str = conf("LOG_FORMAT", cast=str, default=LOG_FORMAT)

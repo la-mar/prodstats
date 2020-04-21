@@ -437,8 +437,44 @@ class TestGeomExecutor:
 
 class TestWellExecutor:
     @pytest.fixture
-    def ex(self):
-        yield WellExecutor(HoleDirection.H)
+    def exh(self, wells_h, fracs_h, geoms_h, prod_headers_h):
+        ihs_dispatch = MockAsyncDispatch({"data": wells_h})
+        fracfocus_dispatch = MockAsyncDispatch({"data": fracs_h})
+        geoms_dispatch = MockAsyncDispatch({"data": geoms_h})
+        prod_headers_dispatch = MockAsyncDispatch({"data": prod_headers_h})
+        exh = WellExecutor(
+            HoleDirection.H,
+            download_kwargs={
+                "dispatch": {"dispatch": ihs_dispatch},
+                "ihs_kwargs": {"dispatch": ihs_dispatch},
+                "fracfocus_kwargs": {"dispatch": fracfocus_dispatch},
+            },
+            process_kwargs={
+                "geoms_dispatch": geoms_dispatch,
+                "prod_headers_dispatch": prod_headers_dispatch,
+            },
+        )
+        yield exh
+
+    @pytest.fixture
+    def exv(self, wells_v, fracs_v, geoms_v, prod_headers_v):
+        ihs_dispatch = MockAsyncDispatch({"data": wells_v})
+        fracfocus_dispatch = MockAsyncDispatch({"data": fracs_v})
+        geoms_dispatch = MockAsyncDispatch({"data": geoms_v})
+        prod_headers_dispatch = MockAsyncDispatch({"data": prod_headers_v})
+        exv = WellExecutor(
+            HoleDirection.V,
+            download_kwargs={
+                "dispatch": {"dispatch": ihs_dispatch},
+                "ihs_kwargs": {"dispatch": ihs_dispatch},
+                "fracfocus_kwargs": {"dispatch": fracfocus_dispatch},
+            },
+            process_kwargs={
+                "geoms_dispatch": geoms_dispatch,
+                "prod_headers_dispatch": prod_headers_dispatch,
+            },
+        )
+        yield exv
 
     def test_init_default(self):
         ex = WellExecutor(HoleDirection.H)
@@ -471,9 +507,20 @@ class TestWellExecutor:
 
     @pytest.mark.parametrize("hole_dir", HoleDirection.members())
     @pytest.mark.asyncio
-    async def test_download(self, wells_h_dispatcher, hole_dir):
+    async def test_download(self, hole_dir, wells_h, wells_v, fracs_h, fracs_v):
+        wells = wells_h if hole_dir == HoleDirection.H else wells_v
+        fracs = fracs_h if hole_dir == HoleDirection.H else fracs_v
+
+        ihs_dispatch = MockAsyncDispatch({"data": wells})
+        fracfocus_dispatch = MockAsyncDispatch({"data": fracs})
+
         ex = WellExecutor(hole_dir)
-        wellset = await ex.download(api14s=["a", "b", "c"], dispatch=wells_h_dispatcher)
+        wellset = await ex.download(
+            api14s=["a", "b", "c"],
+            ihs_kwargs={"dispatch": ihs_dispatch},
+            fracfocus_kwargs={"dispatch": fracfocus_dispatch},
+        )
+
         assert isinstance(wellset, WellSet)
         assert ex.metrics.shape[0] == 1
 
@@ -493,10 +540,11 @@ class TestWellExecutor:
 
     @pytest.mark.cionly
     @pytest.mark.asyncio
-    async def test_process_and_persist_h_full(self, wellset_h, bind):
-        ex = WellExecutor(HoleDirection.H)
-        dataset: WellSet = await ex.process(wellset_h)
-        await ex.persist(dataset)
+    async def test_process_and_persist_h_full(self, exh, wellset_h, bind):
+        # exh = WellExecutor(HoleDirection.H)
+
+        dataset: WellSet = await exh.process(wellset_h)
+        await exh.persist(dataset)
 
     # @pytest.mark.asyncio
     # async def test_process_and_persist_h_small_batch(self, geoms_h, bind):
@@ -508,10 +556,9 @@ class TestWellExecutor:
 
     @pytest.mark.cionly
     @pytest.mark.asyncio
-    async def test_process_and_persist_v_full(self, wellset_v, bind):
-        ex = WellExecutor(HoleDirection.V)
-        dataset: WellSet = await ex.process(wellset_v)
-        await ex.persist(dataset)
+    async def test_process_and_persist_v_full(self, exv, wellset_v, bind):
+        dataset: WellSet = await exv.process(wellset_v)
+        await exv.persist(dataset)
 
     # @pytest.mark.asyncio
     # async def test_process_and_persist_v_small_batch(self, geoms_v, bind):

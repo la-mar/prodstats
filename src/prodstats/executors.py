@@ -812,7 +812,10 @@ class WellExecutor(BaseExecutor):
                 prodpath = IHSPath.prod_h_headers
                 if geoms is None:
                     logger.debug(f"({self}) fetching fresh geometries")
-                    geoms = await pd.DataFrame.shapes.from_ihs(gpath, api14s=api14s)
+                    geoms = await pd.DataFrame.shapes.from_ihs(
+                        gpath, api14s=api14s, dispatch=kwargs.get("geoms_dispatch"),
+                    )
+                    logger.warning(f"geoms: {geoms}")
 
             elif self.hole_dir == HoleDirection.V:  # TODO:  Move to router
                 prodpath = IHSPath.prod_v_headers
@@ -820,7 +823,9 @@ class WellExecutor(BaseExecutor):
             if prod_headers is None:
                 logger.debug(f"({self}) fetching fresh production headers")
                 prod_headers = await wells.wells.last_prod_date(
-                    path=prodpath, prefer_local=use_local_prod
+                    path=prodpath,
+                    prefer_local=use_local_prod,
+                    dispatch=kwargs.get("prod_headers_dispatch"),
                 )
 
             #  * process depths
