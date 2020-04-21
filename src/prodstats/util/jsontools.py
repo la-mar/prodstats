@@ -29,7 +29,7 @@ class ObjectEncoder(json.JSONEncoder):
     def default(self, obj: Any):
         """Convert `obj` to json"""
 
-        if isinstance(obj, (int, float, str, list, dict, tuple)):
+        if isinstance(obj, (int, float, str, list, dict, tuple, bool)):
             # return super().default(obj)
             return obj
         elif hasattr(obj, "to_dict"):
@@ -43,7 +43,14 @@ class ObjectEncoder(json.JSONEncoder):
         elif hasattr(obj, "__geo_interface__"):
             return self.default(obj.__geo_interface__)
         else:
-            return super().default(obj)
+            # generic fallback
+            cls = type(obj)
+            result = {
+                "__custom__": True,
+                "__module__": cls.__module__,
+                "__name__": cls.__name__,
+            }
+            return result
 
 
 class UniversalEncoder(DateTimeEncoder, ObjectEncoder):
