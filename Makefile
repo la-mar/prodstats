@@ -33,38 +33,54 @@ view-cov:
 release:
 	poetry run python scripts/release.py
 
-redis-up:
-	# start a local redis container
-	redis-server ./redis/redis.conf
-
-kubectl-proxy:
-	# open a proxy to the configured kubernetes cluster
-	kubectl proxy --port=8080
-
 login:
 	docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
-build: login
+build:
 	@echo "Building docker image: ${IMAGE_NAME}"
-	docker build  -f ${DOCKERFILE} ${CTX} -t ${IMAGE_NAME}
-	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${COMMIT_HASH}
+	docker build  -f Dockerfile . -t ${IMAGE_NAME}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_VERSION}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:latest
+	# docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${COMMIT_HASH}
+	# docker tag ${IMAGE_NAME} ${IMAGE_NAME}:dev
 
-push:
+
+build-with-chamber:
+	@echo "Building docker image: ${IMAGE_NAME} (with chamber)"
+	docker build  -f Dockerfile.chamber . -t ${IMAGE_NAME}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-${APP_VERSION}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-latest
+	# docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-${COMMIT_HASH}
+	# docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-dev
+
+build-all: build-with-chamber build
+
+push: login
 	docker push ${IMAGE_NAME}:dev
 	docker push ${IMAGE_NAME}:${COMMIT_HASH}
+	docker push ${IMAGE_NAME}:latest
+
+push-all: login push
+	docker push ${IMAGE_NAME}:chamber-dev
+	docker push ${IMAGE_NAME}:chamber-${COMMIT_HASH}
+	docker push ${IMAGE_NAME}:chamber-latest
 
 push-version:
 	# docker push ${IMAGE_NAME}:latest
+	@echo pushing: ${IMAGE_NAME}:${APP_VERSION}, ${IMAGE_NAME}:chamber-${APP_VERSION}
 	docker push ${IMAGE_NAME}:${APP_VERSION}
+	docker push ${IMAGE_NAME}:chamber-${APP_VERSION}
 
-circleci-expand-config:
+all: build-all push-all
+
+ci-expand-config:
 	# show expanded configuration
 	circleci config process .circleci/config.yml
 
-circleci-process:
+ci-process:
 	circleci config process .circleci/config.yml > process.yml
 
-circleci-build-local:
+ci-build-local:
 	JOBNAME?=build-image
 	circleci local execute -c process.yml --job build-image -e DOCKER_LOGIN=${DOCKER_LOGIN} -e DOCKER_PASSWORD=${DOCKER_PASSWORD}
 

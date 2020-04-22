@@ -222,11 +222,12 @@ class DataFrameMixin(BulkIOMixin):
             if col in df.columns:
                 df = df.dropna(subset=[col], how="all")
         ct_after = df.shape[0]
-
+        diff = ct_before - ct_after
         # TODO: capture rows when in debug mode, similar to execute_statement()
-        logger.info(
-            f"({cls.__name__}) Dropped {ct_before - ct_after} records with missing primary keys"
-        )
+        if diff > 0:
+            logger.info(
+                f"({cls.__name__}) Dropped {diff} records with missing primary keys"
+            )
 
         return df.to_dict(orient="records")
 

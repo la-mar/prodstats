@@ -90,7 +90,7 @@ class ProdStats:
         df = self._obj.sort_values(["api14", "status"], ascending=False)
 
         # * fore provider date to UTC
-        if "provider_last_update_at" in df.columns:
+        if "provider_last_update_at" in df.columns and not df.empty:
             # force remove tzinfo then localize to UTC
             df["provider_last_update_at"] = (
                 df["provider_last_update_at"].dt.tz_localize(None).dt.tz_localize("utc")
@@ -302,6 +302,13 @@ class ProdStats:
         range_name = ProdStatRange(range_name)
         columns = util.ensure_list(columns)
 
+        before: int = len(columns)
+        columns = [c for c in columns if c in monthly.columns]
+        after: int = len(columns)
+        diff: int = after - before
+        if diff > 0:
+            logger.debug(f"filtered {diff} requested columns from prodstat calcs")
+
         if norm_value:
             norm_suffix = norm_suffix or util.humanize.short_number(norm_value).lower()
 
@@ -345,7 +352,9 @@ class ProdStats:
         #       example: name='days_in_month' becomes property_name='days'
         aggregated["property_name"] = (
             aggregated.reset_index(level=1)
-            .name.str.split("_")
+            .name.astype(str)
+            .fillna("")
+            .str.split("_")
             .apply(lambda x: x[0] if x else None)
             .values
         )

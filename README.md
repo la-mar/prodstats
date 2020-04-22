@@ -50,6 +50,7 @@
 4. Refactor jsontools and ext.orjson to jsonlib
 5. Standardize log messages
 6. Normalize Area/Provider related tables when incorporating drillinginfo. Change Area to ProviderArea and add providers.IDMaster.
+7. Flower API metrics to Datadog
 
 ### Development
 

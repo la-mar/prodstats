@@ -62,6 +62,15 @@ class PDUtil:
             elements = {*df.reset_index()[column_name].values.tolist()}
         return elements
 
+    def dedup_index(self) -> pd.DataFrame:
+        before: int = self._obj.shape[0]
+        df = self._obj.loc[~self._obj.index.duplicated()]
+        after: int = self._obj.shape[0]
+        diff = before - after
+        if diff > 0:
+            logger.debug(f"deduped index: dropped {diff} entries")
+        return df
+
     def column_stats(self, columns: Union[str, List[str]]) -> pd.DataFrame:
         " "
         df = self._obj

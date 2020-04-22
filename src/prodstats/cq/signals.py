@@ -3,6 +3,7 @@ import logging
 
 from celery.signals import (
     after_setup_logger,
+    after_setup_task_logger,
     beat_init,
     worker_process_init,
     worker_process_shutdown,
@@ -16,7 +17,15 @@ logger = logging.getLogger(__name__)
 
 
 @after_setup_logger.connect
-def setup_loggers(logger, *args, **kwargs):
+def setup_logger(logger, *args, **kwargs):
+    """ Configure loggers on worker/beat startup """
+    loggers.config(
+        logger=logger, level=conf.CELERY_LOG_LEVEL, formatter=conf.CELERY_LOG_FORMAT
+    )
+
+
+@after_setup_task_logger.connect
+def setup_task_logger(logger, *args, **kwargs):
     """ Configure loggers on worker/beat startup """
     loggers.config(
         logger=logger, level=conf.CELERY_LOG_LEVEL, formatter=conf.CELERY_LOG_FORMAT
@@ -48,11 +57,6 @@ def shutdown_worker(**kwargs):
     """ Cleans up behind each Celery worker process on process shutdown"""
 
     loop = asyncio.get_event_loop()
-
-    # async def run():
-    #     bind = await db.shutdown()
-    #     return bind
-
     loop.run_until_complete(db.shutdown())
 
 

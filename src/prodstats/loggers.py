@@ -90,14 +90,44 @@ class ColorizingStreamHandler(logutils.colorize.ColorizingStreamHandler):
             logging.CRITICAL: ("red", "white", True),
         }
 
-
-class DatadogJSONFormatter(json_log_formatter.JSONFormatter):
-    """JSON log formatter that includes Datadog standard attributes.
-       Adapted from https://github.com/dailymuse/muselog"""
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # if celery is detected, add a hook to the currently running task
+        try:
+            from celery._state import get_current_task
 
+            self.get_current_task = get_current_task
+        except ImportError:
+            self.get_current_task = lambda: None
+
+    def format(self, record: LogRecord) -> str:
+        task = self.get_current_task()
+        if task and task.request:
+            task_short_id = None
+            if task.request.id:
+                task_short_id = task.request.id.split("-")[-1]
+            record.__dict__.update(
+                task_id=task.request.id,
+                task_short_id=task_short_id,
+                task_name=task.name,
+                task_meta=task.meta,
+                task_retries=task.request.retries,
+                task_max_retries=task.max_retries,
+            )
+        else:
+            record.__dict__.update(
+                task_id=None,
+                task_name=None,
+                task_meta=None,
+                task_retries=None,
+                task_max_retries=None,
+            )
+        return super().format(record)
+
+
+class DatadogJSONFormatter(json_log_formatter.JSONFormatter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         # if celery is detected, add a hook to the currently running task
         try:
             from celery._state import get_current_task
@@ -139,10 +169,25 @@ class DatadogJSONFormatter(json_log_formatter.JSONFormatter):
         # if running inside of a celery task, add the current task's identifiers
         task = self.get_current_task()
         if task and task.request:
+            task_short_id = None
+            if task.request.id:
+                task_short_id = task.request.id.split("-")[-1]
             record_dict.update(
-                task_id=task.request.id, task_name=task.name, task_meta=task.meta
+                task_id=task.request.id,
+                task_short_id=task_short_id,
+                task_name=task.name,
+                task_meta=task.meta,
+                task_retries=task.request.retries,
+                task_max_retries=task.max_retries,
             )
-
+        else:
+            record_dict.update(
+                task_id=None,
+                task_name=None,
+                task_meta=None,
+                task_retries=None,
+                task_max_retries=None,
+            )
         # Handle exceptions, including those in the formatter itself
         exc_info = record.exc_info
         if exc_info:
@@ -172,6 +217,10 @@ def get_formatter(name: Union[str, None]) -> logging.Formatter:
         "layman": logging.Formatter(
             fmt="%(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
         ),
+        "celery": logging.Formatter(
+            fmt="%(levelname)s: [%(task_short_id)s:%(task_retries)s] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        ),
         "json": DatadogJSONFormatter(),
     }
     return formatters[name or "funcname"]  # type: ignore
@@ -186,7 +235,6 @@ def get_existing_logger_by_name(name: str) -> Optional[logging.Logger]:
     if name in loggers().keys():
         return logging.getLogger(name)
     else:
-        # active = ",".join(list(loggers().keys()))
         active = sorted(loggers())
         raise ValueError(
             f"No active logger with name '{name}' -- Valid options are: {to_string(active)}"

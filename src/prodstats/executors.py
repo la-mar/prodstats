@@ -319,20 +319,40 @@ class ProdExecutor(BaseExecutor):
         )
 
         prodstat_dfs: List[pd.DataFrame] = []
-        for range_name, months, include_zeroes in option_sets:
-            prodstat_dfs.append(
-                monthly.prodstats.calc_prodstat(
-                    range_name=range_name,
-                    columns=prod_columns,
-                    months=months,
-                    agg_type=agg_type,
-                    include_zeroes=include_zeroes,
-                    norm_value=norm_value,
-                    norm_suffix=norm_suffix,
+        if monthly is not None and not monthly.empty:
+            for range_name, months, include_zeroes in option_sets:
+                prodstat_dfs.append(
+                    monthly.prodstats.calc_prodstat(
+                        range_name=range_name,
+                        columns=prod_columns,
+                        months=months,
+                        agg_type=agg_type,
+                        include_zeroes=include_zeroes,
+                        norm_value=norm_value,
+                        norm_suffix=norm_suffix,
+                    )
                 )
-            )
 
-        return pd.concat(prodstat_dfs, axis=0)
+            return pd.concat(prodstat_dfs, axis=0)
+        else:
+            return pd.DataFrame(
+                columns=[
+                    "start_month",
+                    "end_month",
+                    "start_date",
+                    "end_date",
+                    "value",
+                    "includes_zeroes",
+                    "ll_norm_value",
+                    "is_ll_norm",
+                    "is_peak_norm",
+                    "aggregate_type",
+                    "property_name",
+                    "comments",
+                    "api10",
+                    "name",
+                ]
+            ).set_index(["api10", "name"])
 
     def _process_prodstat_ratios(
         self,

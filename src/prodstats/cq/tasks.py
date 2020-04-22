@@ -105,11 +105,11 @@ def run_executors(
             }
             countdown = spread_countdown(idx, vs=log_vs, hs=log_hs)
             logger.info(
-                f"submitting task: hole_dir={hole_dir.value} executor={executor.__name__} {id_name}={len(chunk)} countdown={countdown}"  # noqa
+                f"({executor.__name__}[{hole_dir.value}]) submitting task: {id_name}={len(chunk)} countdown={countdown}"  # noqa
             )
 
             run_executor.apply_async(
-                args=[], kwargs=kwargs, countdown=countdown,
+                args=[], kwargs=kwargs, countdown=countdown, ignore_result=False
             )
 
 
@@ -127,7 +127,9 @@ def run_executor(hole_dir: HoleDirection, executor_name: str, **kwargs):
 
 
 @celery_app.task
-def run_next_available(hole_dir: Union[HoleDirection, str], force: bool = False):
+def run_next_available(
+    hole_dir: Union[HoleDirection, str], force: bool = False, **kwargs
+):
     """ Run next available area """
 
     # TODO: set task meta
@@ -153,8 +155,8 @@ def run_next_available(hole_dir: Union[HoleDirection, str], force: bool = False)
             api14s: List[str] = await IHSClient.get_ids_by_area(
                 path=ids_path, area=area_obj.area
             )  # pull from IDMaster once implmented
-            api14s = api14s[:10]
-            run_executors(hole_dir=hole_dir, api14s=api14s)
+            # api14s = api14s[:10]
+            run_executors(hole_dir=hole_dir, api14s=api14s, **kwargs)
 
             await area_obj.update(**{attr: utcnow}).apply()
 
@@ -176,7 +178,7 @@ def run_next_available(hole_dir: Union[HoleDirection, str], force: bool = False)
     return util.aio.async_to_sync(coro())
 
 
-@celery_app.task
+@celery_app.task()
 def sync_area_manifest():  # FIXME: change to use Counties endpoint (and add Counties endpoint to IHS service :/) # noqa
     """ Ensure the local list of areas is up to date """
 
@@ -711,70 +713,58 @@ def run_driftwood():
 
 if __name__ == "__main__":
     from db import db
-    from db.models import ProdMonthly, ProdStat
     import loggers
     import cq.tasks
+    from const import HoleDirection
+
+    # from executors import WellExecutor, GeomExecutor, ProdExecutor
+    # import util
 
     loggers.config()
     hole_dir = HoleDirection.H
     util.aio.async_to_sync(db.startup())
-    # cq.tasks.sync_area_manifest.apply_async()
+    cq.tasks.sync_area_manifest.apply_async()
 
-    from util.jsontools import load_json
+    cq.tasks.run_next_available(HoleDirection.H, log_vs=10, log_hs=None)
 
-    api10s = load_json("/Users/friedrichb/Downloads/apilist.json")
-    api10s = list(set(api10s))
+    api14s = [
+        "42461409160000",
+        "42383406370000",
+        "42461412100000",
+        "42461412090000",
+        "42461411750000",
+        "42461411740000",
+        "42461411730000",
+        "42461411720000",
+        "42461411600000",
+        "42461411280000",
+        "42461411270000",
+        "42461411260000",
+        "42383406650000",
+        "42383406640000",
+        "42383406400000",
+        "42383406390000",
+        "42383406380000",
+        "42461412110000",
+        "42383402790000",
+    ]
 
-    api10s_db = util.aio.async_to_sync(
-        ProdStat.query.distinct(ProdStat.api10).gino.load(ProdStat.api10).all()
-    )
-    api10s_db = list(set(api10s_db))
-    missing = list({x for x in api10s if x not in api10s_db})
-    print(f"input={len(api10s)} missing={len(missing)} in_db={len(api10s_db)}")
+    holedir = HoleDirection.H
 
-    api10s_db = util.aio.async_to_sync(
-        ProdMonthly.query.distinct(ProdMonthly.api10)
-        .where(ProdMonthly.oil_norm_3k is None)
-        .gino.load(ProdMonthly.api10)
-        .all()
-    )
+    async def run_wells(holedir: HoleDirection, api14s: List[str]):
+        wexec = WellExecutor(holedir)
+        wellset = await wexec.download(api14s=api14s)
+        wellset = await wexec.process(wellset)
+        await wexec.persist(wellset)
 
-    len(api10s_db)
+    async def run_geoms(holedir: HoleDirection, api14s: List[str]):
+        gexec = GeomExecutor(holedir)
+        geomset = await gexec.download(api14s=api14s)
+        geomset = await gexec.process(geomset)
+        await gexec.persist(geomset)
 
-    cq.tasks.run_executors(
-        hole_dir=hole_dir,
-        api10s=api10s,
-        executors=[ProdExecutor],
-        batch_size=10,
-        log_vs=200,
-        # log_hs=0.5,
-    )
-
-    cq.tasks.run_executors(
-        hole_dir=hole_dir, api10s=api10s, executors=[WellExecutor], batch_size=10,
-    )
-
-    # import pandas as pd
-    # import numpy as np
-    # import math
-
-    # df = pd.DataFrame(data={"ct": range(0, 200)})
-    # df["log"] = df.ct.add(1).apply(np.log10)
-    # df["a"] = df.ct.apply(lambda x: 1 * np.log(1 * (x + 0)) + 1)
-    # df["b"] = df.ct.apply(lambda x: 50 * np.log(0.25 * (x + 4)) + 0)
-    # df["c"] = df.ct.apply(lambda x: 25 * np.log(0.5 * (x + 2)) + 5)
-    # df["d"] = df.ct.apply(lambda x: 25 * np.log(1 * (x + 1)) + 5)
-    # df = df.replace([-np.inf, np.inf], np.nan)
-    # df = df.fillna(0)
-    # sample = df.sample(n=25).fillna(0).astype(int).sort_index()
-    # # ax = sns.lineplot(data=df)
-    # # ax.set_yscale('log')
-    # ax.set_xlim(0, 150)
-    # ax.set_ylim(0, 150)
-
-    # f(x) = a * ln(b * (x - c)) + d
-    #
-    # a = vertical stretch or compress
-    # b = horizontal stretch or compress
-    # c = translate horizontally
-    # d = translate vertically
+    async def run_production(holedir: HoleDirection, api14s: List[str]):
+        pexec = ProdExecutor(holedir)
+        prodset = await pexec.download(api14s=api14s)
+        prodset = await pexec.process(prodset)
+        await pexec.persist(prodset)

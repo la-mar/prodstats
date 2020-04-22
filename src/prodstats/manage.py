@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import List
 
 import typer
-from prodstats.main import app
 
 import config as conf
 import loggers
+from prodstats.main import app
 
 loggers.config()
 
@@ -98,6 +98,22 @@ def cron(loglevel: str = CELERY_LOG_LEVEL_NAME):
         "cq:celery_app",
         "beat",
         "--pidfile=",
+        "--loglevel",
+        loggers.mlevelname(loglevel),
+    ]
+    if conf.TESTING:
+        print(subprocess.Popen(cmd).pid)
+    else:
+        subprocess.call(cmd)  # nocover
+
+
+@run_cli.command(help="Launch a flower monitor")
+def flower(loglevel: str = CELERY_LOG_LEVEL_NAME):
+    cmd = [
+        "celery",
+        "-A",
+        "cq:celery_app",
+        "flower",
         "--loglevel",
         loggers.mlevelname(loglevel),
     ]

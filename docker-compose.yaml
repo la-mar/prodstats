@@ -52,6 +52,7 @@ services:
     container_name: prodstats_worker_2
     user: celeryuser
     command: prodstats run worker
+
   # worker_3:
   #   <<: *defaults
   #   container_name: prodstats_worker_3
@@ -62,6 +63,13 @@ services:
   #   container_name: prodstats_worker_4
   #   user: celeryuser
   #   command: prodstats run worker
+  flower:
+    <<: *defaults
+    container_name: prodstats_flower
+    user: celeryuser
+    command: prodstats run flower
+    ports:
+      - 5555:5555
   cron:
     <<: *defaults
     container_name: prodstats_cron

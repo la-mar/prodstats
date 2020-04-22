@@ -41,7 +41,7 @@ class Shapes:
         locations = sch.WellLocationSet(wells=data).df()
         surveys = sch.WellSurveySet(wells=data).df()
         points = sch.WellSurveyPointSet(wells=data).df()
-
+        points = points.loc[~points.index.duplicated()]
         return WellGeometrySet(locations=locations, surveys=surveys, points=points)
 
     @staticmethod
@@ -135,10 +135,17 @@ class Shapes:
         # ensure all points after the heel point are marked as in the lateral.
         # The dip filter doesnt always cant all of the points
         for api14 in points.groupby(level=0).groups:
-            heel_start_seq = heel_start_seq_by_group.loc[api14].iloc[0]
-            group = points.xs(api14, level=0, drop_level=False)
-            group_in_lateral_index = group.loc[group.sequence >= heel_start_seq].index
-            points.loc[group_in_lateral_index, "is_in_lateral"] = True
+            try:
+                heel_start_seq = heel_start_seq_by_group.loc[api14].iloc[0]
+                group = points.xs(api14, level=0, drop_level=False)
+                group_in_lateral_index = group.loc[
+                    group.sequence >= heel_start_seq
+                ].index
+                points.loc[group_in_lateral_index, "is_in_lateral"] = True
+            except KeyError:
+                logger.debug(
+                    f"{api14} has no survey points -- skipping lateral indexing"
+                )
 
         return points
 
