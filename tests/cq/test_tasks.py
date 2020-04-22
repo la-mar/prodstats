@@ -21,7 +21,12 @@ class TestCeleryTasks:
     def test_post_heartbeat(self):
         cq.tasks.post_heartbeat()
 
-    def test_sync_area_manifest(self):
+    def test_sync_area_manifest(self, sa_engine):
+        # import loggers
+
+        # loggers.config(10)
+        # results = sa_engine.execute("select * from areas").fetchall()
+        # logger.warning(f"results: {results}")
         cq.tasks.sync_area_manifest.apply()
 
 
