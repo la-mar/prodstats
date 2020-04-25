@@ -1,17 +1,31 @@
-# """ Custom routing functions for Celery """
-# import config as conf
+""" Custom routing functions for Celery """
+
+import logging
+
+import config as conf
+from const import HoleDirection
+
+logger = logging.getLogger(__name__)
 
 
-# def router_mapper(name, args, kwargs, options, task=None, **kw):
-#     """ Route the message to a queue specified in kwargs,
-#         defaults to the configured default queue.
-#     """
+def hole_direction_router(name, args, kwargs, options, task=None, **kw):
 
-#     queue_name = conf.CELERY_DEFAULT_QUEUE
+    key = options["routing_key"]
 
-#     if kwargs:
-#         mapped_queue = kwargs.get("queue", None)
-#         if mapped_queue:
-#             queue_name = mapped_queue
+    queue = None
+    if isinstance(key, HoleDirection):
+        queue = f"{conf.project}-{key}".lower()
 
-#     return {"queue": queue_name}
+    logger.debug(f"{key} -> routed to -> {queue}")
+
+    # logger.warning(f""" router parameters:
+    #     {name=}
+    #     {args=}
+    #     {kwargs=}
+    #     {options=}
+    #     {task=}
+    #     {kw=}
+
+    #     -> routed to -> {queue}
+    # """)
+    return {"queue": queue}

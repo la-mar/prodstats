@@ -20,6 +20,7 @@ from typing import Dict, List, Optional, Tuple
 import pandas as pd
 import uvloop
 from httpx import URL as HTTPUrl
+from kombu import Queue
 from starlette.config import Config
 from starlette.datastructures import Secret
 
@@ -154,26 +155,28 @@ CELERY_LOG_FORMAT: str = conf("CELERY_LOG_FORMAT", cast=str, default=LOG_FORMAT)
 
 class CeleryConfig:
 
-    # custom
+    # --- custom ------------------------------------------------------------- #
+
     db_pool_min_size: int = conf("CELERY_DB_MIN_POOL_SIZE", cast=int, default=1)
     db_pool_max_size: int = conf(
         "CELERY_DB_MAX_POOL_SIZE", cast=int, default=db_pool_min_size
     )
 
-    # broker
+    # --- broker ------------------------------------------------------------- #
+
     accept_content: List[str] = conf("", cast=StringArray, default=["json"])
     broker_url: str = conf("PRODSTATS_BROKER_URL", cast=str)
     broker_connection_timeout = 2
     broker_connection_max_retries = 1
 
-    # beat
-    beat_scheduler = "redbeat.RedBeatScheduler"
+    # --- beat --------------------------------------------------------------- #
 
-    # redbeat
+    beat_scheduler = "redbeat.RedBeatScheduler"
     redbeat_redis_url: str = conf("PRODSTATS_BROKER_URL", cast=str)
     redbeat_key_prefix: str = project
 
-    # task
+    # --- task --------------------------------------------------------------- #
+
     task_track_started: bool = conf(
         "CELERY_TASK_TRACK_STARTED", cast=bool, default=False
     )
@@ -185,7 +188,7 @@ class CeleryConfig:
     task_default_queue: str = conf(
         "CELERY_DEFAULT_QUEUE", cast=str, default=f"{project}-default"
     )  # sqs default queue name
-    task_routes: Optional[Tuple[str]] = conf("CELERY_ROUTES", cast=tuple, default=None)
+
     task_create_missing_queues: bool = conf(
         "CELERY_TASK_CREATE_MISSING_QUEUES", cast=bool, default=False
     )
@@ -197,13 +200,23 @@ class CeleryConfig:
         "CELERY_TASK_STORE_ERRORS", cast=bool, default=True
     )
 
-    # worker
-    worker_max_tasks_per_child: int = conf(
-        "CELERYD_MAX_TASKS_PER_CHILD", cast=int, default=1000
+    task_queues = (
+        Queue(f"{project}-default", routing_key=f"{project}-default"),
+        Queue(f"{project}-h", routing_key=f"{project}-h"),
+        Queue(f"{project}-v", routing_key=f"{project}-v"),
     )
-    # worker_max_memory_per_child: int = conf(
-    #     "CELERYD_MAX_MEMORY_PER_CHILD", cast=int, default=24000
-    # )  # 24mb
+    task_routes: Optional[Tuple[str]] = conf(
+        "CELERY_ROUTES", cast=tuple, default=("cq.routers.hole_direction_router",)
+    )
+
+    # --- worker ------------------------------------------------------------- #
+
+    worker_max_tasks_per_child: int = conf(
+        "CELERYD_MAX_TASKS_PER_CHILD", cast=int, default=100
+    )
+    worker_max_memory_per_child: int = conf(
+        "CELERYD_MAX_MEMORY_PER_CHILD", cast=int, default=15000
+    )  # 150mb
     worker_enable_remote_control: bool = conf(
         "CELERY_ENABLE_REMOTE_CONTROL", cast=bool, default=False
     )  # must be false for sqs
@@ -214,6 +227,8 @@ class CeleryConfig:
         "CELERYD_PREFETCH_MULTIPLIER", cast=int, default=4
     )
     worker_concurrency: int = conf("CELERYD_CONCURRENCY", cast=int, default=None)
+
+    # --- results ------------------------------------------------------------ #
 
     result_backend: str = conf(
         "CELERY_RESULT_BACKEND", cast=str, default=f"db+{ALEMBIC_CONFIG.url}"

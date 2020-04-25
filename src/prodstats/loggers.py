@@ -26,7 +26,7 @@ logging.getLogger("datadog").setLevel(logging.WARNING)
 logging.getLogger("datadog.api").setLevel(logging.WARNING)
 logging.getLogger("celery.app.trace").setLevel(logging.WARNING)
 logging.getLogger("celery.worker.strategy").setLevel(logging.WARNING)
-logging.getLogger("redbeat.schedulers").setLevel(logging.WARNING)
+# logging.getLogger("redbeat.schedulers").setLevel(logging.WARNING)
 
 
 def mlevel(level: Union[int, str]) -> int:

@@ -2,6 +2,7 @@ import logging
 
 import pandas as pd
 import pytest
+from tests.utils import MockAsyncDispatch, rand_str
 
 import calc
 import calc.geom  # noqa
@@ -12,7 +13,6 @@ from const import HoleDirection, IHSPath, ProdStatRange  # noqa
 from db.models import ProdHeader
 from db.models import ProdStat as Model
 from executors import BaseExecutor, GeomExecutor, ProdExecutor, WellExecutor
-from tests.utils import MockAsyncDispatch, rand_str
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +153,7 @@ class TestProdExecutor:
             await pexec.download(entities=["a", "b", "c"])
 
     @pytest.mark.parametrize("hole_dir", HoleDirection.members())
+    @pytest.mark.cionly
     @pytest.mark.asyncio
     async def test_download_catch_network_error(self, prod_dispatcher, hole_dir):
         pexec = ProdExecutor(hole_dir)
@@ -551,11 +552,9 @@ class TestWellExecutor:
         with pytest.raises(Exception):
             await ex.download(zaza=["a", "b", "c"])
 
-    # @pytest.mark.cionly
+    @pytest.mark.cionly
     @pytest.mark.asyncio
     async def test_process_and_persist_h_full(self, exh, wellset_h, bind):
-        # exh = WellExecutor(HoleDirection.H)
-
         dataset: WellSet = await exh.process(wellset_h)
         await exh.persist(dataset)
 
@@ -567,7 +566,7 @@ class TestWellExecutor:
     #     dataset: WellSet = await ex.process(wellset)
     #     await ex.persist(dataset)
 
-    # @pytest.mark.cionly
+    @pytest.mark.cionly
     @pytest.mark.asyncio
     async def test_process_and_persist_v_full(self, exv, wellset_v, bind):
         dataset: WellSet = await exv.process(wellset_v)

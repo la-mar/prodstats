@@ -132,7 +132,7 @@ class ProdStats:
         )
 
         # * monthly calculations
-        monthly = df.copy(deep=True)
+        monthly = df.copy(deep=True).sort_index()
         monthly = monthly.loc[
             :,
             [
@@ -148,9 +148,7 @@ class ProdStats:
         ]
 
         force_numeric_cols = ["oil", "gas", "water", "gor", "water_cut", "perfll"]
-        monthly.loc[:, force_numeric_cols] = monthly.loc[:, force_numeric_cols].astype(
-            float
-        )
+        monthly.loc[:, force_numeric_cols] = monthly[force_numeric_cols].astype(float)
 
         # * ensure deduplication of api10+prod_month and sort
         monthly = monthly.groupby(level=[0, 1]).first().drop(columns=["api14"])

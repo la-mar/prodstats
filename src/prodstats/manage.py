@@ -5,11 +5,12 @@ import sys
 from pathlib import Path
 from typing import List
 
+import click
 import typer
+from prodstats.main import app
 
 import config as conf
 import loggers
-from prodstats.main import app
 
 loggers.config()
 
@@ -27,123 +28,27 @@ def hr():
     return "-" * get_terminal_columns()
 
 
-cli = typer.Typer(
-    help="Prodstats Content Recommendation Service", context_settings=CONTEXT_SETTINGS
-)
-dev_cli = typer.Typer(help="Development tools")
-cli.add_typer(dev_cli, name="dev")
-
-run_cli = typer.Typer(help="Execution procedures")
-cli.add_typer(run_cli, name="run")
-
+# dev_cli = typer.Typer(help="Development tools")
 db_cli = typer.Typer(help="Database Management")
-cli.add_typer(db_cli, name="db")
-
 test_cli = typer.Typer(help="Test Commands")
-cli.add_typer(test_cli, name="test")
-
 delete_cli = typer.Typer(help="Delete things")
-cli.add_typer(delete_cli, name="delete")
-
-
-@cli.command(help="List api routes")
-def routes():
-    for r in app.routes:
-        typer.echo(f"{r.name:<25} {r.path:<30} {r.methods}")
 
 
 # -----------------------------  subcommands  -------------------------------- #
 
 
-@dev_cli.command(help="Launch a web process with hot reload enabled")
-def server(port: int = 8000):
-    cmd = ["uvicorn", "prodstats.main:app", "--reload", "--port", f"{port}"]
-    if conf.TESTING:
-        print(subprocess.Popen(cmd).pid)
-    else:
-        subprocess.call(cmd)  # nocover
-
-
-@run_cli.command(help="Launch a web process to serve the api")
-def web(port: int = 8000):
-    cmd = ["uvicorn", "prodstats.main:app", "--port", str(port)]
-    if conf.TESTING:
-        print(subprocess.Popen(cmd).pid)
-    else:
-        subprocess.call(cmd)  # nocover
-
-
-@run_cli.command(help="Launch a background worker")
-def worker(loglevel: str = CELERY_LOG_LEVEL_NAME):
-    cmd = [
-        "celery",
-        "-E",
-        "-A",
-        "cq:celery_app",
-        "worker",
-        "--loglevel",
-        loggers.mlevelname(loglevel),
-    ]
-    if conf.TESTING:
-        print(subprocess.Popen(cmd).pid)
-    else:
-        subprocess.call(cmd)  # nocover
-
-
-@run_cli.command(help="Launch a scheduling process")
-def cron(loglevel: str = CELERY_LOG_LEVEL_NAME):
-    cmd = [
-        "celery",
-        "-A",
-        "cq:celery_app",
-        "beat",
-        "--pidfile=",
-        "--loglevel",
-        loggers.mlevelname(loglevel),
-    ]
-    if conf.TESTING:
-        print(subprocess.Popen(cmd).pid)
-    else:
-        subprocess.call(cmd)  # nocover
-
-
-@run_cli.command(help="Launch a flower monitor")
-def flower(loglevel: str = CELERY_LOG_LEVEL_NAME):
-    cmd = [
-        "celery",
-        "-A",
-        "cq:celery_app",
-        "flower",
-        "--loglevel",
-        loggers.mlevelname(loglevel),
-    ]
-    if conf.TESTING:
-        print(subprocess.Popen(cmd).pid)
-    else:
-        subprocess.call(cmd)  # nocover
-
-
-@run_cli.command(help="Invoke an asyncronous task from the command line")
-def task(task: str):
-    """Run a one-off task. Pass the name of the scoped task to run.
-        Ex. endpoint_name.task_name"""
-    # from cq.tasks import sync_endpoint
-
-    try:
-        if "." in task:
-            typer.secho(f"{task=}")
-        else:
-            raise ValueError
-    except ValueError:
-        typer.secho("Invalid task format. Try specifying ENDPOINT_NAME.TASK_NAME")
-        return 0
-
-
-@test_cli.command()
-def smoke_test(help="Execute a smoke test against a worker instance"):
+@test_cli.command(help="Execute a smoke test against a worker instance")
+def smoke_test():
 
     # TODO: implement
     logger.warning("verified")
+
+
+@test_cli.command(help="Placeholder")
+def unit_test():
+    """ Unittest placeholder """
+    # TODO: implement
+    # logger.warning("verified")
 
 
 @db_cli.command(help="Create a directory to manage database migrations")
@@ -194,6 +99,109 @@ def recreate(args: List[str] = None):  # nocover
     logger.info(f"Recreated database at: {url}")
     # cmd = ["seed_db"]
     # subprocess.call(cmd)
+
+
+# --- run -------------------------------------------------------------------- #
+
+# run_cli = typer.Typer(help="Execution procedures")
+
+
+# NOTE: typer doesn't yet support passing unknown options. The workaround below is
+#       creating a click parent group and adding each typer group as a sub-group
+#       of the click parent, then creating a click group to handle the commands
+#       that need dynamic arguments.
+
+cli = click.Group(
+    help="Prodstats: Ingest, process, and analyze production and well data"
+)
+run_cli = click.Group("run", help="Execution procedures")
+
+
+@run_cli.command(
+    help="Launch a web process to serve the api",
+    context_settings={"ignore_unknown_options": True},
+)
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+def web(args):
+    cmd = ["uvicorn", "prodstats.main:app"] + list(args)
+    subprocess.call(cmd)  # nocover
+
+
+@run_cli.command(
+    help="Launch a web process with hot reload enabled",
+    context_settings={"ignore_unknown_options": True},
+)
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+def dev(args):
+    cmd = ["uvicorn", "prodstats.main:app", "--reload"] + list(args)
+    subprocess.call(cmd)
+
+
+@run_cli.command(
+    help="Launch a Celery worker", context_settings={"ignore_unknown_options": True}
+)
+@click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
+def worker(celery_args):
+    cmd = ["celery", "-A", "cq:celery_app", "worker"] + list(celery_args)
+    subprocess.call(cmd)
+
+
+@run_cli.command(
+    help="Launch a Celery Beat scheduler",
+    context_settings={"ignore_unknown_options": True},
+)
+@click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
+def cron(celery_args):
+    cmd = ["celery", "-A", "cq:celery_app", "beat"] + list(celery_args)
+    subprocess.call(cmd)
+
+
+@run_cli.command(
+    help="Launch a monitoring process running flower",
+    context_settings={"ignore_unknown_options": True},
+)
+@click.argument("celery_args", nargs=-1, type=click.UNPROCESSED)
+def flower(celery_args):
+    cmd = ["celery", "-A", "cq:celery_app", "flower"] + list(celery_args)
+    subprocess.call(cmd)
+
+
+@run_cli.command(help="Manually send a task to the worker cluster")
+@click.argument("task")
+def task(task: str):
+    """Run a one-off task. Pass the name of the scoped task to run.
+        Ex. endpoint_name.task_name"""
+    # from cq.tasks import sync_endpoint
+
+    try:
+        if "." in task:
+            typer.secho(f"{task=}")
+        else:
+            raise ValueError
+    except ValueError:
+        typer.secho("Invalid task format. Try specifying ENDPOINT_NAME.TASK_NAME")
+        return 0
+
+
+# --- top -------------------------------------------------------------------- #
+
+
+@cli.command(help="List api routes")
+def routes():
+    for r in app.routes:
+        typer.echo(f"{r.name:<25} {r.path:<30} {r.methods}")
+
+
+# --- attach groups ---------------------------------------------------------- #
+
+
+cli.add_command(run_cli)
+
+
+cli.add_command(typer.main.get_command(db_cli), "db")
+cli.add_command(typer.main.get_command(test_cli), "test")
+# cli.add_command(typer.main.get_command(dev_cli), "dev")
+# cli.add_command(typer.main.get_command(delete_cli), "delete")
 
 
 def main(argv: List[str] = sys.argv):

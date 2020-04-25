@@ -109,7 +109,11 @@ def run_executors(
             )
 
             run_executor.apply_async(
-                args=[], kwargs=kwargs, countdown=countdown, ignore_result=False
+                args=[],
+                kwargs=kwargs,
+                countdown=countdown,
+                ignore_result=False,
+                routing_key=hole_dir,
             )
 
 
@@ -762,6 +766,8 @@ if __name__ == "__main__":
         geomset = await gexec.download(api14s=api14s)
         geomset = await gexec.process(geomset)
         await gexec.persist(geomset)
+
+    loggers.config(formatter="funcname")
 
     async def run_production(holedir: HoleDirection, api14s: List[str]):
         pexec = ProdExecutor(holedir)

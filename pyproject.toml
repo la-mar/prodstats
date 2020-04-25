@@ -6,9 +6,8 @@ authors = ["Brock Friedrich <brocklfriedrich@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
-sentry-sdk = "^0.13.5"
-tomlkit = "^0.5.8"
-datadog = "^0.33.0"
+tomlkit = "^0.6.0"
+datadog = "^0.35.0"
 gunicorn = "^20.0.4"
 json-log-formatter = "^0.2.0"
 setproctitle = "^1.1.10"
@@ -21,12 +20,11 @@ alembic = "^1.4.0"
 gino = "^0.8.5"
 sqlalchemy-utils = "^0.36.1"
 asyncpg = "^0.20.1"
-httpx = "^0.11.1"
-typer = {version = "^0.0.8", extras = ["all"]}
+httpx = "^0.12.1"
 geoalchemy2 = "^0.6.3"
 dateparser = "^0.7.2"
 orjson = "^2.5.0"
-fastapi = "^0.49.0"
+fastapi = "^0.54.1"
 aiofiles = "^0.4.0"
 python-multipart = "^0.0.5"
 itsdangerous = "^1.1.0"
@@ -44,6 +42,7 @@ celery-redbeat = "^0.13.0"
 geopandas = "^0.7.0"
 geojson = "^2.5.0"
 flower = "^0.9.4"
+typer = "^0.1.1"
 
 [tool.poetry.scripts]
 prodstats = "prodstats.manage:main"
@@ -51,7 +50,7 @@ seed_db = "scripts.seed_db:run"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^19.10b0", allow-prereleases = true}
-mypy = "^0.761"
+mypy = "^0.770"
 flake8 = "^3.7.9"
 ipython = "^7.11.1"
 pytest = "^5.3.2"
@@ -65,6 +64,7 @@ async-asgi-testclient = "^1.4.3"
 matplotlib = "^3.2.1"
 seaborn = "^0.10.0"
 flower = "^0.9.4"
+localstack = "^0.11.0"
 
 [tool.coverage.report]
 exclude_lines = [
@@ -87,7 +87,7 @@ include_trailing_comma=true
 force_grid_wrap=0
 use_parentheses=true
 line_length=88
-known_third_party = ["alembic", "async_asgi_testclient", "async_generator", "asyncpg", "boto3", "celery", "dateutil", "dotenv", "fastapi", "geoalchemy2", "geopandas", "gino", "httpx", "json_log_formatter", "logutils", "numpy", "orjson", "pandas", "psutil", "pydantic", "pytest", "pytz", "requests_mock", "shapely", "sqlalchemy", "sqlalchemy_utils", "starlette", "tomlkit", "typer", "uvicorn", "uvloop", "yaml"]
+known_third_party = ["alembic", "async_asgi_testclient", "async_generator", "asyncpg", "boto3", "celery", "click", "coverage", "dateutil", "dotenv", "fastapi", "geoalchemy2", "geopandas", "gino", "httpx", "json_log_formatter", "kombu", "logutils", "numpy", "orjson", "pandas", "prodstats", "psutil", "pydantic", "pytest", "pytz", "requests_mock", "shapely", "sqlalchemy", "sqlalchemy_utils", "starlette", "tests", "tomlkit", "typer", "uvicorn", "uvloop", "yaml"]
 
 [build-system]
 requires = ["poetry>=0.12"]

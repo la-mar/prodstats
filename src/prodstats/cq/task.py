@@ -1,9 +1,9 @@
 from typing import Dict, Optional
 
 from celery import Task
-from httpx.exceptions import HTTPError
+from httpx import HTTPError
 
-# from httpx.exceptions import (
+# from httpx import (
 #     ConnectTimeout,
 #     ConnectionClosed,
 #     NetworkError,

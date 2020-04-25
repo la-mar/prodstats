@@ -5,8 +5,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
 
-from httpx import Response
-from httpx.dispatch.base import AsyncDispatcher, SyncDispatcher
+from httpx import ASGIDispatch, Response, WSGIDispatch
 
 import util
 from collector import FracFocusClient, IHSClient
@@ -38,7 +37,7 @@ class MockBaseDispatch:
         self.assert_func = assert_func
 
 
-class MockDispatch(MockBaseDispatch, SyncDispatcher):
+class MockDispatch(MockBaseDispatch, WSGIDispatch):
     def send(self, request, verify=None, cert=None, timeout=None):
         if self.assert_func:
             self.assert_func(request)
@@ -48,7 +47,7 @@ class MockDispatch(MockBaseDispatch, SyncDispatcher):
         )
 
 
-class MockAsyncDispatch(MockBaseDispatch, AsyncDispatcher):
+class MockAsyncDispatch(MockBaseDispatch, ASGIDispatch):
     async def send(self, request, verify=None, cert=None, timeout=None):
         if self.assert_func:
             self.assert_func(request)

@@ -44,20 +44,19 @@ services:
   #     - 8000
   worker_1:
     <<: *defaults
-    container_name: prodstats_worker_1
+    container_name: prodstats_worker
     user: celeryuser
     command: prodstats run worker
   worker_2:
     <<: *defaults
-    container_name: prodstats_worker_2
+    container_name: prodstats_worker_h
     user: celeryuser
-    command: prodstats run worker
-
-  # worker_3:
-  #   <<: *defaults
-  #   container_name: prodstats_worker_3
-  #   user: celeryuser
-  #   command: prodstats run worker
+    command: prodstats run worker -Q prodstats-h
+  worker_3:
+    <<: *defaults
+    container_name: prodstats_worker_v
+    user: celeryuser
+    command: prodstats run worker -Q prodstats-v
   # worker_4:
   #   <<: *defaults
   #   container_name: prodstats_worker_4

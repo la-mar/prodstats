@@ -1,10 +1,10 @@
 import logging
 
 from fastapi import FastAPI
+from fastapi.responses import ORJSONResponse
 
 import config as conf
 import db
-from ext.orjson import ORJSONResponse
 
 logger = logging.getLogger(__name__)
 
