@@ -1,5 +1,4 @@
 
-
 variable "cluster_name" {
   description = "Name of the ECS cluster"
 }
@@ -204,3 +203,4 @@ resource "aws_cloudwatch_metric_alarm" "sqs_usage_low" {
       }
     }
   }
+}

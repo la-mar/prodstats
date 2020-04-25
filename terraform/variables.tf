@@ -16,17 +16,17 @@ variable "service_port" {
 }
 
 variable "worker_scale_in_threshold" {
-  description = "Threshold to trigger an autoscale-in activity, represented as number of messages in SQS"
-  type        = number
-}
-
-variable "worker_scale_out_threshold" {
-  description = "Threshold to trigger an autoscale-in activity, represented as number of messages in SQS"
+  description = "Threshold to trigger a scale-in event, represented as number of messages in SQS"
   type        = number
 }
 
 variable "worker_scale_in_cooldown" {
   description = "Cooldown, in seconds, between triggering scale in events"
+  type        = number
+}
+
+variable "worker_scale_out_threshold" {
+  description = "Threshold to trigger a scale-out event, represented as number of messages in SQS"
   type        = number
 }
 
