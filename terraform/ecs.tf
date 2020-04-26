@@ -77,9 +77,6 @@ resource "aws_ecs_service" "web" {
 }
 
 
-
-
-
 resource "aws_ecs_service" "worker" {
   name            = "${var.service_name}-worker"
   cluster         = data.terraform_remote_state.ecs_cluster.outputs.cluster_arn
@@ -168,6 +165,7 @@ resource "aws_iam_role_policy_attachment" "attach_ecs_service_policy_to_task_rol
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
 }
 
+
 data "aws_iam_policy_document" "task_policy" {
   statement {
     sid = "0" # task_access_sqs
@@ -176,7 +174,9 @@ data "aws_iam_policy_document" "task_policy" {
     ]
 
     resources = [
-      "*"
+      aws_sqs_queue.default.arn,
+      aws_sqs_queue.h.arn,
+      aws_sqs_queue.v.arn,
     ]
   }
 

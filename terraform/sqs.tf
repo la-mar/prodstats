@@ -4,31 +4,7 @@ locals {
 }
 
 
-data "aws_iam_policy_document" "allow_ecs_task_access_to_sqs" {
-  statement {
-    sid = "0" # task_access_sqs
-    actions = [
-      "sqs:*",
-    ]
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-    condition {
-      test     = "ArnEquals"
-      variable = "aws:SourceArn"
-      values = [
-        aws_ecs_service.worker.id,
-        aws_ecs_service.cron.id,
-      ]
-    }
-    resources = [
-      aws_sqs_queue.default.arn,
-      aws_sqs_queue.h.arn,
-      aws_sqs_queue.v.arn,
-    ]
-  }
-}
+
 
 # NOTE: visibility timeout must match or exceed longest anticipated eta/cooldown/retry
 #       used in a given celery task.
@@ -59,19 +35,4 @@ resource "aws_sqs_queue" "v" {
   visibility_timeout_seconds = 3600 * 2 # 2 hours
   receive_wait_time_seconds  = 0
   tags                       = merge(local.tags, { class = local.vt })
-}
-
-resource "aws_sqs_queue_policy" "default" {
-  queue_url = aws_sqs_queue.default.id
-  policy    = data.aws_iam_policy_document.allow_ecs_task_access_to_sqs.json
-}
-
-resource "aws_sqs_queue_policy" "h" {
-  queue_url = aws_sqs_queue.h.id
-  policy    = data.aws_iam_policy_document.allow_ecs_task_access_to_sqs.json
-}
-
-resource "aws_sqs_queue_policy" "v" {
-  queue_url = aws_sqs_queue.v.id
-  policy    = data.aws_iam_policy_document.allow_ecs_task_access_to_sqs.json
 }
