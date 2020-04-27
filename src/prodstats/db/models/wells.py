@@ -132,7 +132,7 @@ class WellLocation(WellBase):
     metes_bounds = db.Column(db.String(50))
     lon = db.Column(db.Float())
     lat = db.Column(db.Float())
-    geom = db.Column(db.Geometry("POINT", srid=4326))
+    geom = db.Column(db.Geometry("POINT", srid=4326, spatial_index=False))
     ix_well_location_geom = db.Index(
         "ix_well_location_geom", "geom", postgresql_using="gist"
     )

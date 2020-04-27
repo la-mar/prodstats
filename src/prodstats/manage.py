@@ -7,25 +7,21 @@ from typing import List
 
 import click
 import typer
-from prodstats.main import app
 
 import config as conf
 import loggers
+from prodstats.main import app
 
 loggers.config()
-
 logger = logging.getLogger()
+
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"], ignore_unknown_options=True)
 CELERY_LOG_LEVEL_NAME: str = loggers.mlevelname(conf.CELERY_LOG_LEVEL)
 
 
-def get_terminal_columns():
-    return shutil.get_terminal_size().columns  # pragma: no cover
-
-
 def hr():
-    return "-" * get_terminal_columns()
+    return "-" * shutil.get_terminal_size().columns + "\n"
 
 
 # dev_cli = typer.Typer(help="Development tools")
@@ -65,6 +61,7 @@ def migrate(args: List[str] = None):
 
 @db_cli.command(help="Apply pending migrations to the database")
 def upgrade(args: List[str] = None):
+    logger.warning(f"Applying database migrations")
     cmd = ["alembic", "upgrade", "head"] + (args or [])
     subprocess.call(cmd)
 
@@ -85,20 +82,21 @@ def recreate(args: List[str] = None):  # nocover
             f"""Cant recreate database when not in development mode. Set ENV=development as an environment variable to enable this feature."""  # noqa
         )
         sys.exit(0)
+    else:
+        from sqlalchemy_utils import create_database, database_exists, drop_database
 
-    from sqlalchemy_utils import create_database, database_exists, drop_database
-
-    url = conf.ALEMBIC_CONFIG.url
-    if database_exists(url):
-        drop_database(url)
-    create_database(url)
-    upgrade()
-    # rv = sqlalchemy.create_engine(url, echo=False)
-    # db.drop_all(bind=rv)
-    # db.create_all(bind=rv)
-    logger.info(f"Recreated database at: {url}")
-    # cmd = ["seed_db"]
-    # subprocess.call(cmd)
+        url = conf.ALEMBIC_CONFIG.url
+        short_url = str(url).split("@")[-1]
+        if database_exists(url):
+            logger.warning(f"Dropping existing database: {short_url}")
+            drop_database(url)
+            logger.warning(f"Recreating database at: {short_url}")
+            create_database(url)
+        else:
+            logger.warning(f"Creating new database at: {short_url}")
+            create_database(url)
+        upgrade()
+        logger.warning(f"Database recreation complete")
 
 
 # --- run -------------------------------------------------------------------- #

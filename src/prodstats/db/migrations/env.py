@@ -5,7 +5,9 @@ import sys
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
+from alembic.autogenerate import rewriter
+from alembic.operations import ops
+from sqlalchemy import Column, engine_from_config, pool
 
 import loggers
 from config import ALEMBIC_CONFIG
@@ -24,11 +26,53 @@ config = context.config
 config.set_main_option("sqlalchemy.url", str(ALEMBIC_CONFIG.url))
 exclude_tables = config.get_section("alembic:exclude").get("tables", "").split(",")
 
+
 fileConfig(config.config_file_name)
 target_metadata = db
 
 loggers.config(20, formatter="layman")
 logger = logging.getLogger(__name__)
+
+
+class CustomRewriter(rewriter.Rewriter):
+    """ Extends self.process_revision_directives since a standalone
+        process_revision_directives function and a rewriter cant both
+        be passed to the MigrationContext at the same time."""
+
+    def process_revision_directives(self, context, revision, directives):
+        if config.cmd_opts.autogenerate:
+            script = directives[0]
+
+            # Dont generate a new migration file if there are no pending operations
+            if script.upgrade_ops.is_empty():
+                directives[:] = []
+                logger.warning(
+                    "No pending operations. Skipping creating an empty revision file."
+                )
+            else:
+                # generate the new migration using the rewriter
+                super().process_revision_directives(context, revision, directives)
+
+
+writer = CustomRewriter()
+
+
+@writer.rewrites(ops.CreateTableOp)
+def order_columns(context, revision, op):
+    """ Enforce id to be the first column of the table, as well as forcing
+        created_at and updated_at to be the last columns"""
+    special_names = {"id": -100, "created_at": 1001, "updated_at": 1002}
+
+    cols_by_key = [
+        (
+            special_names.get(col.key, index) if isinstance(col, Column) else 2000,
+            col.copy(),
+        )
+        for index, col in enumerate(op.columns)
+    ]
+
+    columns = [col for idx, col in sorted(cols_by_key, key=lambda entry: entry[0])]
+    return ops.CreateTableOp(op.table_name, columns, schema=op.schema, **op.kw)
 
 
 def include_object(object, name, type_, reflected, compare_to):  # nocover
@@ -74,22 +118,13 @@ def run_migrations_online():
         poolclass=pool.NullPool,
     )
 
-    def process_revision_directives(context, revision, directives):  # nocover
-        """ Dont generate a new migration file if there are no pending operations """
-        if config.cmd_opts.autogenerate:
-            script = directives[0]
-            if script.upgrade_ops.is_empty():
-                directives[:] = []
-                logger.warning(
-                    "No pending operations. Skipping creating an empty revision file."
-                )
-
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
             include_object=include_object,
-            process_revision_directives=process_revision_directives,
+            transaction_per_migration=True,
+            process_revision_directives=writer,
         )
 
         with context.begin_transaction():

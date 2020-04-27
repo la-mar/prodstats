@@ -117,7 +117,7 @@ def run_executors(
             )
 
 
-@celery_app.task
+@celery_app.task(is_eager=True)
 def post_heartbeat():
     """ Send heartbeat to metrics backend"""
     return metrics.post_heartbeat()
@@ -670,49 +670,54 @@ def run_test_apilist():
 
 
 @celery_app.task
-def run_driftwood():
+def run_driftwood(hole_dir: HoleDirection):
+
+    hole_dir = HoleDirection(hole_dir)
 
     executors = [WellExecutor, GeomExecutor, ProdExecutor]
 
-    deo_api14h = [
-        "42461409160000",
-        "42383406370000",
-        "42461412100000",
-        "42461412090000",
-        "42461411750000",
-        "42461411740000",
-        "42461411730000",
-        "42461411720000",
-        "42461411600000",
-        "42461411280000",
-        "42461411270000",
-        "42461411260000",
-        "42383406650000",
-        "42383406640000",
-        "42383406400000",
-        "42383406390000",
-        "42383406380000",
-        "42461412110000",
-        "42383402790000",
-    ]
+    if hole_dir == HoleDirection.H:
+        api14s = [
+            "42461409160000",
+            "42383406370000",
+            "42461412100000",
+            "42461412090000",
+            "42461411750000",
+            "42461411740000",
+            "42461411730000",
+            "42461411720000",
+            "42461411600000",
+            "42461411280000",
+            "42461411270000",
+            "42461411260000",
+            "42383406650000",
+            "42383406640000",
+            "42383406400000",
+            "42383406390000",
+            "42383406380000",
+            "42461412110000",
+            "42383402790000",
+        ]
 
-    run_executors(HoleDirection.H, deo_api14h, executors=executors)
+    elif hole_dir == HoleDirection.V:
+        api14s = [
+            "42461326620001",
+            "42461326620000",
+            "42461328130000",
+            "42461343960001",
+            "42461352410000",
+            "42383362120000",
+            "42383362080000",
+            "42383362090000",
+            "42383374140000",
+            "42383374130000",
+            "42383362060000",
+        ]
 
-    deo_api14v = [
-        "42461326620001",
-        "42461326620000",
-        "42461328130000",
-        "42461343960001",
-        "42461352410000",
-        "42383362120000",
-        "42383362080000",
-        "42383362090000",
-        "42383374140000",
-        "42383374130000",
-        "42383362060000",
-    ]
+    else:
+        raise ValueError(f"Invalid hole direction: {hole_dir=}")
 
-    run_executors(HoleDirection.V, deo_api14v, executors=executors)
+    run_executors(hole_dir, api14s=api14s, executors=executors)
 
 
 if __name__ == "__main__":

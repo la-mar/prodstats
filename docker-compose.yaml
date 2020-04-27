@@ -1,15 +1,13 @@
 version: "3.7"
 
 x-defaults: &defaults
-  image: prodstats
+  image: driftwood/prodstats
   build:
     context: .
     dockerfile: Dockerfile
   restart: unless-stopped
   env_file:
     - .env.compose
-  depends_on:
-    - redis
   volumes:
     - ./src/prodstats:/app/prodstats
 
@@ -35,33 +33,33 @@ services:
   #     DATABASE_PASSWORD: null
   #     LOG_LEVEL: 10
   #     LOG_FORMAT: layman
-
-  # web:
-  #   <<: *defaults
-  #   container_name: web
-  #   command: prodstats dev server
-  #   ports:
-  #     - 8000
+  web:
+    <<: *defaults
+    container_name: prodstats_web
+    command: prodstats run dev
+    ports:
+      - 8000
   worker_1:
     <<: *defaults
     container_name: prodstats_worker
     user: celeryuser
     command: prodstats run worker
+    depends_on:
+      - redis
   worker_2:
     <<: *defaults
     container_name: prodstats_worker_h
     user: celeryuser
     command: prodstats run worker -Q prodstats-h
+    depends_on:
+      - redis
   worker_3:
     <<: *defaults
     container_name: prodstats_worker_v
     user: celeryuser
     command: prodstats run worker -Q prodstats-v
-  # worker_4:
-  #   <<: *defaults
-  #   container_name: prodstats_worker_4
-  #   user: celeryuser
-  #   command: prodstats run worker
+    depends_on:
+      - redis
   flower:
     <<: *defaults
     container_name: prodstats_flower
@@ -69,11 +67,20 @@ services:
     command: prodstats run flower
     ports:
       - 5555:5555
-  cron:
-    <<: *defaults
-    container_name: prodstats_cron
-    user: celeryuser
-    command: prodstats run cron
+    depends_on:
+      - redis
+  # cron:
+  #   <<: *defaults
+  #   container_name: prodstats_cron
+  #   user: celeryuser
+  #   command: prodstats run cron
+  #   depends_on:
+  #     - redis
+  # db_migration:
+  #   <<: *defaults
+  #   container_name: prodstats_db_migrations
+  #   restart: "no"
+  #   command: prodstats db upgrade
   redis:
     container_name: prodstats_redis
     image: redis
@@ -83,7 +90,7 @@ services:
     command: redis-server  --save "" --appendonly no --loglevel notice --bind 0.0.0.0
     ports:
       - 6379:6379
-    # volumes:
-    #   - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-    # command:
-    #   - /usr/local/etc/redis/redis.conf
+  # volumes:
+  #   - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+  # command:
+  #   - /usr/local/etc/redis/redis.conf

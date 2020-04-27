@@ -19,10 +19,11 @@
 ## Roadmap
 
 0. Terraform and deployment scripts
-1. Formation grid sourcing (cli upload, s3, dropbox)
-2. Formation Assignment
-3. Well Spacing
-4. Implement WellStats
+1. Shell script to deploy worker task to run db migrations
+2. Formation grid sourcing (cli upload, s3, dropbox)
+3. Formation Assignment
+4. Well Spacing
+5. Implement WellStats
 
    - wellbore_crow_length
    - wellbore_direction
@@ -36,9 +37,9 @@
    - nearest_api10
    - dist_to_company_well_mi
 
-5. Implement WellLinks (to RRC)
-6. Capture material changes in allocation well count month over month
-7. Incorporate DrillingInfo well data
+6. Implement WellLinks (to RRC)
+7. Capture material changes in allocation well count month over month
+8. Incorporate DrillingInfo well data
 
 ## TODO
 
@@ -51,6 +52,7 @@
 5. Standardize log messages
 6. Normalize Area/Provider related tables when incorporating drillinginfo. Change Area to ProviderArea and add providers.IDMaster.
 7. Flower API metrics to Datadog
+8. Request/Response logging middleware
 
 ### Development
 

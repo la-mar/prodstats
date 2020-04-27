@@ -16,14 +16,14 @@ def load():
     """ Load and initialize the Datadog library """
 
     if conf.DATADOG_ENABLED:
-        if conf.DATADOG_API_KEY:
+        if conf.DATADOG_API_KEY is not None:
             global datadog
             import datadog
 
             datadog.initialize(
-                api_key=conf.DATADOG_API_KEY,
-                app_key=conf.DATADOG_APP_KEY,
-                api_host=api_endpoint,
+                api_key=str(conf.DATADOG_API_KEY),
+                app_key=str(conf.DATADOG_APP_KEY),
+                # api_host=api_endpoint,
             )
             logger.info("Datadog enabled")
         else:
@@ -139,3 +139,23 @@ def to_tags(values: Union[Dict, List, str], sep: str = ",") -> List[str]:
         result = []
 
     return result
+
+
+# if __name__ == "__main__":
+
+#     from datetime import datetime
+
+#     conf.DATADOG_ENABLED = True
+#     conf.DATADOG_API_KEY._value
+#     conf.DATADOG_APP_KEY._value
+
+#     import datadog
+
+#     datadog.initialize(
+#         api_key=str(conf.DATADOG_API_KEY),
+#         app_key=str(conf.DATADOG_APP_KEY),
+#         # api_host=api_endpoint,
+#     )
+
+#     now = datetime.now().isoformat()
+#     datadog.api.Metric.send(metric="prodstats.test", points=[(now, 1)], type="count")

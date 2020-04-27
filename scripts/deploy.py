@@ -1,28 +1,16 @@
-"""
-Example docker deployment to AWS ECS cluster.
-
-The script does the following:
-
-    1. Loads environment variables from .env file in the project root
-
-    For each service in SERVICES
-    2. Generates a populated ECS task definition
-        - You can configure your task definitions in the get_task_definition() method.
-    3. Optionally authenticate Docker to ECR
-    4. Optionally build any configured containers
-    5. Optionally push any configured containers to ECR
-    6. Register the new task definition in ECR
-    7. Retrieve the latest task definition revision number
-    8. Update the running service with the new task definition
-        and force a new deployment
-"""
-
 import os
-from typing import List
+import shutil
+from typing import Dict, List, Optional
 
 import boto3
 import tomlkit
-from dotenv import dotenv_values
+from colorama import Fore, init
+
+init(autoreset=True)
+
+
+def hr(frac: int = 1):
+    return "-" * int(shutil.get_terminal_size().columns / frac) + "\n"
 
 
 def get_project_meta() -> dict:
@@ -36,223 +24,231 @@ def get_project_meta() -> dict:
 
 
 pkg_meta = get_project_meta()
-project = pkg_meta.get("name")
-version = pkg_meta.get("version")
+project: str = pkg_meta.get("name")  # type: ignore
+version: str = pkg_meta.get("version")  # type: ignore
 
-ENV = os.getenv("ENV", "prod")
-AWS_ACCOUNT_ID = os.getenv("AWS_ACCOUNT_ID")
-SERVICE_NAME: str = os.getenv("SERVICE_NAME")  # type: ignore
-IMAGE_TAG: str = os.getenv("IMAGE_TAG")  # type: ignore
-IMAGE_NAME: str = f"{os.getenv('IMAGE_NAME')}{':' if IMAGE_TAG else ''}{IMAGE_TAG or ''}"  # noqa
+if not project:
+    raise ValueError(f"project name is missing")
+if not version:
+    raise ValueError(f"project version is missing")
 
-CLUSTER_NAME = os.getenv("ECS_CLUSTER")  # type: ignore
-TASK_IAM_ROLE = f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/prodstats-task-role"
+ENV: Optional[str] = os.getenv("ENV")
+AWS_ACCOUNT_ID: Optional[str] = os.getenv("AWS_ACCOUNT_ID")
+AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
+SERVICE_NAME: Optional[str] = os.getenv("SERVICE_NAME", project)
+IMAGE_TAG: Optional[str] = os.getenv("IMAGE_TAG", "latest")
+IMAGE_NAME: str = os.getenv("IMAGE_NAME", project)
+IMAGE = f"{IMAGE_NAME}:{IMAGE_TAG}"
 
-if not any([ENV, AWS_ACCOUNT_ID, SERVICE_NAME, IMAGE_NAME, CLUSTER_NAME]):
-    raise ValueError("One or more environment variables are missing")
-
-
-SERVICES: List[str] = [
-    "prodstats-web",
-    "prodstats-worker-collector",
-    "prodstats-worker-deleter",
-    "prodstats-worker-submitter",
-    "prodstats-worker-default",
-    "prodstats-cron",
-]
+TASK_IAM_ROLE = f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/{project}-task-role"
 
 IMAGES = [
     {"name": SERVICE_NAME, "dockerfile": "Dockerfile", "build_context": "."},
 ]
 
 TAGS = [
-    {"key": "domain", "value": "technology"},
+    {"key": "domain", "value": "engineering"},
     {"key": "service_name", "value": project},
     {"key": "environment", "value": ENV},
     {"key": "terraform", "value": "true"},
 ]
 
 
-BUILD = False
-PUSH = False
+SERVICES: List[Dict[str, Optional[str]]] = [
+    {
+        "task_name": f"{project}-web",
+        "cluster_name": "ecs-web-cluster",
+        "task_type": "service",  # service or scheduled
+    },
+    {
+        "task_name": f"{project}-worker",
+        "cluster_name": "ecs-collector-cluster",
+        "task_type": "service",
+    },
+    {
+        "task_name": f"{project}-cron",
+        "cluster_name": "ecs-collector-cluster",
+        "task_type": "service",
+    },
+    {
+        "task_name": f"{project}-db-migrations",
+        "cluster_name": None,
+        "task_type": "service",
+    },
+]
 
-print("\n\n" + "-" * 30)
-print(f"ENV: {ENV}")
-print(f"AWS_ACCOUNT_ID: {AWS_ACCOUNT_ID}")
-print(f"CLUSTER_NAME: {CLUSTER_NAME}")
-print(f"SERVICES: {SERVICES}")
-print("-" * 30 + "\n\n")
+TAGS = [
+    {"key": "domain", "value": "engineering"},
+    {"key": "service_name", "value": project},
+    {"key": "environment", "value": ENV},
+    {"key": "terraform", "value": "true"},
+]
 
 
-task_envs = dotenv_values(".env.production")
+# EXAMPLE SCHEDULED TASK:
+# "task_name_here": {
+#     "service": "service_name_here",
+#     "command": "container_command_here",
+#     "rule": "cloudwatch_schedule_rule_name_here",
+# },
+SCHEDULED_TASKS: Dict[str, Dict] = {}
 
 
-def transform_envs(d: dict):
-    return [{"name": k, "value": v} for k, v in d.items()]
+""" Print deployment summary """
+tpl = "{name:>25} {value:<50}\n"
+string = ""
+string += tpl.format(name="ENV:", value=ENV)
+string += tpl.format(name="AWS_ACCOUNT_ID:", value=AWS_ACCOUNT_ID)
+string += tpl.format(name="AWS_REGION:", value=AWS_REGION)
+string += tpl.format(name="SERVICE_NAME:", value=SERVICE_NAME)
+string += tpl.format(name="IMAGE:", value=IMAGE)
+print("\n\n" + hr(2) + string + hr(2))
+
+if not all([ENV, AWS_ACCOUNT_ID, SERVICE_NAME, IMAGE, AWS_REGION]):
+    raise ValueError(f"One or more environment variables are missing")
 
 
 def get_task_definition(
     name: str,
-    envs: dict,
     service_name: str,
     tags: list = [],
     task_iam_role_arn: str = "ecsTaskExecutionRole",
 ):
-    image = IMAGE_NAME
+    image = IMAGE
     defs = {
-        "prodstats-web": {
+        f"{project}-web": {
             "containerDefinitions": [
                 {
-                    "name": "prodstats-web",
+                    "name": f"{project}-web",
                     "command": [
-                        "prodstats",
+                        "chamber",
+                        "exec",
+                        f"{project}",
+                        f"{project}-web",
+                        "datadog",
+                        "--",
+                        f"{project}",
                         "run",
                         "web",
-                        "-b 0.0.0.0:9090",
-                        "--statsd-host=localhost:8125",
+                        "--port",
+                        "80",
                     ],
-                    "memoryReservation": 128,
+                    "memoryReservation": 256,
                     "cpu": 256,
                     "image": image,
                     "essential": True,
-                    "environment": transform_envs(envs),
                     "portMappings": [
-                        {"hostPort": 9090, "containerPort": 9090, "protocol": "tcp"}
+                        {"hostPort": 80, "containerPort": 80, "protocol": "tcp"}
                     ],
                 },
             ],
             "executionRoleArn": "ecsTaskExecutionRole",
-            "family": f"{service_name}",
+            "family": service_name,
             "networkMode": "awsvpc",
             "taskRoleArn": task_iam_role_arn,
             "tags": tags,
         },
-        "prodstats-worker-submitter": {
+        f"{project}-worker": {
             "containerDefinitions": [
                 {
-                    "name": "prodstats-worker",
+                    "name": f"{project}-worker",
                     "command": [
-                        "prodstats",
+                        "chamber",
+                        "exec",
+                        f"{project}",
+                        f"{project}-worker",
+                        "datadog",
+                        "--",
+                        f"{project}",
                         "run",
                         "worker",
-                        "-c",
-                        "10",
-                        "-Q",
-                        "prodstats-submissions-h,prodstats-submissions-v",
-                        # "--loglevel",
-                        # "info",
+                        # "-Q",
+                        # f"{project}-h,{project}-v",
+                    ],
+                    "memoryReservation": 512,
+                    "cpu": 512,
+                    "image": image,
+                    "essential": True,
+                    "user": "celeryuser",
+                },
+                # {
+                #     "name": f"{project}-worker-default",
+                #     "command": [
+                #         "chamber",
+                #         "exec",
+                #         f"{project}",
+                #         f"{project}-worker",
+                #         "datadog",
+                #         "--",
+                #         f"{project}",
+                #         "run",
+                #         "worker",
+                #         "-Q",
+                #         f"{project}-default",
+                #     ],
+                #     "memoryReservation": 128,
+                #     "cpu": 128,
+                #     "image": image,
+                #     "essential": True,
+                #     "user": "celeryuser",
+                # },
+            ],
+            "executionRoleArn": "ecsTaskExecutionRole",
+            "family": service_name,
+            "networkMode": "bridge",
+            "taskRoleArn": task_iam_role_arn,
+            "tags": tags,
+        },
+        f"{project}-cron": {
+            "containerDefinitions": [
+                {
+                    "name": f"{project}-cron",
+                    "command": [
+                        "chamber",
+                        "exec",
+                        f"{project}",
+                        f"{project}-cron",
+                        "datadog",
+                        "--",
+                        f"{project}",
+                        "run",
+                        "cron",
+                    ],
+                    "memoryReservation": 160,
+                    "cpu": 64,
+                    "image": image,
+                    "essential": True,
+                    "user": "celeryuser",
+                },
+            ],
+            "executionRoleArn": "ecsTaskExecutionRole",
+            "family": service_name,
+            "networkMode": "bridge",
+            "taskRoleArn": task_iam_role_arn,
+            "tags": tags,
+        },
+        f"{project}-db-migrations": {
+            "containerDefinitions": [
+                {
+                    "name": f"{project}-db-migrations",
+                    "command": [
+                        "chamber",
+                        "exec",
+                        f"{project}",
+                        "datadog",
+                        "--",
+                        f"{project}",
+                        "db",
+                        "upgrade",
                     ],
                     "memoryReservation": 128,
-                    "cpu": 256,
+                    "cpu": 128,
                     "image": image,
                     "essential": True,
-                    "environment": transform_envs(envs),
                 },
             ],
             "executionRoleArn": "ecsTaskExecutionRole",
-            "family": f"{service_name}",
-            "networkMode": "bridge",
-            "taskRoleArn": task_iam_role_arn,
-            "tags": tags,
-        },
-        "prodstats-worker-collector": {
-            "containerDefinitions": [
-                {
-                    "name": "prodstats-worker",
-                    "command": [
-                        "prodstats",
-                        "run",
-                        "worker",
-                        "-c",
-                        "10",
-                        "-Q",
-                        "prodstats-collections-h,prodstats-collections-v",
-                        # "--loglevel",
-                        # "warn",
-                    ],
-                    "memoryReservation": 512,
-                    "cpu": 512,
-                    "image": image,
-                    "essential": True,
-                    "environment": transform_envs(envs),
-                },
-            ],
-            "executionRoleArn": "ecsTaskExecutionRole",
-            "family": f"{service_name}",
-            "networkMode": "bridge",
-            "taskRoleArn": task_iam_role_arn,
-            "tags": tags,
-        },
-        "prodstats-worker-deleter": {
-            "containerDefinitions": [
-                {
-                    "name": "prodstats-worker",
-                    "command": [
-                        "prodstats",
-                        "run",
-                        "worker",
-                        "-c",
-                        "10",
-                        "-Q",
-                        "prodstats-deletions-h,prodstats-deletions-v",
-                        # "--loglevel",
-                        # "warn",
-                    ],
-                    "memoryReservation": 512,
-                    "cpu": 512,
-                    "image": image,
-                    "essential": True,
-                    "environment": transform_envs(envs),
-                },
-            ],
-            "executionRoleArn": "ecsTaskExecutionRole",
-            "family": f"{service_name}",
-            "networkMode": "bridge",
-            "taskRoleArn": task_iam_role_arn,
-            "tags": tags,
-        },
-        "prodstats-worker-default": {
-            "containerDefinitions": [
-                {
-                    "name": "prodstats-worker",
-                    "command": [
-                        "prodstats",
-                        "run",
-                        "worker",
-                        "-c",
-                        "10",
-                        "-Q",
-                        "prodstats-default",
-                        # "--loglevel",
-                        # "warn",
-                    ],
-                    "memoryReservation": 256,
-                    "cpu": 512,
-                    "image": image,
-                    "essential": True,
-                    "environment": transform_envs(envs),
-                },
-            ],
-            "executionRoleArn": "ecsTaskExecutionRole",
-            "family": f"{service_name}",
-            "networkMode": "bridge",
-            "taskRoleArn": task_iam_role_arn,
-            "tags": tags,
-        },
-        "prodstats-cron": {
-            "containerDefinitions": [
-                {
-                    "name": "prodstats-cron",
-                    "command": ["prodstats", "run", "cron", "--loglevel", "debug"],
-                    "memoryReservation": 256,
-                    "cpu": 512,
-                    "image": image,
-                    "essential": True,
-                    "environment": transform_envs(envs),
-                },
-            ],
-            "executionRoleArn": "ecsTaskExecutionRole",
-            "family": f"{service_name}",
+            "family": service_name,
             "networkMode": "bridge",
             "taskRoleArn": task_iam_role_arn,
             "tags": tags,
@@ -328,34 +324,108 @@ class AWSClient:
 client = AWSClient()
 
 
-results = []
+results: List = []
+
+events = client.get_client("events")
+target_id = 0
+targets = []
 
 
-for service in SERVICES:
-    s = f"{service:>20}:"
-    prev_rev_num = client.get_latest_revision(service)
-    cdef = get_task_definition(
-        name=service,
-        envs=task_envs,
-        service_name=service,
-        tags=TAGS,
-        task_iam_role_arn=TASK_IAM_ROLE,
-    )
+# * update ECS task definitions
+for deployment in SERVICES:
+    task_name = deployment["task_name"]
 
-    # pprint(cdef)
-    client.ecs.register_task_definition(**cdef)
+    if task_name:
+        s = f"{Fore.GREEN}{task_name:>25}{Fore.RESET}"
+        try:
+            prev_rev_num = f"{Fore.GREEN}{client.get_latest_revision(task_name)}"
+        except Exception:
+            prev_rev_num = Fore.YELLOW + "?"
+        cdef = get_task_definition(
+            name=task_name,
+            service_name=task_name,
+            tags=TAGS,
+            task_iam_role_arn=TASK_IAM_ROLE,
+        )
 
-    rev_num = client.get_latest_revision(service)
-    s += "\t" + f"updated revision: {prev_rev_num} -> {rev_num}"
-    results.append((service, prev_rev_num, rev_num))
-    print(s)
+        task_def_arn = client.ecs.register_task_definition(**cdef)["taskDefinition"][
+            "taskDefinitionArn"
+        ]
 
-for service, prev_rev_num, rev_num in results:
-    response = client.ecs.update_service(
-        cluster=CLUSTER_NAME,
-        service=service,
-        forceNewDeployment=True,
-        taskDefinition=f"{service}:{rev_num}",
-    )
-    print(f"{service:>20}: updated service on cluster {CLUSTER_NAME}")
-print("\n\n")
+        rev_num = client.get_latest_revision(task_name)
+
+        results.append(
+            (
+                task_name,
+                deployment["task_type"],
+                deployment["cluster_name"],
+                prev_rev_num,
+                rev_num,
+                task_def_arn,
+            )
+        )
+        print(
+            f"{s}: updated revision ({prev_rev_num} {Fore.RESET}-> "
+            + f"{Fore.GREEN}{rev_num}{Fore.RESET})"
+        )
+    else:
+        print(f"{Fore.RED}No task_name specified: {deployment=}")
+
+
+# * update ECS services and tasks scheduled through Cloudwatch
+for task_name, task_type, cluster, prev_rev_num, rev_num, task_def_arn in results:
+    if task_type == "service":
+        try:
+            if cluster:
+                response = client.ecs.update_service(
+                    cluster=cluster,
+                    service=task_name,
+                    forceNewDeployment=True,
+                    taskDefinition=f"{task_name}:{rev_num}",
+                )
+                print(
+                    f"{Fore.GREEN}{task_name:>25}{Fore.RESET}: updated service "
+                    + f"on {Fore.GREEN}{cluster}"
+                )
+            else:
+                print(
+                    f"{Fore.GREEN}{task_name:>25}{Fore.RESET}: {Fore.YELLOW}SKIPPED{Fore.RESET} (no cluster specified)"  # noqa
+                )
+        except (
+            client.ecs.exceptions.ServiceNotFoundException,
+            client.ecs.exceptions.ServiceNotActiveException,
+        ):
+            print(
+                f"{Fore.RED}{task_name:>25}{Fore.RESET}: "
+                + f"{Fore.RED}NOT FOUND{Fore.RESET} on {cluster}"
+            )
+
+    elif task_type == "scheduled":
+        if task_name:
+            task_def = SCHEDULED_TASKS[task_name]
+            service = task_def["service"]
+            rule = task_def["rule"]
+            task_count = 1
+            cluster_arn = "arn:aws:ecs:{region}:{account_id}:cluster/{cluster_name}".format(
+                region=AWS_REGION, account_id=AWS_ACCOUNT_ID, cluster_name=cluster
+            )
+            targets = [
+                {
+                    "Id": str(target_id),
+                    "Arn": cluster_arn,
+                    "RoleArn": f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/ecsEventsRole",
+                    "EcsParameters": {
+                        "TaskDefinitionArn": task_def_arn,
+                        "TaskCount": task_count,
+                    },
+                }
+            ]
+            response = events.put_targets(Rule=rule, Targets=targets)
+            print("\t" + f"created event: {cluster}/{service} - {rule}")
+            target_id += 1
+        else:
+            print(f"{Fore.RED}Failed creating Cloudwatch event: no task_name specified")
+    else:
+        print(f"{Fore.RED}Invalid task_type: {task_type=} --  {cluster=} {task_name=}")
+
+print("\n")

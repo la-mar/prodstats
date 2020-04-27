@@ -12,7 +12,7 @@
 
 from __future__ import annotations
 
-# import asyncio
+import os
 import socket
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -72,7 +72,7 @@ DATABASE_USERNAME: str = conf("DATABASE_USERNAME", cast=str, default=None)
 DATABASE_PASSWORD: Secret = conf("DATABASE_PASSWORD", cast=Secret, default=None)
 DATABASE_HOST: str = conf("DATABASE_HOST", cast=str, default="localhost")
 DATABASE_PORT: int = conf("DATABASE_PORT", cast=int, default=5432)
-DATABASE_NAME: str = conf("DATABASE_NAME", cast=str, default=project)
+DATABASE_NAME: str = conf("DATABASE_NAME", cast=str)
 DATABASE_POOL_SIZE_MIN: int = conf("DATABASE_POOL_SIZE_MIN", cast=int, default=1)
 DATABASE_POOL_SIZE_MAX: int = conf(
     "DATABASE_POOL_SIZE_MIN", cast=int, default=DATABASE_POOL_SIZE_MIN
@@ -88,6 +88,9 @@ DATABASE_CONFIG: DatabaseURL = DatabaseURL(
 
 # --- alembic ---------------------------------------------------------------- #
 
+# Currently only used to first initialize alembic in manage.py::db::init
+# if script_location is later changed in alembic.ini, this would be misleading.
+# FIXME: use this path if alembic.ini does not exist, else use script_location
 MIGRATION_DIR: Path = Path("./src/prodstats/db/migrations").resolve()
 
 ALEMBIC_CONFIG: DatabaseURL = DatabaseURL(
@@ -109,14 +112,10 @@ LOG_HANDLER: str = conf("LOG_HANDLER", cast=str, default="colorized")
 
 DATADOG_ENABLED: bool = conf("DATADOG_ENABLED", cast=bool, default=False)
 DATADOG_API_KEY: Optional[Secret] = conf(
-    "DATADOG_API_KEY",
-    cast=Secret,
-    default=conf("DD_API_KEY", cast=Secret, default=None),
+    "DATADOG_API_KEY", cast=Secret, default=os.getenv("DD_API_KEY", None)
 )
 DATADOG_APP_KEY: Optional[Secret] = conf(
-    "DATADOG_APP_KEY",
-    cast=Optional[Secret],
-    default=conf("DD_APP_KEY", cast=Secret, default=None),
+    "DATADOG_APP_KEY", cast=Secret, default=os.getenv("DD_APP_KEY", None),
 )
 
 DATADOG_DEFAULT_TAGS: Dict[str, str] = {
@@ -172,7 +171,7 @@ class CeleryConfig:
     # --- beat --------------------------------------------------------------- #
 
     beat_scheduler = "redbeat.RedBeatScheduler"
-    redbeat_redis_url: str = conf("PRODSTATS_BROKER_URL", cast=str)
+    redbeat_redis_url: str = conf("PRODSTATS_CRON_URL", cast=str)
     redbeat_key_prefix: str = project
 
     # --- task --------------------------------------------------------------- #
@@ -226,7 +225,9 @@ class CeleryConfig:
     worker_prefetch_multiplier: int = conf(
         "CELERYD_PREFETCH_MULTIPLIER", cast=int, default=4
     )
-    worker_concurrency: int = conf("CELERYD_CONCURRENCY", cast=int, default=None)
+    worker_concurrency: int = conf(
+        "CELERYD_CONCURRENCY", cast=int, default=None
+    )  # celery default = number of CPUs (not hyperthreaded CPUs)
 
     # --- results ------------------------------------------------------------ #
 

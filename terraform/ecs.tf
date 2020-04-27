@@ -173,11 +173,7 @@ data "aws_iam_policy_document" "task_policy" {
       "sqs:*",
     ]
 
-    resources = [
-      aws_sqs_queue.default.arn,
-      aws_sqs_queue.h.arn,
-      aws_sqs_queue.v.arn,
-    ]
+    resources = ["*"]
   }
 
   statement {

@@ -1,18 +1,16 @@
 SERVICE_NAME:=prodstats
 ENV:=prod
-COMMIT_HASH    ?= $$(git log -1 --pretty=%h)
+COMMIT_HASH ?= $$(git log -1 --pretty=%h)
 DATE := $$(date +"%Y-%m-%d")
 CTX:=.
 AWS_ACCOUNT_ID:=$$(aws-vault exec prod -- aws sts get-caller-identity | jq .Account -r)
-IMAGE_NAME:=prodstats
 DOCKERFILE:=Dockerfile
+APP_NAME:=$$(grep -e 'name\s=\s\(.*\)' pyproject.toml| cut -d"\"" -f2)
 APP_VERSION=$$(grep -o '\([0-9]\+.[0-9]\+.[0-9]\+\)' pyproject.toml | head -n1)
+# IMAGE_NAME:=$(APP_NAME)
 
 run-tests:
 	pytest --cov=prodstats tests/ --cov-report xml:./coverage/python/coverage.xml
-
-smoke-test:
-	docker run --entrypoint prodstats driftwood/prodstats:${COMMIT_HASH} test smoke-test
 
 cov:
 	export CI=false && poetry run pytest -x --cov src/prodstats tests/ --cov-report html:./coverage/coverage.html --log-cli-level 30 --log-level 20 -vv
@@ -39,39 +37,17 @@ login:
 build:
 	@echo "Building docker image: ${IMAGE_NAME}"
 	docker build  -f Dockerfile . -t ${IMAGE_NAME}
-	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${APP_VERSION}
 	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:latest
-	# docker tag ${IMAGE_NAME} ${IMAGE_NAME}:${COMMIT_HASH}
-	# docker tag ${IMAGE_NAME} ${IMAGE_NAME}:dev
-
-
-build-with-chamber:
-	@echo "Building docker image: ${IMAGE_NAME} (with chamber)"
-	docker build  -f Dockerfile.chamber . -t ${IMAGE_NAME}
-	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-${APP_VERSION}
-	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-latest
-	# docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-${COMMIT_HASH}
-	# docker tag ${IMAGE_NAME} ${IMAGE_NAME}:chamber-dev
-
-build-all: build-with-chamber build
 
 push: login
-	docker push ${IMAGE_NAME}:dev
-	docker push ${IMAGE_NAME}:${COMMIT_HASH}
+	# docker push ${IMAGE_NAME}:dev
+	# docker push ${IMAGE_NAME}:${COMMIT_HASH}
 	docker push ${IMAGE_NAME}:latest
 
-push-all: login push
-	docker push ${IMAGE_NAME}:chamber-dev
-	docker push ${IMAGE_NAME}:chamber-${COMMIT_HASH}
-	docker push ${IMAGE_NAME}:chamber-latest
-
 push-version:
-	# docker push ${IMAGE_NAME}:latest
-	@echo pushing: ${IMAGE_NAME}:${APP_VERSION}, ${IMAGE_NAME}:chamber-${APP_VERSION}
 	docker push ${IMAGE_NAME}:${APP_VERSION}
-	docker push ${IMAGE_NAME}:chamber-${APP_VERSION}
 
-all: build-all push-all
+all: build push
 
 ci-expand-config:
 	# show expanded configuration
@@ -84,10 +60,26 @@ ci-build-local:
 	JOBNAME?=build-image
 	circleci local execute -c process.yml --job build-image -e DOCKER_LOGIN=${DOCKER_LOGIN} -e DOCKER_PASSWORD=${DOCKER_PASSWORD}
 
-all: build login push
-
 deploy:
-	poetry run python scripts/deploy.py
+	export AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} && poetry run python scripts/deploy.py
+
+redeploy-cron:
+	@echo ""
+	aws ecs update-service --cluster ecs-collector-cluster --service prodstats-cron --force-new-deployment --profile ${ENV} | jq .service.serviceName,.service.taskDefinition,.service.clusterArn
+
+redeploy-worker:
+	@echo ""
+	aws ecs update-service --cluster ecs-collector-cluster --service prodstats-worker --force-new-deployment --profile ${ENV} | jq .service.serviceName,.service.taskDefinition,.service.clusterArn
+
+redeploy-web:
+	@echo ""
+	aws ecs update-service --cluster ecs-web-cluster --service prodstats-web --force-new-deployment --profile ${ENV} | jq .service.serviceName,.service.taskDefinition,.service.clusterArn
+
+redeploy: redeploy-worker redeploy-cron redeploy-web
+
+deploy-migrations:
+	aws ecs run-task --cluster ecs-collector-cluster --task-definition prodstats-db-migrations --profile ${ENV}
+
 
 secret-key:
 	python3 -c 'import secrets;print(secrets.token_urlsafe(256))'
@@ -96,4 +88,5 @@ post-from-file:
 	http POST :8000/api/v1/users < tests/data/users.json --follow
 
 create-db:
-	psql -h localhost -d postgres -c "create database well;"
+	@echo "Creating database: ${DATABASE_NAME}"
+	psql -h localhost -d postgres -c "create database ${DATABASE_NAME};"

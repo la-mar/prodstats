@@ -7,13 +7,12 @@ authors = ["Brock Friedrich <brocklfriedrich@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.8.1"
 tomlkit = "^0.6.0"
-datadog = "^0.35.0"
+datadog = "^0.31.0"
 gunicorn = "^20.0.4"
 json-log-formatter = "^0.2.0"
 setproctitle = "^1.1.10"
 pyyaml = "^5.2"
 attrs = "^19.3.0"
-tenacity = "^6.0.0"
 sqlalchemy = "^1.3.13"
 psycopg2-binary = "^2.8.4"
 alembic = "^1.4.0"
@@ -43,6 +42,8 @@ geopandas = "^0.7.0"
 geojson = "^2.5.0"
 flower = "^0.9.4"
 typer = "^0.1.1"
+colorama = "^0.4.3"
+tenacity = "^6.1.0"
 
 [tool.poetry.scripts]
 prodstats = "prodstats.manage:main"
@@ -87,7 +88,7 @@ include_trailing_comma=true
 force_grid_wrap=0
 use_parentheses=true
 line_length=88
-known_third_party = ["alembic", "async_asgi_testclient", "async_generator", "asyncpg", "boto3", "celery", "click", "coverage", "dateutil", "dotenv", "fastapi", "geoalchemy2", "geopandas", "gino", "httpx", "json_log_formatter", "kombu", "logutils", "numpy", "orjson", "pandas", "prodstats", "psutil", "pydantic", "pytest", "pytz", "requests_mock", "shapely", "sqlalchemy", "sqlalchemy_utils", "starlette", "tests", "tomlkit", "typer", "uvicorn", "uvloop", "yaml"]
+known_third_party = ["alembic", "async_asgi_testclient", "async_generator", "asyncpg", "boto3", "celery", "click", "colorama", "dateutil", "fastapi", "geoalchemy2", "geopandas", "gino", "httpx", "json_log_formatter", "kombu", "logutils", "numpy", "orjson", "pandas", "psutil", "pydantic", "pytest", "pytz", "requests_mock", "shapely", "sqlalchemy", "sqlalchemy_utils", "starlette", "tomlkit", "typer", "uvicorn", "uvloop", "yaml"]
 
 [build-system]
 requires = ["poetry>=0.12"]
