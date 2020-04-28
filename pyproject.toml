@@ -40,7 +40,6 @@ celery = {version = "4.4.0", extras = ["sqs", "redis"]}
 celery-redbeat = "^0.13.0"
 geopandas = "^0.7.0"
 geojson = "^2.5.0"
-flower = "^0.9.4"
 typer = "^0.1.1"
 colorama = "^0.4.3"
 tenacity = "^6.1.0"
