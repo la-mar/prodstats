@@ -37,9 +37,29 @@ variable "worker_scale_out_cooldown" {
 
 variable "worker_min_capacity" {
   description = "worker service minimum number of autoscaled containers"
+  type        = number
   default     = 1
 }
 
 variable "worker_max_capacity" {
   description = "worker service minimum number of autoscaled containers"
+  type        = number
+}
+
+variable "web_desired_count" {
+  description = "desired number of web containers"
+  type        = number
+  default     = 2
+}
+
+variable "worker_desired_count" {
+  description = "desired number of worker containers"
+  type        = number
+  default     = 2
+}
+
+variable "cron_desired_count" {
+  description = "desired number of cron containers"
+  type        = number
+  default     = 2
 }
