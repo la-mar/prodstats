@@ -181,17 +181,15 @@ class CeleryConfig:
     )
     task_always_eager: bool = conf("CELERY_TASK_ALWAYS_EAGER", cast=bool, default=False)
     task_time_limit: int = conf(
-        "CELERYD_TASK_TIME_LIMIT", cast=int, default=3600
+        "CELERY_TASK_TIME_LIMIT", cast=int, default=3600
     )  # seconds
     task_serializer: str = conf("CELERY_TASK_SERIALIZER", cast=str, default="json")
     task_default_queue: str = conf(
         "CELERY_DEFAULT_QUEUE", cast=str, default=f"{project}-default"
     )  # sqs default queue name
-
     task_create_missing_queues: bool = conf(
         "CELERY_TASK_CREATE_MISSING_QUEUES", cast=bool, default=False
-    )
-
+    )  # set to True if not managing SQS queues in Terraform
     task_ignore_result: bool = conf(
         "CELERY_TASK_IGNORE_RESULT", cast=bool, default=True
     )
@@ -223,11 +221,11 @@ class CeleryConfig:
         "CELERY_SEND_EVENTS", cast=bool, default=False
     )  # must be false for sqs
     worker_prefetch_multiplier: int = conf(
-        "CELERYD_PREFETCH_MULTIPLIER", cast=int, default=4
+        "CELERY_PREFETCH_MULTIPLIER", cast=int, default=4
     )
     worker_concurrency: int = conf(
-        "CELERYD_CONCURRENCY", cast=int, default=None
-    )  # celery default = number of CPUs (not hyperthreaded CPUs)
+        "CELERY_CONCURRENCY", cast=int, default=None
+    )  # celery default = number of CPUs (not hyperthreaded CPUs). can increase if tasks tend to be i/o bound # noqa
 
     # --- results ------------------------------------------------------------ #
 
