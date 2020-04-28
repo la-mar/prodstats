@@ -138,7 +138,6 @@ class TestCLISlow:
 
         command.upgrade(config, "base:head", sql=True)
         captured = capfd.readouterr()
-        logger.error(captured.err)
 
         for rev in revisions:
             assert rev in captured.err
