@@ -205,6 +205,15 @@ class BulkIOMixin(object):
 
 class DataFrameMixin(BulkIOMixin):
     @classmethod
+    async def df(cls, create_index: bool = True) -> pd.DataFrame:
+        records = await cls.query.gino.all()
+        df = pd.DataFrame([x.to_dict() for x in records], columns=cls.c.names)
+        if create_index:
+            df = df.set_index(cls.pk.names)
+
+        return df
+
+    @classmethod
     def _prepare(cls, df: pd.DataFrame, reset_index: bool) -> List[Dict]:
 
         if reset_index:

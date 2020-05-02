@@ -81,10 +81,10 @@ class ProdStat(Base):
     __tablename__ = "prodstats"
 
     api10 = db.Column(db.String(10), primary_key=True)
-    name = db.Column(db.String(50), primary_key=True)
+    name = db.Column(db.String(50), primary_key=True, index=True)
     value = db.Column(db.Numeric(19, 2))
-    property_name = db.Column(db.String(50))
-    aggregate_type = db.Column(db.String(25))
+    property_name = db.Column(db.String(50), index=True)
+    aggregate_type = db.Column(db.String(25), index=True)
     is_peak_norm = db.Column(db.Boolean())
     is_ll_norm = db.Column(db.Boolean())
     ll_norm_value = db.Column(db.Integer())

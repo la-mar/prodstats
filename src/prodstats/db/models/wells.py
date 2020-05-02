@@ -148,6 +148,12 @@ class Survey(WellBase):
     survey_top_uom = db.Column(db.String(10))
     survey_base = db.Column(db.Integer())
     survey_base_uom = db.Column(db.String(10))
+
+    # NOTE: alembic doesn't play nicely with spatial created by geoalchemy2. It
+    #       will autogenerate them, then delete them in the next migration. The
+    #       workaround here is to disable the automatic index creation by
+    #       geoalchemy2 (spatial_index=False) and explictly add the gist indices
+    #       using sqlalchemy.
     wellbore = db.Column(db.Geometry("LINESTRING", srid=4326, spatial_index=False))
     lateral_only = db.Column(db.Geometry("LINESTRING", srid=4326, spatial_index=False))
     stick = db.Column(db.Geometry("LINESTRING", srid=4326, spatial_index=False))

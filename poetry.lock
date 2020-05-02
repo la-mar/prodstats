@@ -104,7 +104,7 @@ marker = "sys_platform == \"win32\""
 name = "atomicwrites"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "1.3.0"
+version = "1.4.0"
 
 [[package]]
 category = "main"
@@ -162,10 +162,10 @@ description = "The AWS SDK for Python"
 name = "boto3"
 optional = false
 python-versions = "*"
-version = "1.12.47"
+version = "1.12.48"
 
 [package.dependencies]
-botocore = ">=1.15.47,<1.16.0"
+botocore = ">=1.15.48,<1.16.0"
 jmespath = ">=0.7.1,<1.0.0"
 s3transfer = ">=0.3.0,<0.4.0"
 
@@ -175,7 +175,7 @@ description = "Low-level, data-driven core of boto 3."
 name = "botocore"
 optional = false
 python-versions = "*"
-version = "1.15.47"
+version = "1.15.48"
 
 [package.dependencies]
 docutils = ">=0.10,<0.16"
@@ -499,26 +499,6 @@ pycodestyle = ">=2.5.0,<2.6.0"
 pyflakes = ">=2.1.0,<2.2.0"
 
 [[package]]
-category = "dev"
-description = "Celery Flower"
-name = "flower"
-optional = false
-python-versions = "*"
-version = "0.9.4"
-
-[package.dependencies]
-humanize = "0.5.1"
-pytz = "*"
-
-[package.dependencies.celery]
-python = ">=3.7"
-version = ">=4.3.0"
-
-[package.dependencies.tornado]
-python = ">=3.5.2"
-version = ">=5.0.0,<7.0.0"
-
-[[package]]
 category = "main"
 description = "Using SQLAlchemy with Spatial Databases"
 name = "geoalchemy2"
@@ -647,14 +627,6 @@ idna = ">=2.0.0,<3.0.0"
 rfc3986 = ">=1.3,<2"
 sniffio = ">=1.0.0,<2.0.0"
 urllib3 = ">=1.0.0,<2.0.0"
-
-[[package]]
-category = "dev"
-description = "python humanize utilities"
-name = "humanize"
-optional = false
-python-versions = "*"
-version = "0.5.1"
 
 [[package]]
 category = "main"
@@ -1526,15 +1498,6 @@ version = "0.6.0"
 
 [[package]]
 category = "dev"
-description = "Tornado is a Python web framework and asynchronous networking library, originally developed at FriendFeed."
-marker = "python_version >= \"3.5.2\""
-name = "tornado"
-optional = false
-python-versions = ">= 3.5"
-version = "6.0.4"
-
-[[package]]
-category = "dev"
 description = "Traitlets Python config system"
 name = "traitlets"
 optional = false
@@ -1658,7 +1621,7 @@ python-versions = ">=3.6.1"
 version = "8.1"
 
 [metadata]
-content-hash = "b3bd949cf2ec7d9022b23a242999f805bdb18a91a4b50fe735c8f3ae55a996c0"
+content-hash = "28567aa3a8d2dcbf3285c773ba3f3bfbe0da5f1eaf97d74341472ffdccd85a99"
 python-versions = "^3.8.1"
 
 [metadata.files]
@@ -1720,8 +1683,8 @@ asyncpg = [
     {file = "asyncpg-0.20.1.tar.gz", hash = "sha256:394bf19bdddbba07a38cd6fb526ebf66e120444d6b3097332b78efd5b26495b0"},
 ]
 atomicwrites = [
-    {file = "atomicwrites-1.3.0-py2.py3-none-any.whl", hash = "sha256:03472c30eb2c5d1ba9227e4c2ca66ab8287fbfbbda3888aa93dc2e28fc6811b4"},
-    {file = "atomicwrites-1.3.0.tar.gz", hash = "sha256:75a9445bac02d8d058d5e1fe689654ba5a6556a1dfd8ce6ec55a0ed79866cfa6"},
+    {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},
+    {file = "atomicwrites-1.4.0.tar.gz", hash = "sha256:ae70396ad1a434f9c7046fd2dd196fc04b12f9e91ffb859164193be8b6168a7a"},
 ]
 attrs = [
     {file = "attrs-19.3.0-py2.py3-none-any.whl", hash = "sha256:08a96c641c3a74e44eb59afb61a24f2cb9f4d7188748e76ba4bb5edfa3cb7d1c"},
@@ -1740,12 +1703,12 @@ black = [
     {file = "black-19.10b0.tar.gz", hash = "sha256:c2edb73a08e9e0e6f65a0e6af18b059b8b1cdd5bef997d7a0b181df93dc81539"},
 ]
 boto3 = [
-    {file = "boto3-1.12.47-py2.py3-none-any.whl", hash = "sha256:7f8b822e383c0d7656488d3b6fdc3e9c42a56fab3ed1a27c2cbc65876093cb21"},
-    {file = "boto3-1.12.47.tar.gz", hash = "sha256:84daba6d2f0c8d55477ba0b8196ffa7eb7f79d9099f768ac93eb968955877a3f"},
+    {file = "boto3-1.12.48-py2.py3-none-any.whl", hash = "sha256:d345f2ba820f022ab45627913cb427b1fa56d7c1f8e19312eee20874ba800007"},
+    {file = "boto3-1.12.48.tar.gz", hash = "sha256:39ef75f1351d9dce9542c71602bbe4dbae001df1aa5c75bdacea933d60cc1e7f"},
 ]
 botocore = [
-    {file = "botocore-1.15.47-py2.py3-none-any.whl", hash = "sha256:cceeb6d2a1bbbd062ab54552ded5065a12b14e845aa35613fc91fd68312020c0"},
-    {file = "botocore-1.15.47.tar.gz", hash = "sha256:6c6e9db7a6e420431794faee111923e4627b4920d4d9d8b16e1a578a389b2283"},
+    {file = "botocore-1.15.48-py2.py3-none-any.whl", hash = "sha256:f3569216d2f0067a34608e26ae1d0035b84fa29ad68d6c5fd26124a4cc86e8c9"},
+    {file = "botocore-1.15.48.tar.gz", hash = "sha256:ef4fa3055421cb95a7bf559e715f8c5f656aca30fafef070eca21b13ca3f0f81"},
 ]
 celery = [
     {file = "celery-4.4.0-py2.py3-none-any.whl", hash = "sha256:7c544f37a84a5eadc44cab1aa8c9580dff94636bb81978cdf9bf8012d9ea7d8f"},
@@ -1876,10 +1839,6 @@ flake8 = [
     {file = "flake8-3.7.9-py2.py3-none-any.whl", hash = "sha256:49356e766643ad15072a789a20915d3c91dc89fd313ccd71802303fd67e4deca"},
     {file = "flake8-3.7.9.tar.gz", hash = "sha256:45681a117ecc81e870cbf1262835ae4af5e7a8b08e40b944a8a6e6b895914cfb"},
 ]
-flower = [
-    {file = "flower-0.9.4-py2.py3-none-any.whl", hash = "sha256:616428951bd28c0463ce225331b22be1914f2240dec37ca7fabdb089ba46acec"},
-    {file = "flower-0.9.4.tar.gz", hash = "sha256:25782840f7ffc25dcf478d94535a2d815448de4aa6c71426be6abfa9ca417448"},
-]
 geoalchemy2 = [
     {file = "GeoAlchemy2-0.6.3-py2.py3-none-any.whl", hash = "sha256:0d1c9ea3ec13f6a522ccc3ffd2569ac524a6c6e80bab883e8805b28c48e77143"},
     {file = "GeoAlchemy2-0.6.3.tar.gz", hash = "sha256:4dc4c6c2bda0fc82cccab4aaff185a6570e13a5351d85e29e12984a55d4138ee"},
@@ -1933,9 +1892,6 @@ httptools = [
 httpx = [
     {file = "httpx-0.12.1-py3-none-any.whl", hash = "sha256:ce51c8e8ed2834447fde5a94650299fd74017b7da69cc786b6421fefda09a393"},
     {file = "httpx-0.12.1.tar.gz", hash = "sha256:405b4749f597b1f45cae5bffc17b23dc251cce30a0c4c8126f1007b9e728a615"},
-]
-humanize = [
-    {file = "humanize-0.5.1.tar.gz", hash = "sha256:a43f57115831ac7c70de098e6ac46ac13be00d69abbf60bdcac251344785bb19"},
 ]
 hyperframe = [
     {file = "hyperframe-5.2.0-py2.py3-none-any.whl", hash = "sha256:5187962cb16dcc078f23cb5a4b110098d546c3f41ff2d4038a9896893bbd0b40"},
@@ -2521,17 +2477,6 @@ toml = [
 tomlkit = [
     {file = "tomlkit-0.6.0-py2.py3-none-any.whl", hash = "sha256:e5d5f20809c2b09276a6c5d98fb0202325aee441a651db84ac12e0812ab7e569"},
     {file = "tomlkit-0.6.0.tar.gz", hash = "sha256:74f976908030ff164c0aa1edabe3bf83ea004b3daa5b0940b9c86a060c004e9a"},
-]
-tornado = [
-    {file = "tornado-6.0.4-cp35-cp35m-win32.whl", hash = "sha256:5217e601700f24e966ddab689f90b7ea4bd91ff3357c3600fa1045e26d68e55d"},
-    {file = "tornado-6.0.4-cp35-cp35m-win_amd64.whl", hash = "sha256:c98232a3ac391f5faea6821b53db8db461157baa788f5d6222a193e9456e1740"},
-    {file = "tornado-6.0.4-cp36-cp36m-win32.whl", hash = "sha256:5f6a07e62e799be5d2330e68d808c8ac41d4a259b9cea61da4101b83cb5dc673"},
-    {file = "tornado-6.0.4-cp36-cp36m-win_amd64.whl", hash = "sha256:c952975c8ba74f546ae6de2e226ab3cc3cc11ae47baf607459a6728585bb542a"},
-    {file = "tornado-6.0.4-cp37-cp37m-win32.whl", hash = "sha256:2c027eb2a393d964b22b5c154d1a23a5f8727db6fda837118a776b29e2b8ebc6"},
-    {file = "tornado-6.0.4-cp37-cp37m-win_amd64.whl", hash = "sha256:5618f72e947533832cbc3dec54e1dffc1747a5cb17d1fd91577ed14fa0dc081b"},
-    {file = "tornado-6.0.4-cp38-cp38-win32.whl", hash = "sha256:22aed82c2ea340c3771e3babc5ef220272f6fd06b5108a53b4976d0d722bcd52"},
-    {file = "tornado-6.0.4-cp38-cp38-win_amd64.whl", hash = "sha256:c58d56003daf1b616336781b26d184023ea4af13ae143d9dda65e31e534940b9"},
-    {file = "tornado-6.0.4.tar.gz", hash = "sha256:0fe2d45ba43b00a41cd73f8be321a44936dc1aba233dee979f17a042b83eb6dc"},
 ]
 traitlets = [
     {file = "traitlets-4.3.3-py2.py3-none-any.whl", hash = "sha256:70b4c6a1d9019d7b4f6846832288f86998aa3b9207c6821f3578a6a6a467fe44"},

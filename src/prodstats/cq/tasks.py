@@ -3,7 +3,6 @@ import itertools
 from datetime import timedelta
 from typing import Coroutine, Dict, List, Union
 
-import numpy as np
 import pandas as pd
 from celery.utils.log import get_task_logger
 from celery.utils.time import humanize_seconds
@@ -11,7 +10,8 @@ from celery.utils.time import humanize_seconds
 import calc.prod  # noqa
 import config as conf
 import cq.signals  # noqa
-import db.models as models
+import cq.util
+import db.models
 import ext.metrics as metrics
 import util
 from collector import IHSClient
@@ -32,46 +32,16 @@ RETRY_BASE_DELAY = 15
 # TODO: add task meta
 
 
-def log_transform(
-    x: float, vs: float = 1, hs: float = 1, ht: float = 0, vt: float = 0, mod: float = 1
-) -> float:
-    """ Default parameters yield the untransformed natural log curve.
-
-        f(x) = (vs * ln(hs * (x - ht)) + vt) + (x/mod)
-
-        vs = vertical stretch or compress
-        hs = horizontal stretch or compress
-        ht = horizontal translation
-        vt = vertical translation
-        mod = modulate growth of curve W.R.T x
-
-     """
-
-    # import pandas as pd
-    # import numpy as np
-    # import math
-
-    # df = pd.DataFrame(data={"ct": range(0, 200)})
-    # df["log"] = df.ct.add(1).apply(np.log10)
-    # df["a"] = df.ct.apply(lambda x: 1 * np.log(1 * (x + 0)) + 1)
-    # df["b"] = df.ct.apply(lambda x: 50 * np.log(0.25 * (x + 4)) + 0)
-    # df["c"] = df.ct.apply(lambda x: 25 * np.log(0.5 * (x + 2)) + 5)
-    # df["d"] = df.ct.apply(lambda x: 25 * np.log(1 * (x + 1)) + 5)
-    # df = df.replace([-np.inf, np.inf], np.nan)
-    # df = df.fillna(0)
-    # sample = df.sample(n=25).fillna(0).astype(int).sort_index()
-    # # ax = sns.lineplot(data=df)
-    # # ax.set_yscale('log')
-    # ax.set_xlim(0, 150)
-    # ax.set_ylim(0, 150)
-
-    # multiplier = multiplier or conf.TASK_SPREAD_MULTIPLIER
-
-    return np.round((vs * np.log(hs * (x + ht)) + vt) + (x / mod), 2)
+@celery_app.task
+def log():
+    """Print some log messages"""
+    logger.warning("heartbeat")
 
 
-def spread_countdown(x: float, vs: float = None, hs: float = None) -> float:
-    return log_transform(x=x, vs=vs or 25, hs=hs or 0.25, ht=4, vt=0, mod=4)
+@celery_app.task
+def smoke_test():
+    """ Verify an arbitrary Celery task can run """
+    return "verified"
 
 
 def run_executors(
@@ -103,7 +73,7 @@ def run_executors(
                 "executor_name": executor.__name__,
                 id_name: chunk,
             }
-            countdown = spread_countdown(idx, vs=log_vs, hs=log_hs)
+            countdown = cq.util.spread_countdown(idx, vs=log_vs, hs=log_hs)
             logger.info(
                 f"({executor.__name__}[{hole_dir.value}]) submitting task: {id_name}={len(chunk)} countdown={countdown}"  # noqa
             )
@@ -149,7 +119,7 @@ def run_next_available(
         else:
             ids_path = IHSPath.well_v_ids
 
-        area_obj, attr, is_ready, cooldown_hours = await models.Area.next_available(
+        area_obj, attr, is_ready, cooldown_hours = await db.models.Area.next_available(
             hole_dir
         )
         utcnow = util.utcnow()
@@ -169,14 +139,14 @@ def run_next_available(
             )
             utcnow = utcnow.strftime(util.dt.formats.no_seconds)
             logger.warning(
-                f"({models.Area.__name__}[{hole_dir}]) updated {area_obj.area}.{attr}: {prev_run} -> {utcnow}"  # noqa
+                f"({db.models.Area.__name__}[{hole_dir}]) updated {area_obj.area}.{attr}: {prev_run} -> {utcnow}"  # noqa
             )
         else:
             next_run_in_seconds = (
                 (prev_run + timedelta(hours=cooldown_hours)) - utcnow
             ).total_seconds()
             logger.warning(
-                f"({models.Area.__name__}[{hole_dir}]) Skipping {area_obj.area} next available for run in {humanize_seconds(next_run_in_seconds)}"  # noqa
+                f"({db.models.Area.__name__}[{hole_dir}]) Skipping {area_obj.area} next available for run in {humanize_seconds(next_run_in_seconds)}"  # noqa
             )  # noqa
 
     return util.aio.async_to_sync(coro())
@@ -210,7 +180,7 @@ def sync_area_manifest():  # FIXME: change to use Counties endpoint (and add Cou
     inbound_df = pd.DataFrame(list(itertools.chain(*results))).set_index("area")
     inbound_areas = inbound_df.groupby(level=0).first().sort_index()
 
-    existing_areas = util.aio.async_to_sync(models.Area.df()).sort_index()
+    existing_areas = util.aio.async_to_sync(db.models.Area.df()).sort_index()
 
     # get unique area names that dont already exist
     for_insert = inbound_areas[~inbound_areas.isin(existing_areas)].dropna()
@@ -218,455 +188,86 @@ def sync_area_manifest():  # FIXME: change to use Counties endpoint (and add Cou
     # for_insert["h_last_run_at"] = util.utcnow()
 
     if for_insert.shape[0] > 0:
-        coro = models.Area.bulk_upsert(
+        coro = db.models.Area.bulk_upsert(
             for_insert,
             update_on_conflict=True,
             reset_index=True,
-            conflict_constraint=models.Area.constraints["uq_areas_area"],
+            conflict_constraint=db.models.Area.constraints["uq_areas_area"],
         )
 
         affected = loop.run_until_complete(coro)
 
         logger.info(
-            f"({models.Area.__name__}) synchronized manifest: added {affected} areas"
+            f"({db.models.Area.__name__}) synchronized manifest: added {affected} areas"
         )
     else:
-        logger.info(f"({models.Area.__name__}) synchronized manifest: no updates")
+        logger.info(f"({db.models.Area.__name__}) synchronized manifest: no updates")
 
 
 @celery_app.task
-def log():
-    """Print some log messages"""
-    logger.warning("heartbeat")
+def sync_known_entities(hole_dir: HoleDirection):
 
+    hole_dir = HoleDirection(hole_dir)
 
-@celery_app.task
-def smoke_test():
-    """ Verify an arbitrary Celery task can run """
-    return "verified"
+    if hole_dir == HoleDirection.H:
+        path = IHSPath.well_h_ids
+    else:
+        path = IHSPath.well_v_ids
 
+    areas: List[Dict] = util.aio.async_to_sync(IHSClient.get_areas(path=path))
 
-@celery_app.task
-def run_test_apilist():
-
-    api10s = list(
-        set(
-            [
-                "4232938906",
-                "4232939088",
-                "4232939552",
-                "4232939730",
-                "4232939821",
-                "4232939919",
-                "4232939930",
-                "4232940253",
-                "4232940254",
-                "4232940257",
-                "4232940266",
-                "4232940267",
-                "4232940268",
-                "4232940269",
-                "4232940270",
-                "4232940271",
-                "4232940317",
-                "4232940463",
-                "4232940465",
-                "4232940466",
-                "4232940467",
-                "4232940567",
-                "4232940569",
-                "4232940570",
-                "4232940572",
-                "4232940573",
-                "4232940624",
-                "4232940625",
-                "4232940699",
-                "4232940700",
-                "4232940745",
-                "4232940746",
-                "4232940747",
-                "4232940803",
-                "4232940807",
-                "4232940808",
-                "4232940809",
-                "4232940815",
-                "4232940816",
-                "4232940899",
-                "4232940901",
-                "4232940902",
-                "4232940904",
-                "4232940906",
-                "4232940932",
-                "4232940936",
-                "4232940941",
-                "4232940990",
-                "4232941003",
-                "4232941050",
-                "4232941068",
-                "4232941070",
-                "4232941071",
-                "4232941072",
-                "4232941073",
-                "4232941077",
-                "4232941103",
-                "4232941139",
-                "4232941140",
-                "4232941141",
-                "4232941158",
-                "4232941161",
-                "4232941198",
-                "4232941232",
-                "4232941234",
-                "4232941236",
-                "4232941238",
-                "4232941245",
-                "4232941272",
-                "4232941273",
-                "4232941274",
-                "4232941312",
-                "4232941398",
-                "4232941413",
-                "4232941415",
-                "4232941417",
-                "4232941420",
-                "4232941422",
-                "4232941434",
-                "4232941435",
-                "4232941436",
-                "4232941501",
-                "4232941517",
-                "4232941530",
-                "4232941535",
-                "4232941540",
-                "4232941545",
-                "4232941547",
-                "4232941550",
-                "4232941558",
-                "4232941559",
-                "4232941560",
-                "4232941596",
-                "4232941609",
-                "4232941611",
-                "4232941644",
-                "4232941708",
-                "4232941709",
-                "4232941710",
-                "4232941775",
-                "4232941847",
-                "4232941890",
-                "4232941892",
-                "4232941918",
-                "4232941919",
-                "4232941920",
-                "4232941921",
-                "4232941922",
-                "4232941923",
-                "4232941924",
-                "4232941928",
-                "4232941930",
-                "4232941939",
-                "4232941940",
-                "4232941957",
-                "4232942009",
-                "4232942078",
-                "4232942105",
-                "4232942120",
-                "4232942136",
-                "4232942140",
-                "4232942143",
-                "4232942152",
-                "4232942169",
-                "4232942170",
-                "4232942171",
-                "4232942172",
-                "4232942175",
-                "4232942202",
-                "4232942205",
-                "4232942207",
-                "4232942210",
-                "4232942213",
-                "4232942245",
-                "4232942266",
-                "4232942299",
-                "4232942302",
-                "4232942304",
-                "4232942370",
-                "4232942378",
-                "4232942379",
-                "4232942423",
-                "4232942424",
-                "4232942436",
-                "4232942437",
-                "4232942463",
-                "4232942509",
-                "4232942514",
-                "4232942515",
-                "4232942516",
-                "4232942586",
-                "4232942587",
-                "4232942589",
-                "4232942598",
-                "4232942650",
-                "4232942666",
-                "4232942683",
-                "4232942719",
-                "4232942728",
-                "4232942729",
-                "4232942730",
-                "4232942755",
-                "4232942758",
-                "4232942783",
-                "4232942788",
-                "4232942791",
-                "4232942805",
-                "4232942807",
-                "4232942819",
-                "4232942827",
-                "4232942884",
-                "4232942887",
-                "4232942889",
-                "4232942929",
-                "4232942931",
-                "4232943011",
-                "4232943058",
-                "4232943061",
-                "4232943064",
-                "4232943067",
-                "4232943069",
-                "4232943070",
-                "4232943082",
-                "4232943087",
-                "4232943092",
-                "4238340357",
-                "4246139434",
-                "4246139461",
-                "4246139588",
-                "4246139665",
-                "4246139671",
-                "4246139720",
-                "4246139754",
-                "4246139770",
-                "4246139771",
-                "4246139796",
-                "4246139841",
-                "4246139851",
-                "4246139885",
-                "4246139924",
-                "4246140005",
-                "4246140013",
-                "4246140014",
-                "4246140015",
-                "4246140016",
-                "4246140017",
-                "4246140018",
-                "4246140069",
-                "4246140106",
-                "4246140108",
-                "4246140114",
-                "4246140122",
-                "4246140130",
-                "4246140132",
-                "4246140146",
-                "4246140151",
-                "4246140152",
-                "4246140158",
-                "4246140159",
-                "4246140165",
-                "4246140166",
-                "4246140168",
-                "4246140169",
-                "4246140170",
-                "4246140173",
-                "4246140174",
-                "4246140175",
-                "4246140190",
-                "4246140193",
-                "4246140194",
-                "4246140195",
-                "4246140197",
-                "4246140201",
-                "4246140204",
-                "4246140205",
-                "4246140206",
-                "4246140208",
-                "4246140209",
-                "4246140213",
-                "4246140217",
-                "4246140222",
-                "4246140223",
-                "4246140230",
-                "4246140237",
-                "4246140238",
-                "4246140243",
-                "4246140244",
-                "4246140245",
-                "4246140246",
-                "4246140247",
-                "4246140250",
-                "4246140253",
-                "4246140256",
-                "4246140258",
-                "4246140272",
-                "4246140291",
-                "4246140292",
-                "4246140301",
-                "4246140308",
-                "4246140336",
-                "4246140343",
-                "4246140345",
-                "4246140349",
-                "4246140358",
-                "4246140362",
-                "4246140364",
-                "4246140377",
-                "4246140378",
-                "4246140379",
-                "4246140381",
-                "4246140388",
-                "4246140397",
-                "4246140400",
-                "4246140402",
-                "4246140407",
-                "4246140409",
-                "4246140410",
-                "4246140415",
-                "4246140417",
-                "4246140441",
-                "4246140443",
-                "4246140444",
-                "4246140445",
-                "4246140449",
-                "4246140460",
-                "4246140467",
-                "4246140468",
-                "4246140469",
-                "4246140470",
-                "4246140472",
-                "4246140473",
-                "4246140491",
-                "4246140492",
-                "4246140493",
-                "4246140494",
-                "4246140495",
-                "4246140504",
-                "4246140505",
-                "4246140522",
-                "4246140531",
-                "4246140532",
-                "4246140533",
-                "4246140534",
-                "4246140535",
-                "4246140537",
-                "4246140538",
-                "4246140543",
-                "4246140544",
-                "4246140545",
-                "4246140550",
-                "4246140551",
-                "4246140552",
-                "4246140553",
-                "4246140554",
-                "4246140555",
-                "4246140556",
-                "4246140562",
-                "4246140563",
-                "4246140576",
-                "4246140577",
-                "4246140578",
-                "4246140579",
-                "4246140611",
-                "4246140612",
-                "4246140613",
-                "4246140632",
-                "4246140633",
-                "4246140634",
-                "4246140635",
-                "4246140647",
-                "4246140650",
-                "4246140656",
-                "4246140666",
-                "4246140667",
-                "4246140668",
-                "4246140669",
-                "4246140692",
-                "4246140710",
-                "4246140719",
-                "4246140720",
-                "4246140733",
-                "4246140734",
-                "4246140741",
-                "4246140742",
-                "4246140743",
-                "4246140749",
-                "4246140750",
-                "4246140751",
-                "4246140752",
-                "4246140773",
-                "4246140774",
-                "4246140775",
-                "4246140778",
-                "4246140780",
-                "4246140781",
-                "4246140782",
-                "4246140814",
-                "4246140815",
-                "4246140816",
-                "4246140819",
-                "4246140820",
-                "4246140822",
-                "4246140823",
-                "4246140832",
-                "4246140837",
-                "4246140838",
-                "4246140842",
-                "4246140856",
-                "4246140874",
-                "4246140877",
-                "4246140878",
-                "4246140879",
-                "4246140880",
-                "4246140881",
-                "4246140882",
-                "4246140884",
-                "4246140885",
-                "4246140886",
-                "4246140887",
-                "4246140905",
-                "4246140914",
-                "4246140915",
-                "4246140917",
-                "4246140922",
-                "4246140927",
-                "4246140938",
-                "4246140939",
-                "4246140943",
-                "4246140944",
-                "4246140945",
-                "4246140946",
-                "4246140947",
-                "4246140948",
-                "4246140950",
-                "4246140951",
-                "4246140956",
-                "4246140958",
-                "4246140959",
-                "4246140960",
-                "4246140961",
-                "4246140964",
-                "4246140966",
-                "4246140971",
-                "4246141003",
-                "4246141012",
-                "4246141036",
-                "4246141054",
-                "4246141055",
-                "4246141077",
-                "4232942174",
-            ]
+    for idx, area in enumerate(areas):
+        sync_known_entities_for_area.apply_async(
+            args=(hole_dir, area), kwargs={}, countdown=idx + 30
         )
-    )
 
-    run_executors(HoleDirection.H, api10s=api10s, log_vs=200, batch_size=10)
+
+@celery_app.task
+def sync_known_entities_for_area(hole_dir: HoleDirection, area: str):
+    async def wrapper(hole_dir: HoleDirection, area: str):
+        hole_dir = HoleDirection(hole_dir)
+        index_cols = ["entity_id", "entity_type"]
+
+        if hole_dir == HoleDirection.H:
+            path = IHSPath.well_h_ids
+        else:
+            path = IHSPath.well_v_ids
+
+        # fetch ids from remote service
+        ids = await IHSClient.get_ids_by_area(path, area=area)
+        df = pd.Series(ids, name="entity_id").to_frame()
+        df["ihs_last_seen_at"] = util.utcnow()
+        df["entity_type"] = "api14"
+        df = df.set_index(index_cols)
+
+        # query matching records existing in the known_entities model
+        objs: List[db.models.KnownEntity] = await db.models.KnownEntity.query.where(
+            db.models.KnownEntity.entity_id.in_(ids)
+        ).gino.all()
+
+        obj_df = pd.DataFrame([x.to_dict() for x in objs]).set_index(index_cols)
+
+        fresh = pd.DataFrame(index=obj_df.index, columns=obj_df.columns)
+
+        # merge the records, prioritizing new values from the remote service
+        combined = fresh.combine_first(df).combine_first(obj_df)
+        combined = combined.drop(columns=["created_at", "updated_at"])
+
+        # persist the new records
+        await db.models.KnownEntity.bulk_upsert(combined, batch_size=1000)
+
+    util.aio.async_to_sync(wrapper(hole_dir, area))
+
+
+@celery_app.task
+def run_for_apilist(
+    hole_dir: HoleDirection,
+    api14s: List[str] = None,
+    api10s: List[str] = None,
+    **kwargs,
+):
+
+    run_executors(HoleDirection.H, api14s=api14s, api10s=api10s, **kwargs)
 
 
 @celery_app.task
@@ -722,43 +323,47 @@ def run_driftwood(hole_dir: HoleDirection):
 
 if __name__ == "__main__":
     from db import db
+
+    util.aio.async_to_sync(db.startup())
+    import db.models
     import loggers
     import cq.tasks
     from const import HoleDirection
 
-    # from executors import WellExecutor, GeomExecutor, ProdExecutor
-    # import util
-
     loggers.config()
     hole_dir = HoleDirection.H
-    util.aio.async_to_sync(db.startup())
-    cq.tasks.sync_area_manifest.apply_async()
-
-    cq.tasks.run_next_available(HoleDirection.H, log_vs=10, log_hs=None)
+    # cq.tasks.sync_area_manifest.apply_async()
+    # cq.tasks.run_next_available(HoleDirection.H, log_vs=10, log_hs=None)
 
     api14s = [
-        "42461409160000",
-        "42383406370000",
-        "42461412100000",
-        "42461412090000",
-        "42461411750000",
-        "42461411740000",
-        "42461411730000",
-        "42461411720000",
-        "42461411600000",
-        "42461411280000",
-        "42461411270000",
-        "42461411260000",
-        "42383406650000",
-        "42383406640000",
-        "42383406400000",
-        "42383406390000",
-        "42383406380000",
-        "42461412110000",
-        "42383402790000",
+        "42501002030001",
+        "42501002030002",
+        # "42501002040000",
+        # "42501002040001",
+        # "42501002040002",
+        # "42501002050000",
+        # "42501002050001",
+        # "42501002060000",
+        # "42501002060001",
+        # "42501002070000",
+        # "42501002070001",
+        # "42501002080000",
+        # "42501002080001",
+        # "42501002090000",
+        # "42501002100000",
+        # "42501002100001",
+        # "42501002110000",
+        # "42501002110001",
+        # "42501002120000",
+        # "42501002120001",
+        # "42501002130000",
+        # "42501002130001",
+        # "42501002140000",
+        # "42501002140001",
+        # "42501002150000",
     ]
 
-    holedir = HoleDirection.H
+    holedir = HoleDirection.V
 
     async def run_wells(holedir: HoleDirection, api14s: List[str]):
         wexec = WellExecutor(holedir)
@@ -779,3 +384,9 @@ if __name__ == "__main__":
         prodset = await pexec.download(api14s=api14s)
         prodset = await pexec.process(prodset)
         await pexec.persist(prodset)
+
+    async def async_wrapper():
+        hole_dir = HoleDirection.H
+        IHSPath.well_h_ids
+
+        sync_known_entities_for_area(hole_dir, "tx-upton")

@@ -1,0 +1,61 @@
+[{
+    "name": "post_heartbeat",
+    "qualname": "cq.tasks.post_heartbeat",
+    "parameters": {}
+}, {
+    "name": "sync_area_manifest",
+    "qualname": "cq.tasks.sync_area_manifest",
+    "parameters": {}
+}, {
+    "name": "run_driftwood",
+    "qualname": "cq.tasks.run_driftwood",
+    "parameters": {
+        "hole_dir": "<enum 'HoleDirection'>"
+    }
+}, {
+    "name": "sync_known_entities",
+    "qualname": "cq.tasks.sync_known_entities",
+    "parameters": {
+        "hole_dir": "<enum 'HoleDirection'>"
+    }
+}, {
+    "name": "run_for_apilist",
+    "qualname": "cq.tasks.run_for_apilist",
+    "parameters": {
+        "hole_dir": "<enum 'HoleDirection'>",
+        "api14s": "typing.List[str]",
+        "api10s": "typing.List[str]",
+        "kwargs": "<class 'inspect._empty'>"
+    }
+}, {
+    "name": "run_executor",
+    "qualname": "cq.tasks.run_executor",
+    "parameters": {
+        "hole_dir": "<enum 'HoleDirection'>",
+        "executor_name": "<class 'str'>",
+        "kwargs": "<class 'inspect._empty'>"
+    }
+}, {
+    "name": "log",
+    "qualname": "cq.tasks.log",
+    "parameters": {}
+}, {
+    "name": "sync_known_entities_for_area",
+    "qualname": "cq.tasks.sync_known_entities_for_area",
+    "parameters": {
+        "hole_dir": "<enum 'HoleDirection'>",
+        "area": "<class 'str'>"
+    }
+}, {
+    "name": "run_next_available",
+    "qualname": "cq.tasks.run_next_available",
+    "parameters": {
+        "hole_dir": "typing.Union[const.HoleDirection, str]",
+        "force": "<class 'bool'>",
+        "kwargs": "<class 'inspect._empty'>"
+    }
+}, {
+    "name": "smoke_test",
+    "qualname": "cq.tasks.smoke_test",
+    "parameters": {}
+}]

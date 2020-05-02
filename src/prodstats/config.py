@@ -64,6 +64,9 @@ TASK_BATCH_SIZE: int = conf("PRODSTATS_TASK_BATCH_SIZE", cast=int, default=25)
 COLLECTOR_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "collectors.yaml"  # TODO: remove
 PARSER_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "parsers.yaml"  # TODO: remove
 
+PRODSTATS_H_COOLDOWN: int = conf("PRODSTATS_H_COOLDOWN", cast=int, default=48)  # hours
+PRODSTATS_V_COOLDOWN: int = conf("PRODSTATS_V_COOLDOWN", cast=int, default=48)  # hours
+
 
 # --- database --------------------------------------------------------------- #
 
@@ -171,8 +174,12 @@ class CeleryConfig:
     # --- beat --------------------------------------------------------------- #
 
     beat_scheduler = "redbeat.RedBeatScheduler"
+    beat_max_loop_interval: int = conf("CELERY_MAX_LOOP_INTERVAL", cast=int, default=30)
     redbeat_redis_url: str = conf("PRODSTATS_CRON_URL", cast=str)
     redbeat_key_prefix: str = project
+    redbeat_lock_timeout: int = conf(
+        "REDBEAT_LOCK_TIMEOUT", cast=int, default=beat_max_loop_interval * 2
+    )
 
     # --- task --------------------------------------------------------------- #
 
@@ -209,10 +216,10 @@ class CeleryConfig:
     # --- worker ------------------------------------------------------------- #
 
     worker_max_tasks_per_child: int = conf(
-        "CELERYD_MAX_TASKS_PER_CHILD", cast=int, default=100
+        "CELERY_MAX_TASKS_PER_CHILD", cast=int, default=100
     )
     worker_max_memory_per_child: int = conf(
-        "CELERYD_MAX_MEMORY_PER_CHILD", cast=int, default=15000
+        "CELERY_MAX_MEMORY_PER_CHILD", cast=int, default=15000
     )  # 150mb
     worker_enable_remote_control: bool = conf(
         "CELERY_ENABLE_REMOTE_CONTROL", cast=bool, default=False

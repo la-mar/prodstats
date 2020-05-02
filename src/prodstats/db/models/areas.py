@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 import pandas as pd
 import pytz
 
+import config as conf
 from const import HoleDirection
 from db.models.bases import Base, db
 
@@ -18,6 +19,9 @@ SIX_HOURS = 6
 ONE_DAY = 24
 TWO_DAYS = 48
 THREE_DAYS = 72
+FOUR_DAYS = 96
+FIVE_DAYS = 120
+SIX_DAYS = 144
 ONE_WEEK = 168
 
 
@@ -53,9 +57,9 @@ class Area(Base):
          the given hole direction and entity type """
 
         if hole_dir == HoleDirection.H:
-            cooldown = ONE_DAY
+            cooldown = conf.PRODSTATS_H_COOLDOWN
         elif hole_dir == HoleDirection.V:
-            cooldown = THREE_DAYS
+            cooldown = conf.PRODSTATS_V_COOLDOWN
         else:
             cooldown = ONE_WEEK
 
@@ -84,6 +88,7 @@ if __name__ == "__main__":
     async def wrapper():
         from db import db
         from db.models import Area
+        from const import HoleDirection
 
         cls = Area
 

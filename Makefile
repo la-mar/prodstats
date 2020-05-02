@@ -9,6 +9,13 @@ APP_NAME:=$$(grep -e 'name\s=\s\(.*\)' pyproject.toml| cut -d"\"" -f2)
 APP_VERSION=$$(grep -o '\([0-9]\+.[0-9]\+.[0-9]\+\)' pyproject.toml | head -n1)
 # IMAGE_NAME:=$(APP_NAME)
 
+
+ssm:
+	chamber export ${SERVICE_NAME} | jq
+	chamber export ${SERVICE_NAME}-worker | jq
+	chamber export ${SERVICE_NAME}-cron | jq
+	chamber export ${SERVICE_NAME}-web | jq
+
 run-tests:
 	pytest --cov=prodstats tests/ --cov-report xml:./coverage/python/coverage.xml
 
@@ -36,8 +43,14 @@ login:
 
 build:
 	@echo "Building docker image: ${IMAGE_NAME}"
-	docker build  -f Dockerfile . -t ${IMAGE_NAME}
+	docker build -f Dockerfile . -t ${IMAGE_NAME}
 	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:latest
+
+build-no-cache:
+	@echo "Building docker image: ${IMAGE_NAME}"
+	docker build --no-cache -f Dockerfile . -t ${IMAGE_NAME}
+	docker tag ${IMAGE_NAME} ${IMAGE_NAME}:latest
+
 
 push: login
 	# docker push ${IMAGE_NAME}:dev

@@ -36,9 +36,9 @@ services:
   web:
     <<: *defaults
     container_name: prodstats_web
-    command: prodstats run dev
+    command: prodstats run dev --host 0.0.0.0
     ports:
-      - 8000
+      - 8000:8000
   worker_1:
     <<: *defaults
     container_name: prodstats_worker
@@ -46,36 +46,36 @@ services:
     command: prodstats run worker
     depends_on:
       - redis
-  worker_2:
-    <<: *defaults
-    container_name: prodstats_worker_h
-    user: celeryuser
-    command: prodstats run worker -Q prodstats-h
-    depends_on:
-      - redis
-  worker_3:
-    <<: *defaults
-    container_name: prodstats_worker_v
-    user: celeryuser
-    command: prodstats run worker -Q prodstats-v
-    depends_on:
-      - redis
-  flower:
-    <<: *defaults
-    container_name: prodstats_flower
-    user: celeryuser
-    command: prodstats run flower
-    ports:
-      - 5555:5555
-    depends_on:
-      - redis
-  # cron:
+  # worker_2:
   #   <<: *defaults
-  #   container_name: prodstats_cron
+  #   container_name: prodstats_worker_h
   #   user: celeryuser
-  #   command: prodstats run cron
+  #   command: prodstats run worker -Q prodstats-h
   #   depends_on:
   #     - redis
+  # worker_3:
+  #   <<: *defaults
+  #   container_name: prodstats_worker_v
+  #   user: celeryuser
+  #   command: prodstats run worker -Q prodstats-v
+  #   depends_on:
+  #     - redis
+  # flower:
+  #   <<: *defaults
+  #   container_name: prodstats_flower
+  #   user: celeryuser
+  #   command: prodstats run flower
+  #   ports:
+  #     - 5555:5555
+  #   depends_on:
+  # - redis
+  cron:
+    <<: *defaults
+    container_name: prodstats_cron
+    user: celeryuser
+    command: prodstats run cron --pidfile=
+    depends_on:
+      - redis
   # db_migration:
   #   <<: *defaults
   #   container_name: prodstats_db_migrations
@@ -84,12 +84,9 @@ services:
   redis:
     container_name: prodstats_redis
     image: redis
-    build:
-      context: ./redis
-      dockerfile: Dockerfile
-    command: redis-server  --save "" --appendonly no --loglevel notice --bind 0.0.0.0
+    command: redis-server  --save "" --appendonly no --loglevel notice --bind 0.0.0.0 --port 6380
     ports:
-      - 6379:6379
+      - 6380:6380
   # volumes:
   #   - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
   # command:

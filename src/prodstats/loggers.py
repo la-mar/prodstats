@@ -117,6 +117,7 @@ class ColorizingStreamHandler(logutils.colorize.ColorizingStreamHandler):
         else:
             record.__dict__.update(
                 task_id=None,
+                task_short_id=None,
                 task_name=None,
                 task_meta=None,
                 task_retries=None,

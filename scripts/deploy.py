@@ -165,7 +165,7 @@ def get_task_definition(
                         # "-Q",
                         # f"{project}-h,{project}-v",
                     ],
-                    "memoryReservation": 512,
+                    "memoryReservation": 1536,
                     "cpu": 512,
                     "image": image,
                     "essential": True,

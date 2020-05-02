@@ -18,8 +18,10 @@
 
 ## Roadmap
 
-0. Terraform and deployment scripts
-1. Shell script to deploy worker task to run db migrations
+<!-- 0. Terraform and deployment scripts -->
+<!-- 1. Container to run db migrations -->
+
+1. Entity Master
 2. Formation grid sourcing (cli upload, s3, dropbox)
 3. Formation Assignment
 4. Well Spacing
@@ -43,16 +45,24 @@
 
 ## TODO
 
-1. Chord GeomExecutor -> ProdExecutor -> WellExecutor(use local geoms and prod_headers)
-2. RequestRouter for provider requests
+1. Run task endpoint
+2. calculate frac_parameters -> gen, gen_name
+3. RequestRouter for provider requests
    input: const.DataType, const.Provider, const.HoleDirection
    output: PathComponent
-3. Set httpx timeouts
-4. Refactor jsontools and ext.orjson to jsonlib
-5. Standardize log messages
-6. Normalize Area/Provider related tables when incorporating drillinginfo. Change Area to ProviderArea and add providers.IDMaster.
-7. Flower API metrics to Datadog
-8. Request/Response logging middleware
+4. Set httpx timeouts
+5. Refactor jsontools and ext.orjson to jsonlib
+6. Standardize log messages
+7. Normalize Area/Provider related tables when incorporating drillinginfo. Change Area to ProviderArea and add providers.IDMaster.
+8. Datadog metrics
+9. Request/Response logging middleware
+10. unit tests for config values
+11. Chord GeomExecutor -> ProdExecutor -> WellExecutor(use local geoms and prod_headers)
+12. parse wells.sub_basin
+
+## Issues
+
+- wells.county_code losing leading zeroes
 
 ### Development
 

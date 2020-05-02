@@ -54,6 +54,10 @@ class IHSPath(str, Enum):
     well_v_sample = "well/v/sample"
     well_v_headers = "well/v/headers"
 
+    @classmethod
+    def id_paths(cls):
+        return [x for x in cls.members() if x.name.endswith("_ids")]
+
 
 class FracFocusPath(str, Enum):
     api10 = "api10"

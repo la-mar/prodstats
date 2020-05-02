@@ -63,7 +63,6 @@ pytest-asyncio = "^0.10.0"
 async-asgi-testclient = "^1.4.3"
 matplotlib = "^3.2.1"
 seaborn = "^0.10.0"
-flower = "^0.9.4"
 localstack = "^0.11.0"
 
 [tool.coverage.report]
@@ -87,7 +86,7 @@ include_trailing_comma=true
 force_grid_wrap=0
 use_parentheses=true
 line_length=88
-known_third_party = ["alembic", "async_asgi_testclient", "async_generator", "asyncpg", "boto3", "celery", "click", "colorama", "dateutil", "fastapi", "geoalchemy2", "geopandas", "gino", "httpx", "json_log_formatter", "kombu", "logutils", "numpy", "orjson", "pandas", "prodstats", "psutil", "pydantic", "pytest", "pytz", "requests_mock", "shapely", "sqlalchemy", "sqlalchemy_utils", "starlette", "tests", "tomlkit", "typer", "uvicorn", "uvloop", "yaml"]
+known_third_party = ["alembic", "async_asgi_testclient", "async_generator", "asyncpg", "boto3", "celery", "click", "colorama", "dateutil", "fastapi", "geoalchemy2", "geopandas", "gino", "httpx", "json_log_formatter", "kombu", "logutils", "numpy", "orjson", "pandas", "psutil", "pydantic", "pytest", "pytz", "requests_mock", "shapely", "sqlalchemy", "sqlalchemy_utils", "starlette", "tomlkit", "typer", "uvicorn", "uvloop", "yaml"]
 
 [build-system]
 requires = ["poetry>=0.12"]

@@ -214,10 +214,17 @@ class IHSClient(AsyncClient):
 
     @classmethod
     async def get_areas(
-        cls, path: IHSPath, name_only: bool = True, **kwargs
+        cls, path: IHSPath, name_only: bool = True, exclude_ids: bool = True, **kwargs
     ) -> List[str]:
+        if path not in IHSPath.id_paths():
+            raise ValueError(f"path should be one of {IHSPath.id_paths()}")
+
+        params = {}
+        if exclude_ids:
+            params["exclude"] = "ids"
+
         async with cls(**kwargs) as client:
-            response = await client.get(f"{path.value}", params={"exclude": "ids"})
+            response = await client.get(f"{path.value}", params=params)
             response.raise_for_status()
             data = response.json()["data"]
             if name_only:
