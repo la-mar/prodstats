@@ -7,13 +7,13 @@ import pytest
 import uvicorn
 from fastapi import Depends, FastAPI
 from starlette.responses import Response
-from tests.utils import MockAsyncDispatch, get_open_port, rand_str
 
 import db
 from api.helpers import Pagination
 from collector import AsyncClient
 from db.models import ProdStat as Model
 from schemas.credentials import BasicAuth
+from tests.utils import MockAsyncDispatch, get_open_port, rand_str
 
 logger = logging.getLogger(__name__)
 

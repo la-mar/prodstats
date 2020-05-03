@@ -3,4 +3,4 @@ try:
 
     coverage.process_startup()
 except ImportError:
-    print(f"Failed to import coverage.py")
+    print("Failed to import coverage.py")

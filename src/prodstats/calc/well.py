@@ -127,7 +127,7 @@ class Well:
         elif hole_dir == HoleDirection.V:
             ihs_path = IHSPath.well_v
         else:
-            raise TypeError(f"hole_dir must be specified!")
+            raise TypeError("hole_dir must be specified!")
 
         wellset = WellSet(wells=None, depths=None, fracs=None, stats=None, ips=None)
         coros: List[Coroutine] = []
@@ -480,7 +480,7 @@ class Well:
 
                 status.loc[status[target_column].isna(), target_column] = selected
         else:
-            raise ValueError(f"Invalid how value: use 'waterfall'")
+            raise ValueError("Invalid how value: use 'waterfall'")
 
         if not detail:
             status = status.loc[:, [target_column]]

@@ -94,7 +94,7 @@ class Parser:
             func = getattr(self, fname)
             newvalue = func(value)
             logger.debug(
-                f"Parsed dtype: %s -> %s (%s)",
+                "Parsed dtype: %s -> %s (%s)",
                 value or "None",
                 newvalue or "None",
                 type(newvalue).__name__,

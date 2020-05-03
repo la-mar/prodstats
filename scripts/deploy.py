@@ -28,9 +28,9 @@ project: str = pkg_meta.get("name")  # type: ignore
 version: str = pkg_meta.get("version")  # type: ignore
 
 if not project:
-    raise ValueError(f"project name is missing")
+    raise ValueError("project name is missing")
 if not version:
-    raise ValueError(f"project version is missing")
+    raise ValueError("project version is missing")
 
 ENV: Optional[str] = os.getenv("ENV")
 AWS_ACCOUNT_ID: Optional[str] = os.getenv("AWS_ACCOUNT_ID")
@@ -105,7 +105,7 @@ string += tpl.format(name="IMAGE:", value=IMAGE)
 print("\n\n" + hr(2) + string + hr(2))
 
 if not all([ENV, AWS_ACCOUNT_ID, SERVICE_NAME, IMAGE, AWS_REGION]):
-    raise ValueError(f"One or more environment variables are missing")
+    raise ValueError("One or more environment variables are missing")
 
 
 def get_task_definition(

@@ -151,7 +151,7 @@ class BulkIOMixin(object):
                 # TODO: Log failed table_name and primary keys and capture for later reprocessing (no mechanism for this exists yet) # noqa
             else:
                 raise ValueError(
-                    f"Invalid value for 'errors': must be one of [fractionalize, raise]"
+                    "Invalid value for 'errors': must be one of [fractionalize, raise]"
                 )
 
             coros.append(

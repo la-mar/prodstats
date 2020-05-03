@@ -381,8 +381,8 @@ class WellLocationSet(WellGeometrySetBase):
 if __name__ == "__main__":
     from util.jsontools import load_json
 
-    ihs_wells = load_json(f"tests/fixtures/ihs_wells.json")
-    ihs_geoms = load_json(f"tests/fixtures/ihs_well_shapes.json")
+    ihs_wells = load_json("tests/fixtures/ihs_wells.json")
+    ihs_geoms = load_json("tests/fixtures/ihs_well_shapes.json")
 
     obj = WellRecord(**ihs_wells[0])
     obj.record()

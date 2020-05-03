@@ -5,10 +5,10 @@ import pytest
 from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
-from tests.utils import get_open_port
 
 import manage
 from db import db
+from tests.utils import get_open_port
 from util.context import working_directory
 
 logger = logging.getLogger(__name__)

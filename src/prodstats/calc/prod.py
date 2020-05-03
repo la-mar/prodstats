@@ -442,7 +442,7 @@ class ProdStats:
 
         alias_map = self.make_aliases(
             columns=["oil", "boe"],
-            agg_type=f"pdp",
+            agg_type="pdp",
             include_zeroes=True,
             range_name=range_name,
             months=months,
@@ -589,14 +589,14 @@ class ProdStats:
 
         if method not in ["ratio_of_averages", "average_of_ratios"]:
             raise ValueError(
-                f"method must be one of [ratio_of_averages, average_of_ratios]"
+                "method must be one of [ratio_of_averages, average_of_ratios]"
             )
 
         if method == "ratio_of_averages":
             # * Ratio of Averages
             if numerator is None or denominator is None:
                 raise ValueError(
-                    f"Must specify 'numerator' and 'denominator' when using ratio_of_averages method"  # noqa
+                    "Must specify 'numerator' and 'denominator' when using ratio_of_averages method"  # noqa
                 )
             validate_required_columns([numerator, denominator], self._obj.columns)
             partials = self.calc_prodstat(
@@ -635,7 +635,7 @@ class ProdStats:
             # * Average of Ratios
             if prod_column is None:
                 raise ValueError(
-                    f"Must specify 'prod_column' when using average_of_ratios method"
+                    "Must specify 'prod_column' when using average_of_ratios method"
                 )
             validate_required_columns([prod_column], self._obj.columns)
 
@@ -669,7 +669,7 @@ class ProdStats:
 
         if method not in ["ratio_of_averages", "average_of_ratios"]:
             raise ValueError(
-                f"method must be one of [ratio_of_averages, average_of_ratios]"
+                "method must be one of [ratio_of_averages, average_of_ratios]"
             )
 
         gor = self.ratio_over_interval(
@@ -705,7 +705,7 @@ class ProdStats:
 
         if method not in ["ratio_of_averages", "average_of_ratios"]:
             raise ValueError(
-                f"method must be one of [ratio_of_averages, average_of_ratios]"
+                "method must be one of [ratio_of_averages, average_of_ratios]"
             )
 
         oil_percent = self.ratio_over_interval(
@@ -740,7 +740,7 @@ class ProdStats:
 
         if method not in ["ratio_of_averages", "average_of_ratios"]:
             raise ValueError(
-                f"method must be one of [ratio_of_averages, average_of_ratios]"
+                "method must be one of [ratio_of_averages, average_of_ratios]"
             )
 
         avgdaily = self.ratio_over_interval(

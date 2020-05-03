@@ -61,7 +61,7 @@ def migrate(args: List[str] = None):
 
 @db_cli.command(help="Apply pending migrations to the database")
 def upgrade(args: List[str] = None):
-    logger.warning(f"Applying database migrations")
+    logger.warning("Applying database migrations")
     cmd = ["alembic", "upgrade", "head"] + (args or [])
     subprocess.call(cmd)
 
@@ -96,7 +96,7 @@ def recreate(args: List[str] = None):  # nocover
             logger.warning(f"Creating new database at: {short_url}")
             create_database(url)
         upgrade()
-        logger.warning(f"Database recreation complete")
+        logger.warning("Database recreation complete")
 
 
 # --- run -------------------------------------------------------------------- #

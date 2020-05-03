@@ -63,7 +63,7 @@ def run_executors(
         id_name = "api10s"
         ids = api10s
     else:
-        raise ValueError(f"One of [api14s, api10s] must be specified")
+        raise ValueError("One of [api14s, api10s] must be specified")
 
     # TODO: move chunking to run_executor?
     for idx, chunk in enumerate(util.chunks(ids, n=batch_size)):

@@ -533,12 +533,12 @@ class ProdExecutor(BaseExecutor):
 
         if param_count > 1:
             raise ValueError(
-                f"Only one of [area_name, api10s, api14s, entity12s, entities] can be specified"
+                "Only one of [area_name, api10s, api14s, entity12s, entities] can be specified"
             )
 
         elif param_count < 1:
             raise ValueError(
-                f"One of [area_name, api10s, api14s, entity12s, entities] must be specified"
+                "One of [area_name, api10s, api14s, entity12s, entities] must be specified"
             )
 
         return await super().arun(
@@ -741,10 +741,10 @@ class GeomExecutor(BaseExecutor):
         param_count = sum([api14s is not None, api10s is not None])
 
         if param_count > 1:
-            raise ValueError(f"Only one of [api14s, api10s] can be specified")
+            raise ValueError("Only one of [api14s, api10s] can be specified")
 
         elif param_count < 1:
-            raise ValueError(f"One of [api14s, api10s] must be specified")
+            raise ValueError("One of [api14s, api10s] must be specified")
 
         return await super().arun(
             api14s=api14s, api10s=api10s, return_data=return_data, **kwargs
@@ -1003,10 +1003,10 @@ class WellExecutor(BaseExecutor):
         param_count = sum([api14s is not None, api10s is not None])
 
         if param_count > 1:
-            raise ValueError(f"Only one of [api14s, api10s] can be specified")
+            raise ValueError("Only one of [api14s, api10s] can be specified")
 
         elif param_count < 1:
-            raise ValueError(f"One of [api14s, api10s] must be specified")
+            raise ValueError("One of [api14s, api10s] must be specified")
 
         return await super().arun(
             api14s=api14s, api10s=api10s, return_data=return_data, **kwargs

@@ -178,7 +178,7 @@ class IHSClient(AsyncClient):
             IHSPath.prod_h_sample,
             IHSPath.prod_v_sample,
         ]:
-            raise ValueError(f"'path' must be path to a sampling endpoint")
+            raise ValueError("'path' must be path to a sampling endpoint")
 
         params: Dict = {}
 
@@ -191,7 +191,7 @@ class IHSClient(AsyncClient):
                 f"invaid fraction supplied ({frac}): must be 0 < frac <= 1"
             )
         else:
-            raise ValueError(f"One of 'n' or 'frac' must be specified")
+            raise ValueError("One of 'n' or 'frac' must be specified")
 
         if area:
             params["area"] = area

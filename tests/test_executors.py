@@ -2,7 +2,6 @@ import logging
 
 import pandas as pd
 import pytest
-from tests.utils import MockAsyncDispatch, rand_str
 
 import calc
 import calc.geom  # noqa
@@ -13,6 +12,7 @@ from const import HoleDirection, IHSPath, ProdStatRange  # noqa
 from db.models import ProdHeader
 from db.models import ProdStat as Model
 from executors import BaseExecutor, GeomExecutor, ProdExecutor, WellExecutor
+from tests.utils import MockAsyncDispatch, rand_str
 
 logger = logging.getLogger(__name__)
 

@@ -2,11 +2,11 @@ import logging
 
 import pytest
 from requests_mock import ANY
-from tests.utils import get_open_port
 
 import ext.metrics.metrics as metrics
 import loggers
 from ext.metrics import load, post, post_event, post_heartbeat, to_tags
+from tests.utils import get_open_port
 
 api_endpoint = f"http://localhost:{get_open_port}"
 

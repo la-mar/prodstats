@@ -203,7 +203,7 @@ async def refresh_fixtures(hole_dir: HoleDirection, n: int = 10):
         prodheaderpath = IHSPath.prod_v_headers
         geompath = IHSPath.well_v_geoms
     else:
-        raise ValueError(f"invalid hole direction")
+        raise ValueError("invalid hole direction")
 
     wells = await IHSClient.get_sample(wellpath, n=n, area="tx-midland")
     api14s = [x["api14"] for x in wells]

@@ -27,7 +27,7 @@ def load():
             )
             logger.info("Datadog enabled")
         else:
-            logger.warning(f"Failed to load Datadog configuration: missing api key")
+            logger.warning("Failed to load Datadog configuration: missing api key")
     else:
         logger.debug("Datadog disabled.")
 

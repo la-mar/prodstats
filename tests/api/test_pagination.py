@@ -7,10 +7,10 @@ from fastapi import Depends, FastAPI
 from httpx import URL
 from starlette.requests import Request
 from starlette.responses import Response
-from tests.models import TestModel as Model
-from tests.schemas import Test as ModelSchema
 
 from api.helpers import Pagination
+from tests.models import TestModel as Model
+from tests.schemas import Test as ModelSchema
 
 logger = logging.getLogger(__name__)
 

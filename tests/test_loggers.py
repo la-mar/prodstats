@@ -2,9 +2,9 @@ import json
 import logging
 
 import pytest
-from tests.utils import rand_str
 
 from loggers import ColorizingStreamHandler, config, get_formatter, mlevel, mlevelname
+from tests.utils import rand_str
 
 logger = logging.getLogger(__name__)
 logger.setLevel(10)
