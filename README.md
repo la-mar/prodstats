@@ -63,6 +63,7 @@
 ## Issues
 
 - wells.county_code losing leading zeroes
+- ip_tests missing duration and duration_uom
 
 ### Development
 

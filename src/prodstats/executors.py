@@ -60,7 +60,8 @@ class BaseExecutor:
 
     def add_metric(self, operation: str, name: str, seconds: float, count: int):
         logger.info(
-            f"({self}) {operation}ed {count}{f' {name}' if name != '*' else ''} records ({seconds}s)"  # noqa
+            f"({self}) {operation}ed {count}{f' {name}' if name != '*' else ''} records ({seconds}s)",  # noqa
+            extra={"duration": seconds},
         )
 
         idx_max = self.metrics.index.max()
@@ -117,6 +118,7 @@ class BaseExecutor:
         exec_id = uuid.uuid4().hex
 
         try:
+            ts = timer()
             logger.info(f"({self}) execution started {exec_id=}")
             ds: DataSet = await self.download(**kwargs)
             ds_proc = await self.process(ds)
@@ -125,13 +127,18 @@ class BaseExecutor:
             else:
                 logger.info(f"({self}) skipping persistance {exec_id=}")
                 ct = 0
-            logger.info(f"({self}) execution completed {exec_id=}")
+            exc_time = round(timer() - ts, 2)
+            logger.info(
+                f"({self}) execution completed {exec_id=}",
+                extra={"duration": exc_time, **kwargs},
+            )
             return ct, ds_proc if return_data else None
 
         except Exception as e:
+            exc_time = round(timer() - ts, 2)
             logger.error(
                 f"({self}) execution failed: {exec_id=} -- {e} ||||| {kwargs=}",
-                extra=kwargs,
+                extra={"duration": exc_time, **kwargs},
             )
             raise e
 

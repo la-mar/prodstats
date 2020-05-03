@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from celery.signals import (
@@ -11,6 +10,7 @@ from celery.signals import (
 
 import config as conf
 import loggers
+import util
 from db import db
 
 logger = logging.getLogger(__name__)
@@ -35,29 +35,20 @@ def setup_task_logger(logger, *args, **kwargs):
 @worker_process_init.connect
 def init_worker(**kwargs):
     """ Configures each Celery worker process on process startup"""
-    loop = asyncio.get_event_loop()
-
-    # async def run():
-    #     bind = await db.startup(  # creates connection pool per worker process
-    #         pool_min_size=conf.CeleryConfig.db_pool_min_size,
-    #         pool_max_size=conf.CeleryConfig.db_pool_max_size,
-    #     )
-    #     return bind
-
-    loop.run_until_complete(
-        db.startup(  # creates connection pool per worker process
-            pool_min_size=conf.CeleryConfig.db_pool_min_size,
-            pool_max_size=conf.CeleryConfig.db_pool_max_size,
-        )
+    # logger.warning(f"init_worker")
+    coro = db.startup(  # creates connection pool per worker process
+        pool_min_size=conf.CeleryConfig.db_pool_min_size,
+        pool_max_size=conf.CeleryConfig.db_pool_max_size,
     )
+    util.aio.async_to_sync(coro)
 
 
 @worker_process_shutdown.connect
 def shutdown_worker(**kwargs):
     """ Cleans up behind each Celery worker process on process shutdown"""
+    # logger.warning(f"shutdown_worker")
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(db.shutdown())
+    util.aio.async_to_sync(db.shutdown())
 
 
 @beat_init.connect

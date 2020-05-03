@@ -184,6 +184,7 @@ class DatadogJSONFormatter(json_log_formatter.JSONFormatter):
         else:
             record_dict.update(
                 task_id=None,
+                task_short_id=None,
                 task_name=None,
                 task_meta=None,
                 task_retries=None,
@@ -192,8 +193,8 @@ class DatadogJSONFormatter(json_log_formatter.JSONFormatter):
         # Handle exceptions, including those in the formatter itself
         exc_info = record.exc_info
         if exc_info:
-            if "error.kind" not in record_dict:
-                record_dict["error.kind"] = exc_info[0].__name__  # type: ignore
+            if "error.kind" not in record_dict and exc_info[0] is not None:
+                record_dict["error.kind"] = exc_info[0].__name__
             if "error.message" not in record_dict:
                 record_dict["error.message"] = str(exc_info[1])
             if "error.stack" not in record_dict:

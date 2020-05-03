@@ -65,7 +65,7 @@ def status_assignment_detail(
 PRODSTAT_DEFAULT_OPTIONS: frozenset = frozenset(  # TODO: define this in config somehow?
     itertools.chain(
         prodstat_option_matrix(
-            ProdStatRange.FIRST, months=[1, 3, 6, 12, 18, 24, 30, 36, 42, 48],
+            ProdStatRange.FIRST, months=[1, 3, 6, 9, 12, 18, 24, 30, 36, 42, 48],
         ),
         prodstat_option_matrix(ProdStatRange.LAST, months=[1, 3, 6, 12],),
         prodstat_option_matrix(ProdStatRange.PEAKNORM, months=[1, 3, 6],),
@@ -75,7 +75,7 @@ PRODSTAT_DEFAULT_OPTIONS: frozenset = frozenset(  # TODO: define this in config 
 
 PRODSTAT_DEFAULT_RATIO_OPTIONS: frozenset = frozenset(
     itertools.chain(
-        prodstat_option_matrix(ProdStatRange.FIRST, months=[1, 3, 6, 12, 18, 24]),
+        prodstat_option_matrix(ProdStatRange.FIRST, months=[1, 3, 6, 9, 12, 18, 24]),
         prodstat_option_matrix(ProdStatRange.LAST, months=[1, 3, 6]),
         prodstat_option_matrix(ProdStatRange.PEAKNORM, months=[1, 3, 6]),
         prodstat_option_matrix(ProdStatRange.ALL, months=None),
