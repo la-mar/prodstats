@@ -1,10 +1,10 @@
 import asyncio
 import logging
-import uuid
 from timeit import default_timer as timer
 from typing import Coroutine, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
+import shortuuid
 
 import calc  # noqa
 import db.models as models
@@ -30,6 +30,7 @@ class BaseExecutor:
         persist_kwargs: Dict = None,
     ):
 
+        self.exec_id = shortuuid.uuid()
         self.hole_dir: HoleDirection = HoleDirection(hole_dir)
         self.download_kwargs = download_kwargs or {}
         self.process_kwargs = process_kwargs or {}
@@ -50,17 +51,17 @@ class BaseExecutor:
         return f"{self.__class__.__name__}[{self.hole_dir.value}]"
 
     def raise_execution_error(
-        self, operation: str, record_count: int, e: Exception, extra: Dict = None
+        self, operation: str, record_count: int, e: Exception, extra: Dict = None,
     ):
         logger.error(
-            f"({self}) error during {operation}ing: {record_count} records in batch -- {e.__class__.__name__}: {e}",  # noqa
+            f"[{self.exec_id}] {self} - error during {operation}ing: {record_count} records in batch -- {e.__class__.__name__}: {e}",  # noqa
             extra=extra,
         )
         raise e
 
     def add_metric(self, operation: str, name: str, seconds: float, count: int):
         logger.info(
-            f"({self}) {operation}ed {count}{f' {name}' if name != '*' else ''} records ({seconds}s)",  # noqa
+            f"[{self.exec_id}] {self} - {operation}ed {count}{f' {name}' if name != '*' else ''} records ({seconds}s)",  # noqa
             extra={"duration": seconds},
         )
 
@@ -93,7 +94,7 @@ class BaseExecutor:
         count = 0
         if df is not None and not df.empty:
             logger.debug(
-                f"({self}) scheduling persistance of {df.shape[0]} {name} records)"
+                f"[{self.exec_id}] {self} - scheduling persistance of {df.shape[0]} {name} records)"
             )
 
             ts = timer()
@@ -103,7 +104,7 @@ class BaseExecutor:
                 operation="persist", name=name, seconds=exc_time, count=df.shape[0],
             )
         else:
-            logger.info(f"({self}) nothing to persist")
+            logger.info(f"[{self.exec_id}] {self} - nothing to persist")
         return count
 
     async def persist(self, dataset: DataSet, **kwargs) -> int:
@@ -115,21 +116,19 @@ class BaseExecutor:
         return_data = kwargs.pop("return_data", True)
         persist = kwargs.pop("persist", True)
 
-        exec_id = uuid.uuid4().hex
-
         try:
             ts = timer()
-            logger.info(f"({self}) execution started {exec_id=}")
+            logger.info(f"[{self.exec_id}] {self} - execution started")
             ds: DataSet = await self.download(**kwargs)
             ds_proc = await self.process(ds)
             if persist:
                 ct = await self.persist(ds_proc)
             else:
-                logger.info(f"({self}) skipping persistance {exec_id=}")
+                logger.info(f"[{self.exec_id}] {self} - skipping persistance")
                 ct = 0
             exc_time = round(timer() - ts, 2)
             logger.info(
-                f"({self}) execution completed {exec_id=}",
+                f"[{self.exec_id}] {self} - execution completed ({exc_time}s)",
                 extra={"duration": exc_time, **kwargs},
             )
             return ct, ds_proc if return_data else None
@@ -137,7 +136,7 @@ class BaseExecutor:
         except Exception as e:
             exc_time = round(timer() - ts, 2)
             logger.error(
-                f"({self}) execution failed: {exec_id=} -- {e} ||||| {kwargs=}",
+                f"[{self.exec_id}] {self} - execution failed ({exc_time}s): -- {e} ||||| {kwargs=}",
                 extra={"duration": exc_time, **kwargs},
             )
             raise e
@@ -242,7 +241,7 @@ class ProdExecutor(BaseExecutor):
 
         if monthly is not None and not monthly.empty:
             # TODO: timeit
-            logger.debug(f"(Production) calculating monthly production...")
+            logger.debug(f"[{self.exec_id}] {self} - calculating monthly production...")
             monthly["boe"] = monthly.prodstats.boe()
             monthly["oil_percent"] = monthly.prodstats.oil_percent()
             monthly["prod_days"] = monthly.prodstats.prod_days()
@@ -267,7 +266,7 @@ class ProdExecutor(BaseExecutor):
 
             prodset.monthly = monthly
         else:
-            logger.info(f"(Production) no monthly production to calculate")
+            logger.info(f"[{self.exec_id}] {self} - no monthly production to calculate")
 
         return prodset
 
@@ -281,7 +280,7 @@ class ProdExecutor(BaseExecutor):
 
         if has_headers and has_monthly:
             # TODO: timeit
-            logger.debug(f"(Production) enriching production headers")
+            logger.debug(f"[{self.exec_id}] {self} - enriching production headers")
             header = header.join(monthly.prodstats.peak30())
             header = header.join(monthly.prodstats.prod_dates_by_well())
             pdp = monthly.prodstats.pdp_by_well(
@@ -295,7 +294,7 @@ class ProdExecutor(BaseExecutor):
             prodset.header = header
         else:
             logger.info(
-                f"(Production) no production headers to process {has_headers=} {has_monthly=}"
+                f"[{self.exec_id}] {self} - no production headers to process {has_headers=} {has_monthly=}"  # noqa
             )
 
         return prodset
@@ -314,15 +313,15 @@ class ProdExecutor(BaseExecutor):
         if option_sets is None:
             option_sets = calc.PRODSTAT_DEFAULT_OPTIONS
             logger.debug(
-                f"({self}) prodstats: using default option_sets -- {option_sets=}"
+                f"[{self.exec_id}] {self} - prodstats: using default option_sets -- {option_sets=}"
             )
         else:
             logger.debug(
-                f"({self}) prodstats: using passed option_sets -- {option_sets=}"
+                f"[{self.exec_id}] {self} - prodstats: using passed option_sets -- {option_sets=}"
             )
 
         logger.debug(
-            f"({self}) prodstats: calculating {agg_type=} {norm_value=} option_sets={len(option_sets)}"  # noqa
+            f"[{self.exec_id}] {self} - prodstats: calculating {agg_type=} {norm_value=} option_sets={len(option_sets)}"  # noqa
         )
 
         prodstat_dfs: List[pd.DataFrame] = []
@@ -371,14 +370,14 @@ class ProdExecutor(BaseExecutor):
         if option_sets is None:
             option_sets = calc.PRODSTAT_DEFAULT_RATIO_OPTIONS
             logger.debug(
-                f"({self}) prodstats: using default ratio option_sets -- {option_sets=}"
+                f"[{self.exec_id}] {self} - prodstats: using default ratio option_sets -- {option_sets=}"  # noqa
             )
         else:
             logger.debug(
-                f"({self}) prodstats: using passed ratio option_sets -- {option_sets=}"
+                f"[{self.exec_id}] {self} - prodstats: using passed ratio option_sets -- {option_sets=}"  # noqa
             )
 
-        logger.debug(f"(Production) calculating prodstat ratios")
+        logger.debug(f"[{self.exec_id}] {self} - calculating prodstat ratios")
 
         # * gor/oil_percent/avg_daily
         gor_dfs: List[pd.DataFrame] = []
@@ -419,47 +418,55 @@ class ProdExecutor(BaseExecutor):
             dataset = self._process_headers(dataset)
             monthly = dataset.monthly
 
-            prodstats = pd.concat(
-                [
-                    self._process_prodstats(
-                        monthly, prod_columns=prod_columns, option_sets=prodstat_opts,
-                    ),
-                    self._process_prodstats(
-                        monthly,
-                        norm_value=1000,
-                        prod_columns=prod_columns,
-                        option_sets=prodstat_opts,
-                    ),
-                    self._process_prodstat_ratios(
-                        monthly, prod_columns=prod_columns, option_sets=ratio_opts,
-                    ),
-                ],
-                axis=0,
-            )
+            if monthly is not None and not monthly.empty:
+                prodstats = pd.concat(
+                    [
+                        self._process_prodstats(
+                            monthly,
+                            prod_columns=prod_columns,
+                            option_sets=prodstat_opts,
+                        ),
+                        self._process_prodstats(
+                            monthly,
+                            norm_value=1000,
+                            prod_columns=prod_columns,
+                            option_sets=prodstat_opts,
+                        ),
+                        self._process_prodstat_ratios(
+                            monthly, prod_columns=prod_columns, option_sets=ratio_opts,
+                        ),
+                    ],
+                    axis=0,
+                )
 
-            dataset.stats = prodstats
+                dataset.stats = prodstats
 
-            if "perfll" in dataset.monthly.columns:
-                dataset.monthly = dataset.monthly.drop(columns=["perfll"])
+                if "perfll" in dataset.monthly.columns:
+                    dataset.monthly = dataset.monthly.drop(columns=["perfll"])
 
-            exc_time = round(timer() - ts, 2)
+                exc_time = round(timer() - ts, 2)
 
-            total_count = sum([x.shape[0] for x in list(dataset) if x is not None])
-            for name, model, df in dataset.items():
-                if df is not None and not df.empty:
-                    seconds = round(df.shape[0] * (exc_time / (total_count or 1)), 2)
-                    self.add_metric(
-                        operation="process",
-                        name=name,
-                        seconds=seconds,
-                        count=df.shape[0],
-                    )
+                total_count = sum([x.shape[0] for x in list(dataset) if x is not None])
+                for name, model, df in dataset.items():
+                    if df is not None and not df.empty:
+                        seconds = round(
+                            df.shape[0] * (exc_time / (total_count or 1)), 2
+                        )
+                        self.add_metric(
+                            operation="process",
+                            name=name,
+                            seconds=seconds,
+                            count=df.shape[0],
+                        )
 
-            logger.debug(f"(Production) processing finished")
+            logger.debug(f"[{self.exec_id}] {self} - processing finished")
             return dataset
 
         except Exception as e:
-            api10s = dataset.header.util.column_as_set("api10")
+            if dataset.header is not None:
+                api10s = dataset.header.util.column_as_set("api10")
+            else:
+                api10s = []
             self.raise_execution_error(
                 operation="process",
                 record_count=len(api10s),
@@ -647,7 +654,7 @@ class GeomExecutor(BaseExecutor):
                 else:
                     api14s = locations.util.column_as_set("api14")
                     logger.warning(
-                        f"({self}) skipped processing of {len(api14s)} surveys)",
+                        f"[{self.exec_id}] {self} - skipped processing of {len(api14s)} surveys)",
                         extra={"api14s": api14s},
                     )
 
@@ -838,17 +845,18 @@ class WellExecutor(BaseExecutor):
                 gpath = IHSPath.well_h_geoms
                 prodpath = IHSPath.prod_h_headers
                 if geoms is None:
-                    logger.debug(f"({self}) fetching fresh geometries")
+                    logger.debug(f"[{self.exec_id}] {self} - fetching fresh geometries")
                     geoms = await pd.DataFrame.shapes.from_ihs(
                         gpath, api14s=api14s, dispatch=kwargs.get("geoms_dispatch"),
                     )
-                    logger.warning(f"geoms: {geoms}")
 
             elif self.hole_dir == HoleDirection.V:  # TODO:  Move to router
                 prodpath = IHSPath.prod_v_headers
 
             if prod_headers is None:
-                logger.debug(f"({self}) fetching fresh production headers")
+                logger.debug(
+                    f"[{self.exec_id}] {self} - fetching fresh production headers"
+                )
                 prod_headers = await wells.wells.last_prod_date(
                     path=prodpath,
                     prefer_local=use_local_prod,
@@ -959,7 +967,7 @@ class WellExecutor(BaseExecutor):
                         kwargs = links_kwargs
 
                     logger.info(
-                        f"({self}) {name}: scheduling peristance to {model.__name__}"
+                        f"[{self.exec_id}] {self} - {name}: scheduling peristance to {model.__name__}"  # noqa
                     )
                     coros.append(
                         self._persist(
@@ -967,7 +975,9 @@ class WellExecutor(BaseExecutor):
                         )
                     )
                 else:
-                    logger.debug(f"({self}) {name}: no records to persist")
+                    logger.debug(
+                        f"[{self.exec_id}] {self} - {name}: no records to persist"
+                    )
 
             result: int = sum(await asyncio.gather(*coros))
 

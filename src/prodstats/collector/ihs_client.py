@@ -43,6 +43,7 @@ class IHSClient(AsyncClient):
         responses: List[httpx.Response] = []
         ids = util.ensure_list(ids)
         concurrency = concurrency or 50
+        timeout = timeout or 300
 
         params = params or {}
 
