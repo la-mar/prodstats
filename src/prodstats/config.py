@@ -65,7 +65,7 @@ COLLECTOR_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "collectors.yaml"  # T
 PARSER_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "parsers.yaml"  # TODO: remove
 
 PRODSTATS_H_COOLDOWN: int = conf("PRODSTATS_H_COOLDOWN", cast=int, default=48)  # hours
-PRODSTATS_V_COOLDOWN: int = conf("PRODSTATS_V_COOLDOWN", cast=int, default=48)  # hours
+PRODSTATS_V_COOLDOWN: int = conf("PRODSTATS_V_COOLDOWN", cast=int, default=168)  # hours
 
 
 # --- database --------------------------------------------------------------- #
