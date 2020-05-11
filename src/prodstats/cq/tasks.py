@@ -271,7 +271,7 @@ def run_for_apilist(
 
 
 @celery_app.task
-def run_driftwood(hole_dir: HoleDirection):
+def run_driftwood(hole_dir: HoleDirection, **kwargs):
 
     hole_dir = HoleDirection(hole_dir)
 
@@ -318,7 +318,7 @@ def run_driftwood(hole_dir: HoleDirection):
     else:
         raise ValueError(f"Invalid hole direction: {hole_dir=}")
 
-    run_executors(hole_dir, api14s=api14s, executors=executors)
+    run_executors(hole_dir, api14s=api14s, executors=executors, **kwargs)
 
 
 if __name__ == "__main__":
