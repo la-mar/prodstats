@@ -101,7 +101,7 @@ class WellDepth(WellBase):
     name = db.Column(db.String(50), index=True, primary_key=True)
     value = db.Column(db.Integer())
     property_name = db.Column(db.String(50), index=True)
-    aggregate_type = db.Column(db.String(25))
+    aggregate_type = db.Column(db.String(25), index=True)
     grid_id = db.Column(db.Integer(), index=True)
     formation = db.Column(db.String(50), index=True)
     into_formation_feet = db.Column(db.Integer())
@@ -210,7 +210,7 @@ class IPTest(WellBase):
     __tablename__ = "ip_tests"
 
     test_number = db.Column(db.Integer(), primary_key=True)
-    test_date = db.Column(db.Date())
+    test_date = db.Column(db.Date(), index=True)
     type_code = db.Column(db.String(10))
     test_method = db.Column(db.String())
     completion = db.Column(db.Integer())
