@@ -38,7 +38,7 @@ def setup_periodic_tasks(sender, **kwargs):
     )
     add_task(
         crontab(minute=30, hour="*/2"),
-        tasks.run_next_available.s(HoleDirection.V, batch_size=5),
+        tasks.run_next_available.s(HoleDirection.V, batch_size=2),
         name="run_next_v",
     )
 
