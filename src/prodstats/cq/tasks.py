@@ -138,14 +138,14 @@ def run_next_available(
                 prev_run.strftime(util.dt.formats.no_seconds) if prev_run else None
             )
             utcnow = utcnow.strftime(util.dt.formats.no_seconds)
-            logger.warning(
+            print(
                 f"({db.models.Area.__name__}[{hole_dir}]) updated {area_obj.area}.{attr}: {prev_run} -> {utcnow}"  # noqa
             )
         else:
             next_run_in_seconds = (
                 (prev_run + timedelta(hours=cooldown_hours)) - utcnow
             ).total_seconds()
-            logger.warning(
+            print(
                 f"({db.models.Area.__name__}[{hole_dir}]) Skipping {area_obj.area} next available for run in {humanize_seconds(next_run_in_seconds)}"  # noqa
             )  # noqa
 
