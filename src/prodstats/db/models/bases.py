@@ -41,6 +41,7 @@ class Base(db.Model, DataFrameMixin):
         default=utcnow,
         onupdate=utcnow,
         server_default=db.func.now(),
+        index=True,
     )
 
     def __repr__(self):
