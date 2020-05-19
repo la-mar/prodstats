@@ -27,9 +27,9 @@ def setup_periodic_tasks(sender, **kwargs):
         name="sync_area_manifest",
     )
     # add_task(60, tasks.run_driftwood.s(HoleDirection.H), name="run_driftwood_h")
-    add_task(
-        60, tasks.run_driftwood.s(HoleDirection.V, batch_size=2), name="run_driftwood_v"
-    )
+    # add_task(
+    #     60, tasks.run_driftwood.s(HoleDirection.V, batch_size=2), name="run_driftwood_v"
+    # )
     add_task(
         crontab(minute=0, hour="*/1"),
         # 15,
@@ -37,7 +37,7 @@ def setup_periodic_tasks(sender, **kwargs):
         name="run_next_h",
     )
     add_task(
-        crontab(minute=30, hour="*/3"),
+        crontab(minute=30, hour="*/2"),
         tasks.run_next_available.s(HoleDirection.V, batch_size=5),
         name="run_next_v",
     )

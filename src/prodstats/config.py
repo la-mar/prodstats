@@ -64,6 +64,16 @@ TASK_BATCH_SIZE: int = conf("PRODSTATS_TASK_BATCH_SIZE", cast=int, default=25)
 COLLECTOR_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "collectors.yaml"  # TODO: remove
 PARSER_CONFIG_PATH: Path = EXTERNAL_CONFIG_BASE_PATH / "parsers.yaml"  # TODO: remove
 
+
+# SIX_HOURS = 6
+# ONE_DAY = 24
+# TWO_DAYS = 48
+# THREE_DAYS = 72
+# FOUR_DAYS = 96
+# FIVE_DAYS = 120
+# SIX_DAYS = 144
+# ONE_WEEK = 168
+
 PRODSTATS_H_COOLDOWN: int = conf("PRODSTATS_H_COOLDOWN", cast=int, default=48)  # hours
 PRODSTATS_V_COOLDOWN: int = conf("PRODSTATS_V_COOLDOWN", cast=int, default=168)  # hours
 
@@ -153,6 +163,8 @@ def with_prefix(prefix: str, tolower: bool = True, strip: bool = True) -> Dict:
 
 CELERY_LOG_LEVEL: str = conf("CELERY_LOG_LEVEL", cast=str, default=LOG_LEVEL)
 CELERY_LOG_FORMAT: str = conf("CELERY_LOG_FORMAT", cast=str, default=LOG_FORMAT)
+CELERY_TASK_MAX_RETRIES: int = conf("CELERY_TASK_MAX_RETRIES", cast=int, default=5)
+CELERY_TASK_EXP_BACKOFF: int = conf("CELERY_TASK_EXP_BACKOFF", cast=int, default=60)
 
 
 class CeleryConfig:
