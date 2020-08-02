@@ -1,9 +1,9 @@
 SERVICE_NAME:=prodstats
-ENV:=prod
+ENV:=deo-prod
 COMMIT_HASH ?= $$(git log -1 --pretty=%h)
 DATE := $$(date +"%Y-%m-%d")
 CTX:=.
-AWS_ACCOUNT_ID:=$$(aws-vault exec prod -- aws sts get-caller-identity | jq .Account -r)
+AWS_ACCOUNT_ID:=$$(aws-vault exec ${ENV} -- aws sts get-caller-identity | jq .Account -r)
 DOCKERFILE:=Dockerfile
 APP_NAME:=$$(grep -e 'name\s=\s\(.*\)' pyproject.toml| cut -d"\"" -f2)
 APP_VERSION=$$(grep -o '\([0-9]\+.[0-9]\+.[0-9]\+\)' pyproject.toml | head -n1)
@@ -11,10 +11,10 @@ APP_VERSION=$$(grep -o '\([0-9]\+.[0-9]\+.[0-9]\+\)' pyproject.toml | head -n1)
 
 
 ssm:
-	chamber export ${SERVICE_NAME} | jq
-	chamber export ${SERVICE_NAME}-worker | jq
-	chamber export ${SERVICE_NAME}-cron | jq
-	chamber export ${SERVICE_NAME}-web | jq
+	aws-vault exec ${ENV} -- chamber export ${SERVICE_NAME} | jq
+	aws-vault exec ${ENV} -- chamber export ${SERVICE_NAME}-worker | jq
+	aws-vault exec ${ENV} -- chamber export ${SERVICE_NAME}-cron | jq
+	aws-vault exec ${ENV} -- chamber export ${SERVICE_NAME}-web | jq
 
 run-tests:
 	pytest --cov=prodstats tests/ --cov-report xml:./coverage/python/coverage.xml
@@ -74,7 +74,7 @@ ci-build-local:
 	circleci local execute -c process.yml --job build-image -e DOCKER_LOGIN=${DOCKER_LOGIN} -e DOCKER_PASSWORD=${DOCKER_PASSWORD}
 
 deploy:
-	export AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} && poetry run python scripts/deploy.py
+	export AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID} && aws-vault exec ${ENV} -- poetry run python scripts/deploy.py
 
 redeploy-cron:
 	@echo ""
